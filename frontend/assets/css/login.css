@@ -14,15 +14,15 @@
   min-height: 100vh;
   position: relative;
   overflow: hidden;
-  background: #FAFAFA; /* clean neutral background */
+  background: #FDFBF7; /* slight warm background */
 }
 
 /* Decorative subtle background accents (no heavy dark fills) */
 .login-page::before {
   content: '';
   position: absolute;
-  width: 560px;
-  height: 560px;
+  width: min(60vh, 35rem);
+  height: min(60vh, 35rem);
   border-radius: 50%;
   background: rgba(139, 115, 85, 0.04);
   top: -160px;
@@ -34,8 +34,8 @@
 .login-page::after {
   content: '';
   position: absolute;
-  width: 380px;
-  height: 380px;
+  width: min(40vh, 24rem);
+  height: min(40vh, 24rem);
   border-radius: 50%;
   background: rgba(139, 115, 85, 0.03);
   top: 80px;
@@ -46,8 +46,8 @@
 
 .circle-deco {
   position: absolute;
-  width: 280px;
-  height: 280px;
+  width: min(30vh, 18rem);
+  height: min(30vh, 18rem);
   border-radius: 50%;
   background: rgba(139, 115, 85, 0.03);
   bottom: -80px;
@@ -61,107 +61,59 @@
    ----------------------------------------------------------------------- */
 .login-brand {
   flex: 1;
+  flex-basis: 50%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(32px, 5vh, 64px) clamp(32px, 6vw, 100px);
+  align-items: flex-start;
+  padding: clamp(32px, 5vh, 64px) clamp(32px, 5vw, 64px);
   position: relative;
   z-index: 1;
 }
 
-.brand-logo {
-  margin-bottom: 0;
-  display: flex;
-  align-items: center;
-}
-
-.brand-logo img,
-.brand-logo svg {
-  height: 42px;
-  width: auto;
-  filter: none; /* official logo color */
-}
-
-/* Center main hero body vertically */
-.brand-body {
-  margin: auto 0;
-  padding: 24px 0;
-}
-
-.brand-headline {
-  max-width: 460px;
-}
-
-.brand-headline h1 {
-  font-size: clamp(36px, 4.5vw, 52px);
-  font-weight: 800;
-  line-height: 1.1;
-  color: #1E293B;
-  letter-spacing: -.03em;
-  margin-bottom: 16px;
-}
-
-.brand-headline h1 em {
-  font-style: normal;
-  color: #8B7355; /* warm brown accent */
-}
-
-.brand-tagline {
-  font-size: 15px;
-  font-weight: 600;
-  color: #8B7355;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  margin-bottom: 20px;
-}
-
-.brand-headline p {
-  font-size: 15px;
-  color: #64748B;
-  line-height: 1.7;
-  max-width: 400px;
-}
-
-/* Feature bullets */
-.brand-features {
-  margin-top: 40px;
+.brand-centered-content {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-
-.brand-feature {
-  display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  color: #334155;
+  text-align: center;
+  width: 100%;
+  max-width: 38rem;
 }
 
-.brand-feature-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #8B7355;
-  flex-shrink: 0;
+.brand-logo-box {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Bottom dots nav */
-.brand-nav-dots {
-  display: flex;
-  gap: 8px;
-  margin-top: 0;
+.brand-logo-box svg {
+  height: 38px;
+  width: auto;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #E2E8F0;
-  cursor: pointer;
-  transition: background 200ms ease;
+.brand-welcome {
+  font-size: clamp(28px, 3vw, 36px);
+  font-weight: 800;
+  color: #1E293B;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
 }
-.dot.active { background: #8B7355; }
+
+.brand-highlight {
+  color: #8B7355; /* Warm olive primary color */
+  white-space: nowrap;
+}
+
+.brand-description {
+  font-size: 15px;
+  color: #64748B;
+  line-height: 1.6;
+}
 
 /* Mobile logo above card */
 .mobile-brand-logo {
@@ -180,24 +132,25 @@
    Right — form card
    ----------------------------------------------------------------------- */
 .login-form-panel {
+  flex: 1;
+  flex-basis: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: clamp(24px, 4vh, 40px) clamp(32px, 5vw, 80px) clamp(24px, 4vh, 40px) clamp(24px, 3vw, 40px);
+  padding: clamp(24px, 4vh, 40px) clamp(24px, 5vw, 60px);
   position: relative;
   z-index: 1;
-  flex-shrink: 0;
 }
 
 .login-form-container {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 20px;
-  padding: clamp(32px, 5vh, 44px) clamp(24px, 4vw, 40px) clamp(32px, 5vh, 40px);
+  border-radius: 1.25rem;
+  padding: clamp(2rem, 5vh, 2.75rem) clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
-  min-width: 340px;
-  max-width: 400px;
+  max-width: 26rem;
+  margin-inline: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
   position: relative;
 }
@@ -242,7 +195,7 @@
 }
 
 .login-form-header h2 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #3A2F20;
   letter-spacing: -.02em;
@@ -279,7 +232,7 @@
 
 .form-input {
   width: 100%;
-  padding: 12px 14px 12px 42px;
+  padding: 12px 14px;
   border: 1.5px solid #DDD5C8;
   border-radius: 10px;
   background: #FFFFFF;
@@ -413,6 +366,27 @@
   flex-direction: column;
 }
 
+.required-star {
+  color: #E74C3C;
+}
+
+.forgot-password-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.forgot-password-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1c60ff;
+  text-decoration: none;
+}
+.forgot-password-link:hover {
+  text-decoration: underline;
+  color: #3A2F20;
+}
+
 /* -----------------------------------------------------------------------
    Responsive
    ----------------------------------------------------------------------- */
@@ -426,4 +400,221 @@
 
 @media (max-width: 480px) {
   .login-form-container { padding: 32px 24px; }
+}
+
+
+/* -----------------------------------------------------------------------
+   Hero illustration cards
+   ----------------------------------------------------------------------- */
+.brand-hero-image {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+/* Base card */
+.hero-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(139, 115, 85, 0.15);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 8px 32px rgba(44, 34, 24, 0.08), 0 1px 4px rgba(44,34,24,0.04);
+  width: 100%;
+  max-width: 360px;
+}
+
+/* Main large card */
+.hero-card--main {
+  max-width: 360px;
+}
+
+/* Small pipeline card */
+.hero-card--sm {
+  max-width: 360px;
+  padding: 18px 22px;
+}
+
+/* Pill notification card */
+.hero-card--pill {
+  max-width: 300px;
+  padding: 11px 18px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4A3A28;
+  width: auto;
+}
+
+/* Card header row */
+.hero-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.hero-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero-card__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1E293B;
+  letter-spacing: 0.01em;
+}
+
+.hero-card__sublabel {
+  font-size: 11px;
+  color: #94A3B8;
+  margin-top: 2px;
+}
+
+.hero-card__badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+}
+.hero-card__badge--green {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+/* Lead rows */
+.hero-card__leads { display: flex; flex-direction: column; gap: 10px; }
+
+.hero-card__lead-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #FDFBF7;
+  border-radius: 10px;
+  border: 1px solid rgba(139,115,85,0.08);
+}
+
+.hero-card__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.hero-card__lead-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.hero-card__lead-info strong {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1E293B;
+}
+.hero-card__lead-info span {
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.hero-card__score {
+  font-size: 14px;
+  font-weight: 800;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.score--high { background: #D1FAE5; color: #065F46; }
+.score--med  { background: #FEF9C3; color: #78350F; }
+
+/* Pipeline card internals */
+.hero-card__pipeline-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1E293B;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+.hero-card__pipeline-bar-wrap {
+  height: 8px;
+  background: #EAE1D7;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.hero-card__pipeline-bar {
+  height: 100%;
+  border-radius: 20px;
+  animation: growPipeline 1.4s cubic-bezier(0.2,0.8,0.2,1) forwards;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.hero-card__pipeline-meta {
+  font-size: 12px;
+  color: #64748B;
+}
+
+/* Float animations */
+.float-anim-1 {
+  animation: floatCard1 5s ease-in-out infinite;
+}
+.float-anim-2 {
+  animation: floatCard2 6s ease-in-out infinite;
+  animation-delay: 0.8s;
+}
+.float-anim-3 {
+  animation: floatCard3 4.5s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+/* Slide-in entrance */
+.hero-card--main  { animation: slideUp 0.7s cubic-bezier(0.2,0.8,0.2,1) both, floatCard1 5s 0.7s ease-in-out infinite; }
+.hero-card--sm    { animation: slideUp 0.7s 0.2s cubic-bezier(0.2,0.8,0.2,1) both, floatCard2 6s 0.9s ease-in-out infinite; }
+.hero-card--pill  { animation: slideUp 0.6s 0.4s cubic-bezier(0.2,0.8,0.2,1) both, floatCard3 4.5s 1.9s ease-in-out infinite; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatCard1 {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-7px); }
+}
+@keyframes floatCard2 {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+@keyframes floatCard3 {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-9px); }
+}
+@keyframes growPipeline {
+  to { transform: scaleX(1); }
 }

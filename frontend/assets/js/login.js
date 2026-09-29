@@ -135,4 +135,32 @@ document.addEventListener('DOMContentLoaded', () => {
       clearError();
     });
   });
+
+  // -----------------------------------------------------------------------
+  // Dashboard metric counter animation
+  // -----------------------------------------------------------------------
+  function animateCounter(el, target, suffix, duration = 1800) {
+    const start = performance.now();
+    const update = (now) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out quad
+      const eased = 1 - (1 - progress) * (1 - progress);
+      const current = Math.round(eased * target);
+      el.textContent = target >= 1000
+        ? current.toLocaleString() + suffix
+        : current + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  }
+
+  // Delay counter start until cards slide in
+  setTimeout(() => {
+    document.querySelectorAll('.counter').forEach(el => {
+      const target = parseInt(el.dataset.target, 10);
+      const suffix = el.dataset.target === '98' ? '%' : '';
+      animateCounter(el, target, suffix);
+    });
+  }, 400);
 });

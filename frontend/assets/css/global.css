@@ -107,6 +107,15 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* Fluid root scaling for smaller laptops and tight heights */
+@media (max-width: 1366px), (max-height: 850px) {
+  html { font-size: 14px; }
+}
+
+@media (max-width: 1024px), (max-height: 700px) {
+  html { font-size: 12px; }
+}
+
 /* Responsive Media */
 img, picture, video {
   max-width: 100%;

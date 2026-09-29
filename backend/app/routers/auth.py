@@ -3,7 +3,7 @@ Authentication router — POST /api/v1/auth/login
 """
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -26,8 +26,9 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     ),
 )
 async def login(
-    request: LoginRequest,
+    request: Request,
+    login_req: LoginRequest,
     db: AsyncSession = Depends(get_db),
 ) -> LoginResponse:
     service = AuthService(db)
-    return await service.login(request)
+    return await service.login(login_req, request=request)

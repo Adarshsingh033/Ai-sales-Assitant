@@ -3,13 +3,15 @@ import re
 import uuid
 from typing import Optional
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.audit_log import AuditLogAction, AuditLogResourceType
 from app.models.tenant import Tenant, TenantStatus
 from app.models.user import User
 from app.repositories.subscription_plan_repository import SubscriptionPlanRepository
 from app.repositories.tenant_repository import TenantRepository
+from app.services.audit_service import AuditService
 from app.schemas.tenant import (
     TenantCreate,
     TenantListResponse,
@@ -30,7 +32,7 @@ class TenantService:
     def __init__(self, db: AsyncSession) -> None:
         self._repo = TenantRepository(db)
 
-    async def create_tenant(self, data: TenantCreate, current_user: User) -> TenantResponse:
+    async def create_tenant(self, data: TenantCreate, current_user: User, request: Optional[Request] = None) -> TenantResponse:
         base_slug = _generate_slug(data.name)
         slug = base_slug
         
@@ -55,6 +57,20 @@ class TenantService:
         )
 
         created_tenant = await self._repo.create(tenant)
+        
+        # Audit log
+        audit = AuditService(self._repo._session)
+        await audit.create_audit_log(
+            action=AuditLogAction.TENANT_CREATED,
+            resource_type=AuditLogResourceType.TENANT,
+            tenant_id=created_tenant.id,
+            user_id=current_user.id,
+            resource_id=str(created_tenant.id),
+            description=f"Tenant '{created_tenant.name}' created.",
+            new_values=data.model_dump(),
+            request=request
+        )
+        
         return TenantResponse.model_validate(created_tenant)
 
     async def get_tenant(self, tenant_id: uuid.UUID) -> TenantResponse:
@@ -91,7 +107,7 @@ class TenantService:
             total_pages=total_pages,
         )
 
-    async def update_tenant(self, tenant_id: uuid.UUID, data: TenantUpdate) -> TenantResponse:
+    async def update_tenant(self, tenant_id: uuid.UUID, data: TenantUpdate, current_user: User, request: Optional[Request] = None) -> TenantResponse:
         tenant = await self._repo.get_by_id(tenant_id)
         if not tenant:
             raise HTTPException(
@@ -103,10 +119,28 @@ class TenantService:
         if not update_data:
             return TenantResponse.model_validate(tenant)
             
+        # Capture old values
+        old_values = {k: getattr(tenant, k) for k in update_data.keys()}
+        
         updated_tenant = await self._repo.update(tenant, update_data)
+        
+        # Audit log
+        audit = AuditService(self._repo._session)
+        await audit.create_audit_log(
+            action=AuditLogAction.TENANT_UPDATED,
+            resource_type=AuditLogResourceType.TENANT,
+            tenant_id=tenant_id,
+            user_id=current_user.id,
+            resource_id=str(tenant_id),
+            description="Tenant details updated.",
+            old_values=old_values,
+            new_values=update_data,
+            request=request
+        )
+        
         return TenantResponse.model_validate(updated_tenant)
 
-    async def update_tenant_status(self, tenant_id: uuid.UUID, data: TenantStatusUpdate) -> TenantResponse:
+    async def update_tenant_status(self, tenant_id: uuid.UUID, data: TenantStatusUpdate, current_user: User, request: Optional[Request] = None) -> TenantResponse:
         tenant = await self._repo.get_by_id(tenant_id)
         if not tenant:
             raise HTTPException(
@@ -114,10 +148,33 @@ class TenantService:
                 detail="Tenant not found.",
             )
             
+        old_status = tenant.status.value
         updated_tenant = await self._repo.update_status(tenant, data.status)
+        
+        action = AuditLogAction.TENANT_UPDATED
+        if data.status == TenantStatus.ACTIVE:
+            action = AuditLogAction.TENANT_ACTIVATED
+        elif data.status == TenantStatus.INACTIVE:
+            action = AuditLogAction.TENANT_DEACTIVATED
+        elif data.status == TenantStatus.SUSPENDED:
+            action = AuditLogAction.TENANT_SUSPENDED
+            
+        audit = AuditService(self._repo._session)
+        await audit.create_audit_log(
+            action=action,
+            resource_type=AuditLogResourceType.TENANT,
+            tenant_id=tenant_id,
+            user_id=current_user.id,
+            resource_id=str(tenant_id),
+            description=f"Tenant status changed to {data.status.value}.",
+            old_values={"status": old_status},
+            new_values={"status": data.status.value},
+            request=request
+        )
+        
         return TenantResponse.model_validate(updated_tenant)
 
-    async def assign_subscription_plan(self, tenant_id: uuid.UUID, plan_id: uuid.UUID) -> TenantResponse:
+    async def assign_subscription_plan(self, tenant_id: uuid.UUID, plan_id: uuid.UUID, current_user: User, request: Optional[Request] = None) -> TenantResponse:
         tenant = await self._repo.get_by_id(tenant_id)
         if not tenant:
             raise HTTPException(
@@ -139,5 +196,20 @@ class TenantService:
                 detail="Cannot assign an inactive subscription plan.",
             )
 
+        old_plan_id = str(tenant.subscription_plan_id) if tenant.subscription_plan_id else None
         updated_tenant = await self._repo.update(tenant, {"subscription_plan_id": plan_id})
+        
+        audit = AuditService(self._repo._session)
+        await audit.create_audit_log(
+            action=AuditLogAction.TENANT_SUBSCRIPTION_PLAN_CHANGED,
+            resource_type=AuditLogResourceType.TENANT,
+            tenant_id=tenant_id,
+            user_id=current_user.id,
+            resource_id=str(tenant_id),
+            description=f"Tenant subscription plan changed to {plan.name}.",
+            old_values={"subscription_plan_id": old_plan_id},
+            new_values={"subscription_plan_id": str(plan_id)},
+            request=request
+        )
+        
         return TenantResponse.model_validate(updated_tenant)

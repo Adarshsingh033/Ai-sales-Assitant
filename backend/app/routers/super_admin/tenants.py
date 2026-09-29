@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -28,12 +28,13 @@ router = APIRouter(prefix="/super-admin/tenants", tags=["Super Admin Tenants"])
     description="Create a new tenant. Accessible only by Super Admin.",
 )
 async def create_tenant(
+    request: Request,
     data: TenantCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ) -> TenantResponse:
     service = TenantService(db)
-    return await service.create_tenant(data, current_user)
+    return await service.create_tenant(data, current_user, request=request)
 
 
 @router.get(
@@ -83,13 +84,14 @@ async def get_tenant(
     description="Update tenant information. Accessible only by Super Admin.",
 )
 async def update_tenant(
+    request: Request,
     tenant_id: uuid.UUID,
     data: TenantUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ) -> TenantResponse:
     service = TenantService(db)
-    return await service.update_tenant(tenant_id, data)
+    return await service.update_tenant(tenant_id, data, current_user, request=request)
 
 
 @router.patch(
@@ -99,13 +101,14 @@ async def update_tenant(
     description="Activate, deactivate, or suspend a tenant. Accessible only by Super Admin.",
 )
 async def update_tenant_status(
+    request: Request,
     tenant_id: uuid.UUID,
     data: TenantStatusUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ) -> TenantResponse:
     service = TenantService(db)
-    return await service.update_tenant_status(tenant_id, data)
+    return await service.update_tenant_status(tenant_id, data, current_user, request=request)
 
 @router.patch(
     "/{tenant_id}/subscription-plan",
@@ -114,10 +117,11 @@ async def update_tenant_status(
     description="Assign an active subscription plan to a tenant. Accessible only by Super Admin.",
 )
 async def assign_subscription_plan(
+    request: Request,
     tenant_id: uuid.UUID,
     data: TenantPlanAssignment,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ) -> TenantResponse:
     service = TenantService(db)
-    return await service.assign_subscription_plan(tenant_id, data.subscription_plan_id)
+    return await service.assign_subscription_plan(tenant_id, data.subscription_plan_id, current_user, request=request)

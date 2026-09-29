@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -24,12 +24,13 @@ router = APIRouter(prefix="/super-admin/subscription-plans", tags=["Super Admin 
     summary="Create Subscription Plan",
 )
 async def create_plan(
+    request: Request,
     data: SubscriptionPlanCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ) -> SubscriptionPlanResponse:
     service = SubscriptionPlanService(db)
-    return await service.create_plan(data)
+    return await service.create_plan(data, current_user, request=request)
 
 
 @router.get(
@@ -67,13 +68,14 @@ async def get_plan(
     summary="Update Subscription Plan",
 )
 async def update_plan(
+    request: Request,
     plan_id: uuid.UUID,
     data: SubscriptionPlanUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ) -> SubscriptionPlanResponse:
     service = SubscriptionPlanService(db)
-    return await service.update_plan(plan_id, data)
+    return await service.update_plan(plan_id, data, current_user, request=request)
 
 
 @router.patch(
@@ -82,10 +84,11 @@ async def update_plan(
     summary="Update Subscription Plan Status",
 )
 async def update_plan_status(
+    request: Request,
     plan_id: uuid.UUID,
     data: SubscriptionPlanStatusUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ) -> SubscriptionPlanResponse:
     service = SubscriptionPlanService(db)
-    return await service.update_plan_status(plan_id, data)
+    return await service.update_plan_status(plan_id, data, current_user, request=request)

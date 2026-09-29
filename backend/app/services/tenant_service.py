@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.tenant import Tenant, TenantStatus
 from app.models.user import User
+from app.repositories.subscription_plan_repository import SubscriptionPlanRepository
 from app.repositories.tenant_repository import TenantRepository
 from app.schemas.tenant import (
     TenantCreate,
@@ -114,4 +115,29 @@ class TenantService:
             )
             
         updated_tenant = await self._repo.update_status(tenant, data.status)
+        return TenantResponse.model_validate(updated_tenant)
+
+    async def assign_subscription_plan(self, tenant_id: uuid.UUID, plan_id: uuid.UUID) -> TenantResponse:
+        tenant = await self._repo.get_by_id(tenant_id)
+        if not tenant:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tenant not found.",
+            )
+
+        plan_repo = SubscriptionPlanRepository(self._repo._session)
+        plan = await plan_repo.get_by_id(plan_id)
+        if not plan:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Subscription plan not found.",
+            )
+        
+        if not plan.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot assign an inactive subscription plan.",
+            )
+
+        updated_tenant = await self._repo.update(tenant, {"subscription_plan_id": plan_id})
         return TenantResponse.model_validate(updated_tenant)

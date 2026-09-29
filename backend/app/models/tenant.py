@@ -56,8 +56,8 @@ class Tenant(Base):
     
     subscription_plan_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True),
+        ForeignKey("subscription_plans.id", ondelete="SET NULL"),
         nullable=True,
-        # No foreign key constraint yet since subscription plans module is not implemented
     )
 
     created_by: Mapped[Optional[uuid.UUID]] = mapped_column(

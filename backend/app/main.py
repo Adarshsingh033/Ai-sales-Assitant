@@ -11,6 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.core.config import settings
 from app.routers import auth
 from app.routers.super_admin import tenants as super_admin_tenants
+from app.routers.super_admin import subscription_plans as super_admin_subscription_plans
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -77,6 +78,7 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 # ---------------------------------------------------------------------------
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(super_admin_tenants.router, prefix="/api/v1")
+app.include_router(super_admin_subscription_plans.router, prefix="/api/v1")
 
 
 # ---------------------------------------------------------------------------

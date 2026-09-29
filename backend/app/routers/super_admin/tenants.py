@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.core.dependencies import require_super_admin
 from app.models.tenant import TenantStatus
 from app.models.user import User
+from app.schemas.subscription_plan import TenantPlanAssignment
 from app.schemas.tenant import (
     TenantCreate,
     TenantListResponse,
@@ -105,3 +106,18 @@ async def update_tenant_status(
 ) -> TenantResponse:
     service = TenantService(db)
     return await service.update_tenant_status(tenant_id, data)
+
+@router.patch(
+    "/{tenant_id}/subscription-plan",
+    response_model=TenantResponse,
+    summary="Assign Subscription Plan to Tenant",
+    description="Assign an active subscription plan to a tenant. Accessible only by Super Admin.",
+)
+async def assign_subscription_plan(
+    tenant_id: uuid.UUID,
+    data: TenantPlanAssignment,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_super_admin),
+) -> TenantResponse:
+    service = TenantService(db)
+    return await service.assign_subscription_plan(tenant_id, data.subscription_plan_id)

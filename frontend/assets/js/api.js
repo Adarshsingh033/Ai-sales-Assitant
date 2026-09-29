@@ -42,6 +42,10 @@ const Api = (() => {
     }
 
     if (!response.ok) {
+      if (response.status === 401) {
+        Auth.logout();
+        throw new ApiError('Session expired. Please log in again.', 401, data);
+      }
       const message = data?.detail || data?.message || `Request failed (${response.status})`;
       throw new ApiError(message, response.status, data);
     }
@@ -60,6 +64,46 @@ const Api = (() => {
         body: JSON.stringify(credentials),
       });
     },
+
+    // ---------------------------------------------------------------------
+    // Tenant Management API (Super Admin)
+    // ---------------------------------------------------------------------
+    async getTenants(params = {}) {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page);
+      if (params.page_size) query.append('page_size', params.page_size);
+      if (params.search) query.append('search', params.search);
+      if (params.status) query.append('status', params.status);
+      if (params.industry) query.append('industry', params.industry);
+      
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/super-admin/tenants${qs}`, { method: 'GET' });
+    },
+
+    async getTenant(id) {
+      return request(`/super-admin/tenants/${id}`, { method: 'GET' });
+    },
+
+    async createTenant(data) {
+      return request('/super-admin/tenants', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateTenant(id, data) {
+      return request(`/super-admin/tenants/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateTenantStatus(id, status) {
+      return request(`/super-admin/tenants/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+    }
   };
 })();
 

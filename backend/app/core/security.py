@@ -5,11 +5,10 @@ Never log passwords, hashes, or JWT secrets.
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from uuid import UUID
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, VerifyMismatchError
-from jose import JWTError, jwt
+from jose import jwt
 
 from app.core.config import settings
 

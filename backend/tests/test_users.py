@@ -8,9 +8,7 @@ Covers:
   - Password hash — never plain text
 """
 import uuid
-
 import pytest
-import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import hash_password, verify_password

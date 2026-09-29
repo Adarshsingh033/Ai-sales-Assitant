@@ -3,11 +3,14 @@ AI Sales Assistant — FastAPI Application Entry Point
 """
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
 from app.routers import auth
+from app.routers.super_admin import tenants as super_admin_tenants
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -43,9 +46,37 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
+# Exception Handlers
+# ---------------------------------------------------------------------------
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:
+    logger.error("Database error occurred: %s", str(exc))
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "A database error occurred. Please try again later."},
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    from fastapi import HTTPException
+    # Let FastAPI handle its own HTTPExceptions
+    if isinstance(exc, HTTPException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+        )
+    logger.error("Unexpected error occurred: %s", str(exc), exc_info=True)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "An unexpected error occurred. Please try again later."},
+    )
+
+
+# ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(super_admin_tenants.router, prefix="/api/v1")
 
 
 # ---------------------------------------------------------------------------

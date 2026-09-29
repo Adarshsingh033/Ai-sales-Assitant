@@ -12,10 +12,6 @@ import asyncio
 import logging
 import sys
 import uuid
-
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.core.security import hash_password

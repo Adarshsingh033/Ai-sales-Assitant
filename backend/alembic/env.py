@@ -27,7 +27,7 @@ import app.models  # noqa: F401
 config = context.config
 
 # Override the SQLAlchemy URL with the value from our Pydantic settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

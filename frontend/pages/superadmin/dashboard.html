@@ -9,6 +9,7 @@
   <!-- Styles -->
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <link rel="stylesheet" href="../../assets/css/superadmin.css" />
+  <link rel="stylesheet" href="../../assets/css/tenants.css" />
 </head>
 <body>
 
@@ -50,7 +51,7 @@
         <span class="nav-item-label">Dashboard</span>
       </a>
 
-      <a href="#" class="nav-item" data-page="Tenants" data-section="section-coming-soon"
+      <a href="#" class="nav-item" data-page="Tenants" data-section="section-tenants"
          aria-label="Tenants">
         <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
              viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
@@ -58,7 +59,6 @@
                 d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
         </svg>
         <span class="nav-item-label">Tenants</span>
-        <span class="nav-coming-soon">Soon</span>
       </a>
 
       <a href="#" class="nav-item" data-page="Subscription Plans" data-section="section-coming-soon"
@@ -184,12 +184,6 @@
   <header class="topbar" role="banner">
     <div class="topbar-left">
       <span class="topbar-title" id="pageTitle">Dashboard</span>
-    </div>
-    <div class="topbar-right">
-      <div class="topbar-user-chip" aria-label="Logged in user">
-        <div class="topbar-avatar" data-user-initials aria-hidden="true">SA</div>
-        <span class="topbar-user-name" data-user-name>Loading…</span>
-      </div>
     </div>
   </header>
 
@@ -412,15 +406,199 @@
       </div>
     </section>
 
-  </main>
+    <!-- -----------------------------------------------------------------
+         Tenants section
+         ----------------------------------------------------------------- -->
+    <section id="section-tenants" class="page-section" hidden>
+      <div class="tenant-page-header">
+        <div class="tenant-page-title">
+          <h2>Tenant Management</h2>
+          <p>Manage and monitor all organizations on the platform.</p>
+        </div>
+        
+        <div class="tenant-toolbar">
+          <div class="tenant-search-box">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <input type="text" id="tenantSearch" placeholder="Search tenants..." aria-label="Search tenants" />
+          </div>
+          <select id="tenantStatusFilter" aria-label="Filter by status" class="tenant-filter">
+            <option value="">All Statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+            <option value="SUSPENDED">Suspended</option>
+          </select>
+          <select id="tenantIndustryFilter" aria-label="Filter by industry" class="tenant-filter">
+            <option value="">All Industries</option>
+            <option value="Technology">Technology</option>
+            <option value="Finance">Finance</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Education">Education</option>
+            <option value="Retail">Retail</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Other">Other</option>
+          </select>
+          <button class="btn-primary" onclick="TenantsModule.openCreateModal()">
+            Create Tenant
+          </button>
+        </div>
+      </div>
 
+      <div id="tenantTableContainer" class="table-container" style="display:none;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tenant Name</th>
+              <th>Email</th>
+              <th>Industry</th>
+              <th>Plan</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tenantTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+        
+        <div class="pagination">
+          <span id="tenantPageIndicator">1 of 1</span>
+          <div class="pagination-controls">
+            <button class="page-btn" id="btnTenantPrev" disabled>Previous</button>
+            <button class="page-btn" id="btnTenantNext" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="tenantEmptyState" class="empty-state" style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+  </main>
 </div>
+
+<!-- ================================================================
+     Modals
+     ================================================================ -->
+
+<!-- Create / Edit Tenant Modal -->
+<div id="tenantModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tenantModalTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="tenantModalTitle" class="modal-title">Add Tenant</h3>
+      <button class="modal-close" onclick="TenantsModule.closeFormModal()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="tenantForm">
+        <input type="hidden" id="formTenantId" />
+        
+        <div class="form-group">
+          <label class="form-label" for="tenantName">Tenant Name *</label>
+          <input type="text" id="tenantName" class="form-input" required placeholder="e.g. Acme Corp" />
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="tenantLegalName">Legal Name</label>
+          <input type="text" id="tenantLegalName" class="form-input" placeholder="e.g. Acme Corporation Pvt Ltd" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="tenantEmail">Email</label>
+            <input type="email" id="tenantEmail" class="form-input" placeholder="admin@acme.com" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tenantPhone">Phone</label>
+            <input type="text" id="tenantPhone" class="form-input" placeholder="+1 (555) 123-4567" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tenantWebsite">Website</label>
+          <input type="url" id="tenantWebsite" class="form-input" placeholder="https://acme.com" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="tenantIndustry">Industry</label>
+            <input type="text" id="tenantIndustry" class="form-input" placeholder="e.g. Technology" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tenantCompanySize">Company Size</label>
+            <input type="text" id="tenantCompanySize" class="form-input" placeholder="e.g. 51-200" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="tenantCountry">Country</label>
+            <input type="text" id="tenantCountry" class="form-input" placeholder="e.g. United States" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tenantTimezone">Timezone</label>
+            <input type="text" id="tenantTimezone" class="form-input" placeholder="e.g. America/New_York" />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="TenantsModule.closeFormModal()">Cancel</button>
+      <button type="submit" form="tenantForm" id="btnTenantSave" class="btn-primary">Save Tenant</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tenant Details Modal -->
+<div id="tenantDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Tenant Details</h3>
+      <button class="modal-close" onclick="TenantsModule.closeDetailsModal()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="tenantDetailsContent">
+      <!-- Injected by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="TenantsModule.closeDetailsModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal" style="max-width: 400px">
+    <div class="modal-header">
+      <h3 id="confirmTitle" class="modal-title">Confirm Action</h3>
+      <button class="modal-close" onclick="TenantsModule.closeConfirmModal()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmText" style="font-size:14px; color:var(--color-gray-700)">Are you sure?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="TenantsModule.closeConfirmModal()">Cancel</button>
+      <button id="btnConfirmAction" class="btn-primary" onclick="TenantsModule.executeStatusChange()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
 
 <!-- Scripts -->
 <script src="../../assets/js/config.js"></script>
 <script src="../../assets/js/api.js"></script>
 <script src="../../assets/js/auth.js"></script>
 <script src="../../assets/js/superadmin.js"></script>
+<script src="../../assets/js/tenants.js"></script>
 
 </body>
 </html>

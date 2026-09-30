@@ -1,0 +1,482 @@
+/* =========================================================================
+   Dashboard Module — Premium Analytics UI
+   ========================================================================= */
+
+/* === Welcome Banner === */
+.db-welcome-banner {
+  background: linear-gradient(135deg, #2d2416 0%, #4a3728 40%, #6b4f35 100%);
+  border-radius: 16px;
+  padding: 32px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 40px -10px rgba(139, 115, 85, 0.4);
+}
+
+.db-welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.db-welcome-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: 30%;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.db-welcome-text {
+  z-index: 2;
+}
+
+.db-welcome-text h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
+}
+
+.db-welcome-text p {
+  font-size: 15px;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+
+.db-welcome-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  z-index: 2;
+}
+
+.db-welcome-date {
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+}
+
+.db-welcome-time {
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* === KPI Cards Row === */
+.db-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.db-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e8edf2;
+  border-radius: 14px;
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: default;
+}
+
+.db-kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -8px rgba(0,0,0,0.1);
+  border-color: rgba(139, 115, 85, 0.25);
+}
+
+.db-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  border-radius: 14px 0 0 14px;
+}
+
+.db-kpi-card.accent-amber::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
+.db-kpi-card.accent-green::before  { background: linear-gradient(180deg, #10b981, #059669); }
+.db-kpi-card.accent-blue::before   { background: linear-gradient(180deg, #3b82f6, #2563eb); }
+.db-kpi-card.accent-rose::before   { background: linear-gradient(180deg, #f43f5e, #e11d48); }
+
+.db-kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.db-kpi-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.db-kpi-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.db-kpi-icon.amber { background: #fef3c7; color: #d97706; }
+.db-kpi-icon.green { background: #d1fae5; color: #059669; }
+.db-kpi-icon.blue  { background: #dbeafe; color: #2563eb; }
+.db-kpi-icon.rose  { background: #ffe4e6; color: #e11d48; }
+
+.db-kpi-value {
+  font-size: 34px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+
+.db-kpi-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+
+.db-kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.db-kpi-trend.up   { background: #ecfdf5; color: #059669; }
+.db-kpi-trend.down { background: #fff1f2; color: #e11d48; }
+.db-kpi-trend.neutral { background: #f1f5f9; color: #64748b; }
+
+/* === Secondary Stats Row === */
+.db-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.db-stat-pill {
+  background: #ffffff;
+  border: 1px solid #e8edf2;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.25s ease;
+}
+
+.db-stat-pill:hover {
+  box-shadow: 0 4px 12px -4px rgba(0,0,0,0.08);
+  border-color: rgba(139, 115, 85, 0.2);
+}
+
+.db-stat-pill-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.db-stat-pill-icon.purple { background: #f3e8ff; color: #9333ea; }
+.db-stat-pill-icon.cyan   { background: #cffafe; color: #0891b2; }
+.db-stat-pill-icon.orange { background: #fff7ed; color: #ea580c; }
+
+.db-stat-pill-text {
+  flex: 1;
+}
+
+.db-stat-pill-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.1;
+}
+
+.db-stat-pill-label {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* === Bottom 2-column layout === */
+.db-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* === Panel base === */
+.db-panel {
+  background: #ffffff;
+  border: 1px solid #e8edf2;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.db-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.db-panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.db-panel-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.db-panel-body {
+  padding: 20px 24px;
+}
+
+/* === Recent Tenants Table === */
+.db-tenant-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.db-tenant-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f8fafc;
+  transition: background 0.2s ease;
+}
+
+.db-tenant-row:last-child {
+  border-bottom: none;
+}
+
+.db-tenant-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #8B7355, #b09070);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.db-tenant-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.db-tenant-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-tenant-industry {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+.db-tenant-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.db-tenant-status.active    { background: #ecfdf5; color: #059669; }
+.db-tenant-status.inactive  { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+.db-tenant-status.suspended { background: #fff1f2; color: #e11d48; }
+
+/* === Activity Feed === */
+.db-activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.db-activity-item {
+  display: flex;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.db-activity-item:last-child {
+  border-bottom: none;
+}
+
+.db-activity-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.db-activity-dot.create { background-color: #10b981; }
+.db-activity-dot.update { background-color: #3b82f6; }
+.db-activity-dot.delete { background-color: #ef4444; }
+.db-activity-dot.auth   { background-color: #f59e0b; }
+.db-activity-dot.other  { background-color: #94a3b8; }
+
+.db-activity-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.db-activity-action {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.db-activity-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-activity-time {
+  font-size: 11px;
+  color: #cbd5e1;
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* === Industry Breakdown === */
+.db-industry-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.db-industry-item:last-child {
+  margin-bottom: 0;
+}
+
+.db-industry-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  width: 110px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-industry-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.db-industry-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.db-industry-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bar-color-0 { background: linear-gradient(90deg, #8B7355, #b09070); }
+.bar-color-1 { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.bar-color-2 { background: linear-gradient(90deg, #10b981, #34d399); }
+.bar-color-3 { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.bar-color-4 { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+.bar-color-5 { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+/* === Loading skeleton === */
+.db-skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: db-shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+
+@keyframes db-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* === Empty state === */
+.db-empty {
+  text-align: center;
+  padding: 30px 20px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* === Responsive === */
+@media (max-width: 1100px) {
+  .db-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .db-bottom-grid { grid-template-columns: 1fr; }
+  .db-secondary-grid { grid-template-columns: 1fr; }
+  .db-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .db-welcome-meta { display: none; }
+}

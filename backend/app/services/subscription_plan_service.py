@@ -50,9 +50,6 @@ class SubscriptionPlanService:
             billing_cycle=data.billing_cycle,
             max_users=data.max_users,
             max_branches=data.max_branches,
-            max_leads=data.max_leads,
-            max_ai_usage=data.max_ai_usage,
-            max_storage=data.max_storage,
         )
 
         created_plan = await self._repo.create(plan)

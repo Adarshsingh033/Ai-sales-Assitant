@@ -39,12 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // -----------------------------------------------------------------------
   // Sidebar navigation
   // -----------------------------------------------------------------------
-  const navItems = document.querySelectorAll('.nav-item[data-page]');
+  const navItems = document.querySelectorAll('.nav-item[data-page], .nav-submenu-item[data-page]');
 
   navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      // Remove active from all
-      navItems.forEach(n => n.classList.remove('active'));
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      // Remove active from all nav items
+      document.querySelectorAll('.nav-item, .nav-submenu-item').forEach(n => n.classList.remove('active'));
       item.classList.add('active');
 
       // Update page title
@@ -58,6 +60,30 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sectionId) {
         const section = document.getElementById(sectionId);
         if (section) section.hidden = false;
+        
+        if (sectionId === 'section-subscription-plans' && typeof SubscriptionPlansModule !== 'undefined') {
+          SubscriptionPlansModule.loadPlans();
+        } else if (sectionId === 'section-billing-cycles' && typeof BillingCyclesModule !== 'undefined') {
+          BillingCyclesModule.loadCycles();
+        } else if (sectionId === 'section-tenants' && typeof TenantsModule !== 'undefined') {
+          TenantsModule.loadTenants();
+        }
+      }
+    });
+  });
+
+  // Parent menu toggle (Accordion)
+  const navParents = document.querySelectorAll('.nav-parent-item');
+  navParents.forEach(parent => {
+    parent.addEventListener('click', () => {
+      const isExpanded = parent.classList.contains('open');
+      parent.classList.toggle('open', !isExpanded);
+      parent.setAttribute('aria-expanded', !isExpanded);
+      
+      const submenuId = parent.getAttribute('aria-controls');
+      if (submenuId) {
+        const submenu = document.getElementById(submenuId);
+        if (submenu) submenu.classList.toggle('open', !isExpanded);
       }
     });
   });
@@ -75,9 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     profileToggle.classList.toggle('open', !isOpen);
   });
 
-  document.addEventListener('click', () => {
+  document.addEventListener('click', (e) => {
     profileDropdown?.classList.remove('open');
     profileToggle?.classList.remove('open');
+    if (!e.target.closest('.cell-actions')) {
+      document.querySelectorAll('.cell-actions.active').forEach(el => el.classList.remove('active'));
+    }
   });
 
   // -----------------------------------------------------------------------
@@ -87,3 +116,42 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => Auth.logout());
   });
 });
+
+/**
+ * Global Toast Notification Helper
+ */
+window.showToast = function(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+
+  const icon = type === 'success'
+    ? '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>'
+    : '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+
+  function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe.toString()
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  toast.innerHTML = `
+    ${icon}
+    <span>${escapeHtml(message)}</span>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => toast.classList.add('show'), 10);
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+};

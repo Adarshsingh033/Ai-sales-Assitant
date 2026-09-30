@@ -61,16 +61,28 @@
         <span class="nav-item-label">Tenants</span>
       </a>
 
-      <a href="#" class="nav-item" data-page="Subscription Plans" data-section="section-coming-soon"
-         aria-label="Subscription Plans">
-        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
-        </svg>
-        <span class="nav-item-label">Subscription Plans</span>
-        <span class="nav-coming-soon">Soon</span>
-      </a>
+      <!-- Subscription Management Group -->
+      <div class="nav-group">
+        <div class="nav-item nav-parent-item open" id="navSubscriptionParent" aria-expanded="true" aria-controls="subscriptionSubmenu">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
+               viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+          </svg>
+          <span class="nav-item-label">Subscription Management</span>
+          <svg class="nav-parent-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+          </svg>
+        </div>
+        <div class="nav-submenu open" id="subscriptionSubmenu">
+          <a href="#" class="nav-submenu-item" data-page="Subscription Plans" data-section="section-subscription-plans" aria-label="Plans">
+            Plans
+          </a>
+          <a href="#" class="nav-submenu-item" data-page="Billing Cycles" data-section="section-billing-cycles" aria-label="Billing Cycles">
+            Billing Cycles
+          </a>
+        </div>
+      </div>
 
       <!-- AI & Analytics -->
       <span class="sidebar-section-label">Analytics</span>
@@ -495,6 +507,167 @@
       </div>
     </section>
 
+    <!-- -----------------------------------------------------------------
+         Subscription Plans section
+         ----------------------------------------------------------------- -->
+    <section id="section-subscription-plans" class="page-section" hidden>
+      <div class="tenant-page-header">
+        <div class="tenant-page-title">
+          <h2>Subscription Plans</h2>
+          <p>Manage platform pricing tiers, billing cycles, and feature limits.</p>
+        </div>
+        
+        <div class="tenant-toolbar">
+          <div class="tenant-search-box">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <input type="text" id="planSearch" placeholder="Search plans..." aria-label="Search subscription plans" />
+          </div>
+          <select id="planStatusFilter" aria-label="Filter by status" class="tenant-filter">
+            <option value="">All Statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+          <select id="planBillingCycleFilter" aria-label="Filter by billing cycle" class="tenant-filter">
+            <option value="">All Cycles</option>
+            <option value="MONTHLY">Monthly</option>
+            <option value="YEARLY">Yearly</option>
+          </select>
+          <button class="btn-primary" onclick="SubscriptionPlansModule.openCreateModal()">
+            Create Plan
+          </button>
+        </div>
+      </div>
+
+      <div id="planTableContainer" class="table-container" style="display:none;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Plan Name</th>
+              <th>Price</th>
+              <th>Billing Cycle</th>
+              <th>Users Limit</th>
+              <th>Branches Limit</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="planTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+        
+        <div class="pagination">
+          <div class="pagination-info">
+            <span id="planPageIndicator">Page 1 of 1</span>
+            <span class="rows-label">Rows per page:</span>
+            <select class="rows-select" id="planRowsSelect" aria-label="Rows per page">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="pagination-controls">
+            <button class="page-icon-btn" id="btnPlanFirst" disabled aria-label="First page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" /></svg>
+            </button>
+            <button class="page-icon-btn" id="btnPlanPrev" disabled aria-label="Previous page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button class="page-icon-btn active" id="btnPlanCurrent">1</button>
+            <button class="page-icon-btn" id="btnPlanNext" disabled aria-label="Next page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+            <button class="page-icon-btn" id="btnPlanLast" disabled aria-label="Last page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="planEmptyState" class="empty-state" style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- -----------------------------------------------------------------
+         Billing Cycles section
+         ----------------------------------------------------------------- -->
+    <section id="section-billing-cycles" class="page-section" hidden>
+      <div class="tenant-page-header">
+        <div class="tenant-page-title">
+          <h2>Billing Cycles</h2>
+          <p>Manage subscription billing cycles, durations, and status.</p>
+        </div>
+        
+        <div class="tenant-toolbar">
+          <div class="tenant-search-box">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <input type="text" id="cycleSearch" placeholder="Search cycles..." aria-label="Search billing cycles" />
+          </div>
+          <select id="cycleStatusFilter" aria-label="Filter by status" class="tenant-filter">
+            <option value="">All Statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+          <button class="btn-primary" onclick="BillingCyclesModule.openCreateModal()">
+            Create Billing Cycle
+          </button>
+        </div>
+      </div>
+
+      <div id="cycleTableContainer" class="table-container" style="display:none;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Duration</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="cycleTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+        
+        <div class="pagination">
+          <div class="pagination-info">
+            <span id="cyclePageIndicator">Page 1 of 1</span>
+            <span class="rows-label">Rows per page:</span>
+            <select class="rows-select" id="cycleRowsSelect" aria-label="Rows per page">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="pagination-controls">
+            <button class="page-icon-btn" id="btnCycleFirst" disabled aria-label="First page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" /></svg>
+            </button>
+            <button class="page-icon-btn" id="btnCyclePrev" disabled aria-label="Previous page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button class="page-icon-btn active" id="btnCycleCurrent">1</button>
+            <button class="page-icon-btn" id="btnCycleNext" disabled aria-label="Next page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+            <button class="page-icon-btn" id="btnCycleLast" disabled aria-label="Last page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="cycleEmptyState" class="empty-state" style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -651,6 +824,152 @@
   </div>
 </div>
 
+<!-- Create / Edit Subscription Plan Modal -->
+<div id="planModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="planModalTitle" class="modal-title">Create Subscription Plan</h3>
+      <button class="modal-close" onclick="SubscriptionPlansModule.closeFormModal()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="planForm">
+        <input type="hidden" id="formPlanId" />
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="planName">Plan Name *</label>
+            <input type="text" id="planName" class="form-input" required placeholder="e.g. Professional" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="planDescription">Description</label>
+            <input type="text" id="planDescription" class="form-input" placeholder="e.g. Perfect for growing sales teams" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="planPrice">Price ($) *</label>
+            <input type="number" id="planPrice" class="form-input" step="0.01" min="0" required placeholder="49.99" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="planCurrency">Currency</label>
+            <input type="text" id="planCurrency" class="form-input" value="USD" placeholder="USD" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="planBillingCycle">Billing Cycle *</label>
+            <select id="planBillingCycle" class="form-input" required>
+              <option value="MONTHLY">Monthly</option>
+              <option value="YEARLY">Yearly</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="planMaxUsers">Max Users *</label>
+            <input type="number" id="planMaxUsers" class="form-input" min="1" required placeholder="10" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="planMaxBranches">Max Branches *</label>
+            <input type="number" id="planMaxBranches" class="form-input" min="1" required placeholder="2" />
+          </div>
+        </div>
+
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="SubscriptionPlansModule.closeFormModal()">Cancel</button>
+      <button type="submit" form="planForm" id="btnPlanSave" class="btn-primary">Save Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Plan Details Modal -->
+<div id="planDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Subscription Plan Details</h3>
+      <button class="modal-close" onclick="SubscriptionPlansModule.closeDetailsModal()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="planDetailsContent">
+      <!-- Injected by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="SubscriptionPlansModule.closeDetailsModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create / Edit Billing Cycle Modal -->
+<div id="cycleModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cycleModalTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="cycleModalTitle" class="modal-title">Create Billing Cycle</h3>
+      <button class="modal-close" onclick="BillingCyclesModule.closeFormModal()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="cycleForm">
+        <input type="hidden" id="formCycleId" />
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="cycleName">Name *</label>
+            <input type="text" id="cycleName" class="form-input" required placeholder="e.g. Semi-Annual" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cycleDuration">Duration (months) *</label>
+            <input type="number" id="cycleDuration" class="form-input" min="1" required placeholder="e.g. 6" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cycleDescription">Billing Description</label>
+          <input type="text" id="cycleDescription" class="form-input" placeholder="e.g. Billed every 6 months" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <div class="status-toggle-wrapper" onclick="BillingCyclesModule.toggleFormStatus()">
+            <span id="cycleFormStatusToggle" class="status-toggle active">
+              <span class="status-toggle-handle"></span>
+            </span>
+            <span id="cycleFormStatusLabel" class="status-toggle-label">Active</span>
+          </div>
+        </div>
+
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="BillingCyclesModule.closeFormModal()">Cancel</button>
+      <button type="submit" form="cycleForm" id="btnCycleSave" class="btn-primary">Save Billing Cycle</button>
+    </div>
+  </div>
+</div>
+
+<!-- Billing Cycle Details Modal -->
+<div id="cycleDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Billing Cycle Details</h3>
+      <button class="modal-close" onclick="BillingCyclesModule.closeDetailsModal()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="cycleDetailsContent">
+      <!-- Injected by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="BillingCyclesModule.closeDetailsModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast Container -->
 <div id="toastContainer" class="toast-container"></div>
 
@@ -660,6 +979,8 @@
 <script src="../../assets/js/auth.js"></script>
 <script src="../../assets/js/superadmin.js"></script>
 <script src="../../assets/js/tenants.js"></script>
+<script src="../../assets/js/billing_cycles.js"></script>
+<script src="../../assets/js/subscription_plans.js"></script>
 
 </body>
 </html>

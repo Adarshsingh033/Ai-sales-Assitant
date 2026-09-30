@@ -103,6 +103,7 @@
   font-weight: 500;
   text-decoration: none;
   position: relative;
+  min-width: 0;
 }
 
 .nav-item:hover {
@@ -113,6 +114,7 @@
 .nav-item.active {
   background: #F5F0E6;
   color: #6B5535;
+  font-weight: 600;
 }
 
 .nav-item-icon {
@@ -124,7 +126,71 @@
 .nav-item.active .nav-item-icon,
 .nav-item:hover .nav-item-icon { opacity: 1; }
 
-.nav-item-label { flex: 1; }
+.nav-item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.nav-parent-chevron {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  transition: transform var(--transition-fast);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.nav-parent-item.open .nav-parent-chevron {
+  transform: rotate(180deg);
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 36px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease-out;
+}
+
+.nav-submenu.open {
+  max-height: 200px;
+}
+
+.nav-submenu-item {
+  display: block;
+  padding: 7px 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-submenu-item:hover {
+  background: var(--color-gray-50);
+  color: var(--color-gray-800);
+}
+
+.nav-submenu-item.active {
+  background: #F5F0E6;
+  color: #6B5535;
+  font-weight: 600;
+}
 
 .nav-item-badge {
   font-size: 10px;

@@ -12,13 +12,10 @@ class SubscriptionPlanBase(BaseModel):
     description: Optional[str] = Field(None, max_length=500)
     price: float = Field(..., ge=0.0)
     currency: str = Field(default="USD", max_length=10)
-    billing_cycle: BillingCycle = Field(default=BillingCycle.MONTHLY)
+    billing_cycle: str = Field(default="Monthly", max_length=100)
     
     max_users: int = Field(..., ge=1)
     max_branches: int = Field(..., ge=1)
-    max_leads: int = Field(..., ge=1)
-    max_ai_usage: int = Field(..., ge=1)
-    max_storage: int = Field(..., ge=1)
 
 
 class SubscriptionPlanCreate(SubscriptionPlanBase):
@@ -30,13 +27,10 @@ class SubscriptionPlanUpdate(BaseModel):
     description: Optional[str] = Field(None, max_length=500)
     price: Optional[float] = Field(None, ge=0.0)
     currency: Optional[str] = Field(None, max_length=10)
-    billing_cycle: Optional[BillingCycle] = None
+    billing_cycle: Optional[str] = Field(None, max_length=100)
     
     max_users: Optional[int] = Field(None, ge=1)
     max_branches: Optional[int] = Field(None, ge=1)
-    max_leads: Optional[int] = Field(None, ge=1)
-    max_ai_usage: Optional[int] = Field(None, ge=1)
-    max_storage: Optional[int] = Field(None, ge=1)
 
 
 class SubscriptionPlanStatusUpdate(BaseModel):

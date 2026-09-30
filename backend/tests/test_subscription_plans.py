@@ -18,9 +18,6 @@ async def test_super_admin_can_create_plan(client: AsyncClient, super_admin_toke
             "billing_cycle": BillingCycle.MONTHLY.value,
             "max_users": 10,
             "max_branches": 2,
-            "max_leads": 1000,
-            "max_ai_usage": 500,
-            "max_storage": 5120
         },
     )
     assert response.status_code == 200
@@ -38,14 +35,14 @@ async def test_duplicate_plan_slug_resolution(client: AsyncClient, super_admin_t
     await client.post(
         "/api/v1/super-admin/subscription-plans",
         headers={"Authorization": f"Bearer {super_admin_token}"},
-        json={"name": "Basic Plan", "price": 10.0, "max_users": 1, "max_branches": 1, "max_leads": 100, "max_ai_usage": 100, "max_storage": 1024},
+        json={"name": "Basic Plan", "price": 10.0, "max_users": 1, "max_branches": 1},
     )
     
     # Create second plan with same name
     response = await client.post(
         "/api/v1/super-admin/subscription-plans",
         headers={"Authorization": f"Bearer {super_admin_token}"},
-        json={"name": "Basic Plan", "price": 15.0, "max_users": 2, "max_branches": 1, "max_leads": 200, "max_ai_usage": 200, "max_storage": 2048},
+        json={"name": "Basic Plan", "price": 15.0, "max_users": 2, "max_branches": 1},
     )
     assert response.status_code == 200
     data = response.json()
@@ -58,7 +55,7 @@ async def test_invalid_plan_data_rejected(client: AsyncClient, super_admin_token
     response = await client.post(
         "/api/v1/super-admin/subscription-plans",
         headers={"Authorization": f"Bearer {super_admin_token}"},
-        json={"name": "Free", "price": -5.0, "max_users": 0, "max_branches": 1, "max_leads": 10, "max_ai_usage": 10, "max_storage": 100},
+        json={"name": "Free", "price": -5.0, "max_users": 0, "max_branches": 1},
     )
     # Validation errors on price and max_users
     assert response.status_code == 422
@@ -69,7 +66,7 @@ async def test_super_admin_can_retrieve_plan(client: AsyncClient, super_admin_to
     create_resp = await client.post(
         "/api/v1/super-admin/subscription-plans",
         headers={"Authorization": f"Bearer {super_admin_token}"},
-        json={"name": "Fetch Me Plan", "price": 0, "max_users": 1, "max_branches": 1, "max_leads": 100, "max_ai_usage": 100, "max_storage": 1024},
+        json={"name": "Fetch Me Plan", "price": 0, "max_users": 1, "max_branches": 1},
     )
     plan_id = create_resp.json()["id"]
 
@@ -86,7 +83,7 @@ async def test_super_admin_can_update_plan(client: AsyncClient, super_admin_toke
     create_resp = await client.post(
         "/api/v1/super-admin/subscription-plans",
         headers={"Authorization": f"Bearer {super_admin_token}"},
-        json={"name": "Update Me Plan", "price": 10, "max_users": 1, "max_branches": 1, "max_leads": 100, "max_ai_usage": 100, "max_storage": 1024},
+        json={"name": "Update Me Plan", "price": 10, "max_users": 1, "max_branches": 1},
     )
     plan_id = create_resp.json()["id"]
 
@@ -105,7 +102,7 @@ async def test_plan_status_transitions(client: AsyncClient, super_admin_token: s
     create_resp = await client.post(
         "/api/v1/super-admin/subscription-plans",
         headers={"Authorization": f"Bearer {super_admin_token}"},
-        json={"name": "Status Check Plan", "price": 10, "max_users": 1, "max_branches": 1, "max_leads": 100, "max_ai_usage": 100, "max_storage": 1024},
+        json={"name": "Status Check Plan", "price": 10, "max_users": 1, "max_branches": 1},
     )
     plan_id = create_resp.json()["id"]
 
@@ -133,7 +130,7 @@ async def test_assign_plan_to_tenant(client: AsyncClient, super_admin_token: str
     plan_resp = await client.post(
         "/api/v1/super-admin/subscription-plans",
         headers={"Authorization": f"Bearer {super_admin_token}"},
-        json={"name": "Assignment Plan", "price": 99.0, "max_users": 10, "max_branches": 5, "max_leads": 1000, "max_ai_usage": 1000, "max_storage": 5000},
+        json={"name": "Assignment Plan", "price": 99.0, "max_users": 10, "max_branches": 5},
     )
     plan_id = plan_resp.json()["id"]
 
@@ -167,7 +164,7 @@ async def test_cannot_assign_inactive_plan(client: AsyncClient, super_admin_toke
     plan_resp = await client.post(
         "/api/v1/super-admin/subscription-plans",
         headers={"Authorization": f"Bearer {super_admin_token}"},
-        json={"name": "Inactive Plan", "price": 0, "max_users": 1, "max_branches": 1, "max_leads": 100, "max_ai_usage": 100, "max_storage": 1024},
+        json={"name": "Inactive Plan", "price": 0, "max_users": 1, "max_branches": 1},
     )
     plan_id = plan_resp.json()["id"]
     await client.patch(

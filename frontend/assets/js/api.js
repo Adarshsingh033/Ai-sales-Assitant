@@ -124,6 +124,74 @@ const Api = (() => {
       if (params.page_size) query.append('page_size', params.page_size);
       const qs = query.toString() ? `?${query.toString()}` : '';
       return request(`/super-admin/subscription-plans${qs}`, { method: 'GET' });
+    },
+
+    async getSubscriptionPlan(id) {
+      return request(`/super-admin/subscription-plans/${id}`, { method: 'GET' });
+    },
+
+    async createSubscriptionPlan(data) {
+      return request('/super-admin/subscription-plans', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateSubscriptionPlan(id, data) {
+      return request(`/super-admin/subscription-plans/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateSubscriptionPlanStatus(id, isActive) {
+      return request(`/super-admin/subscription-plans/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ is_active: isActive }),
+      });
+    },
+
+    // ---------------------------------------------------------------------
+    // Billing Cycles API (Super Admin)
+    // ---------------------------------------------------------------------
+    async getBillingCycles(params = {}) {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page);
+      if (params.page_size) query.append('page_size', params.page_size);
+      if (params.active_only) query.append('active_only', params.active_only);
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/super-admin/billing-cycles${qs}`, { method: 'GET' });
+    },
+
+    async getBillingCycle(id) {
+      return request(`/super-admin/billing-cycles/${id}`, { method: 'GET' });
+    },
+
+    async createBillingCycle(data) {
+      return request('/super-admin/billing-cycles', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateBillingCycle(id, data) {
+      return request(`/super-admin/billing-cycles/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateBillingCycleStatus(id, isActive) {
+      return request(`/super-admin/billing-cycles/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ is_active: isActive }),
+      });
+    },
+
+    async deleteBillingCycle(id) {
+      return request(`/super-admin/billing-cycles/${id}`, {
+        method: 'DELETE',
+      });
     }
   };
 })();

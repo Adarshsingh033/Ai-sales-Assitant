@@ -247,16 +247,16 @@ const TenantsModule = (() => {
             </div>
           </td>
           <td>${createdDate}</td>
-          <td class="cell-actions" onmouseleave="this.classList.remove('active')">
-            <button class="action-btn" onclick="this.parentElement.classList.toggle('active')" aria-label="Actions">
+          <td class="cell-actions">
+            <button class="action-btn" onclick="TenantsModule.toggleActionMenu(event)" aria-label="Actions">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="20" height="20">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 6.75a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 6.75a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
               </svg>
             </button>
             <div class="action-dropdown">
-              <button class="action-dropdown-item" onclick="TenantsModule.openDetailsModal('${t.id}')">View</button>
-              <button class="action-dropdown-item" onclick="TenantsModule.openEditModal('${t.id}')">Edit</button>
-              <button class="action-dropdown-item danger" onclick="TenantsModule.confirmDeleteTenant('${t.id}', '${escapeHtml(t.name)}')">Delete</button>
+              <button class="action-dropdown-item" onclick="TenantsModule.handleAction(event, 'view', '${t.id}')">View</button>
+              <button class="action-dropdown-item" onclick="TenantsModule.handleAction(event, 'edit', '${t.id}')">Edit</button>
+              <button class="action-dropdown-item danger" onclick="TenantsModule.handleAction(event, 'delete', '${t.id}', '${escapeHtml(t.name)}')">Delete</button>
             </div>
           </td>
         </tr>
@@ -559,30 +559,9 @@ const TenantsModule = (() => {
   // Toast Notifications
   // -------------------------------------------------------------------------
   function showToast(message, type = 'success') {
-    if (!els.toastContainer) return;
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    
-    const icon = type === 'success' 
-      ? '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>'
-      : '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
-      
-    toast.innerHTML = `
-      ${icon}
-      <span>${escapeHtml(message)}</span>
-    `;
-    
-    els.toastContainer.appendChild(toast);
-    
-    // Trigger animation
-    setTimeout(() => toast.classList.add('show'), 10);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    if (typeof window.showToast === 'function') {
+      window.showToast(message, type);
+    }
   }
 
   // Utility
@@ -615,6 +594,32 @@ const TenantsModule = (() => {
     }
   }
 
+  function toggleActionMenu(event) {
+    if (event) event.stopPropagation();
+    const cell = event ? event.currentTarget.closest('.cell-actions') : null;
+    if (!cell) return;
+    const isCurrentlyActive = cell.classList.contains('active');
+
+    document.querySelectorAll('.cell-actions.active').forEach(el => el.classList.remove('active'));
+
+    if (!isCurrentlyActive) {
+      cell.classList.add('active');
+    }
+  }
+
+  function handleAction(event, action, tenantId, extra) {
+    if (event) event.stopPropagation();
+    document.querySelectorAll('.cell-actions.active').forEach(el => el.classList.remove('active'));
+
+    if (action === 'view') {
+      openDetailsModal(tenantId);
+    } else if (action === 'edit') {
+      openEditModal(tenantId);
+    } else if (action === 'delete') {
+      confirmDeleteTenant(tenantId, extra);
+    }
+  }
+
   // Public API
   return {
     init,
@@ -628,7 +633,9 @@ const TenantsModule = (() => {
     confirmDeleteTenant,
     closeConfirmModal,
     executeStatusChange,
-    togglePasswordVisibility
+    togglePasswordVisibility,
+    toggleActionMenu,
+    handleAction,
   };
 })();
 

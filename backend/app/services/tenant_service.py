@@ -53,10 +53,30 @@ class TenantService:
             company_size=data.company_size,
             country=data.country,
             timezone=data.timezone,
+            subscription_plan_id=data.subscription_plan_id,
             created_by=current_user.id,
         )
 
         created_tenant = await self._repo.create(tenant)
+
+        # If email and password provided, create initial tenant admin user
+        if data.email and data.password:
+            from app.core.security import hash_password
+            from app.models.user import User, UserRole
+            name_parts = data.name.split(" ", 1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else "Admin"
+            admin_user = User(
+                tenant_id=created_tenant.id,
+                first_name=first_name,
+                last_name=last_name,
+                email=data.email,
+                password_hash=hash_password(data.password),
+                role=UserRole.TENANT_ADMIN,
+                is_active=True,
+            )
+            self._repo._session.add(admin_user)
+            await self._repo._session.flush()
         
         # Audit log
         audit = AuditService(self._repo._session)
@@ -67,7 +87,7 @@ class TenantService:
             user_id=current_user.id,
             resource_id=str(created_tenant.id),
             description=f"Tenant '{created_tenant.name}' created.",
-            new_values=data.model_dump(),
+            new_values=data.model_dump(exclude={"password"}),
             request=request
         )
         
@@ -115,16 +135,25 @@ class TenantService:
                 detail="Tenant not found.",
             )
             
-        update_data = data.model_dump(exclude_unset=True)
-        if not update_data:
-            return TenantResponse.model_validate(tenant)
-            
-        # Capture old values
-        old_values = {k: getattr(tenant, k) for k in update_data.keys()}
+        update_data = data.model_dump(exclude_unset=True, exclude={"password"})
         
-        updated_tenant = await self._repo.update(tenant, update_data)
-        
-        # Audit log
+        # Update password if provided
+        if data.password and tenant.email:
+            from app.core.security import hash_password
+            from sqlalchemy import select
+            from app.models.user import User, UserRole
+            stmt = select(User).where(User.tenant_id == tenant.id, User.role == UserRole.TENANT_ADMIN)
+            res = await self._repo._session.execute(stmt)
+            admin_user = res.scalar_one_or_none()
+            if admin_user:
+                admin_user.password_hash = hash_password(data.password)
+
+        if update_data:
+            old_values = {k: getattr(tenant, k) for k in update_data.keys()}
+            updated_tenant = await self._repo.update(tenant, update_data)
+        else:
+            updated_tenant = tenant
+
         audit = AuditService(self._repo._session)
         await audit.create_audit_log(
             action=AuditLogAction.TENANT_UPDATED,
@@ -133,8 +162,8 @@ class TenantService:
             user_id=current_user.id,
             resource_id=str(tenant_id),
             description="Tenant details updated.",
-            old_values=old_values,
-            new_values=update_data,
+            old_values={k: str(v) for k, v in old_values.items()} if update_data else None,
+            new_values={k: str(v) for k, v in update_data.items()} if update_data else None,
             request=request
         )
         
@@ -173,6 +202,30 @@ class TenantService:
         )
         
         return TenantResponse.model_validate(updated_tenant)
+
+    async def delete_tenant(self, tenant_id: uuid.UUID, current_user: User, request: Optional[Request] = None) -> None:
+        tenant = await self._repo.get_by_id(tenant_id)
+        if not tenant:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tenant not found.",
+            )
+            
+        tenant_name = tenant.name
+        
+        # Log audit log before deleting the tenant record so tenant_id foreign key constraint is satisfied
+        audit = AuditService(self._repo._session)
+        await audit.create_audit_log(
+            action=AuditLogAction.TENANT_UPDATED,
+            resource_type=AuditLogResourceType.TENANT,
+            tenant_id=tenant_id,
+            user_id=current_user.id,
+            resource_id=str(tenant_id),
+            description=f"Tenant '{tenant_name}' deleted.",
+            request=request
+        )
+
+        await self._repo.delete(tenant)
 
     async def assign_subscription_plan(self, tenant_id: uuid.UUID, plan_id: uuid.UUID, current_user: User, request: Optional[Request] = None) -> TenantResponse:
         tenant = await self._repo.get_by_id(tenant_id)

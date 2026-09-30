@@ -17,6 +17,8 @@ class TenantCreate(BaseModel):
     company_size: Optional[str] = Field(None, max_length=50)
     country: Optional[str] = Field(None, max_length=100)
     timezone: Optional[str] = Field(None, max_length=50)
+    subscription_plan_id: Optional[uuid.UUID] = None
+    password: Optional[str] = Field(None, min_length=6)
 
 
 class TenantUpdate(BaseModel):
@@ -29,6 +31,8 @@ class TenantUpdate(BaseModel):
     company_size: Optional[str] = Field(None, max_length=50)
     country: Optional[str] = Field(None, max_length=100)
     timezone: Optional[str] = Field(None, max_length=50)
+    subscription_plan_id: Optional[uuid.UUID] = None
+    password: Optional[str] = Field(None, min_length=6)
 
 
 class TenantStatusUpdate(BaseModel):

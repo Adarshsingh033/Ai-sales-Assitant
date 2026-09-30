@@ -155,3 +155,29 @@ async def test_authorization(client: AsyncClient, tenant_admin_token: str, sales
     # Unauthenticated unauthorized
     resp3 = await client.get("/api/v1/super-admin/tenants")
     assert resp3.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_super_admin_can_delete_tenant(client: AsyncClient, super_admin_token: str):
+    # Create
+    create_resp = await client.post(
+        "/api/v1/super-admin/tenants",
+        headers={"Authorization": f"Bearer {super_admin_token}"},
+        json={"name": "Delete Target"},
+    )
+    tenant_id = create_resp.json()["id"]
+
+    # Delete
+    del_resp = await client.delete(
+        f"/api/v1/super-admin/tenants/{tenant_id}",
+        headers={"Authorization": f"Bearer {super_admin_token}"},
+    )
+    assert del_resp.status_code == 204
+
+    # Verify 404 on get
+    get_resp = await client.get(
+        f"/api/v1/super-admin/tenants/{tenant_id}",
+        headers={"Authorization": f"Bearer {super_admin_token}"},
+    )
+    assert get_resp.status_code == 404
+

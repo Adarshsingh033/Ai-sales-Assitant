@@ -78,3 +78,8 @@ class TenantRepository:
         tenant.status = status
         await self._session.flush()
         return tenant
+
+    async def delete(self, tenant: Tenant) -> None:
+        await self._session.delete(tenant)
+        await self._session.flush()
+

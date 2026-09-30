@@ -427,7 +427,6 @@
             <option value="">All Statuses</option>
             <option value="ACTIVE">Active</option>
             <option value="INACTIVE">Inactive</option>
-            <option value="SUSPENDED">Suspended</option>
           </select>
           <select id="tenantIndustryFilter" aria-label="Filter by industry" class="tenant-filter">
             <option value="">All Industries</option>
@@ -464,10 +463,29 @@
         </table>
         
         <div class="pagination">
-          <span id="tenantPageIndicator">1 of 1</span>
+          <div class="pagination-info">
+            <span id="tenantPageIndicator">Page 1 of 1</span>
+            <span class="rows-label">Rows per page:</span>
+            <select class="rows-select" aria-label="Rows per page">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
           <div class="pagination-controls">
-            <button class="page-btn" id="btnTenantPrev" disabled>Previous</button>
-            <button class="page-btn" id="btnTenantNext" disabled>Next</button>
+            <button class="page-icon-btn" id="btnTenantFirst" disabled aria-label="First page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" /></svg>
+            </button>
+            <button class="page-icon-btn" id="btnTenantPrev" disabled aria-label="Previous page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button class="page-icon-btn active" id="btnTenantCurrent">1</button>
+            <button class="page-icon-btn" id="btnTenantNext" disabled aria-label="Next page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+            <button class="page-icon-btn" id="btnTenantLast" disabled aria-label="Last page">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" /></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -501,11 +519,6 @@
           <label class="form-label" for="tenantName">Tenant Name *</label>
           <input type="text" id="tenantName" class="form-input" required placeholder="e.g. Acme Corp" />
         </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="tenantLegalName">Legal Name</label>
-          <input type="text" id="tenantLegalName" class="form-input" placeholder="e.g. Acme Corporation Pvt Ltd" />
-        </div>
 
         <div class="form-row">
           <div class="form-group">
@@ -514,34 +527,82 @@
           </div>
           <div class="form-group">
             <label class="form-label" for="tenantPhone">Phone</label>
-            <input type="text" id="tenantPhone" class="form-input" placeholder="+1 (555) 123-4567" />
+            <input type="tel" id="tenantPhone" class="form-input" placeholder="+1 (555) 123-4567" />
           </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="tenantWebsite">Website</label>
-          <input type="url" id="tenantWebsite" class="form-input" placeholder="https://acme.com" />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="tenantIndustry">Industry</label>
-            <input type="text" id="tenantIndustry" class="form-input" placeholder="e.g. Technology" />
+            <label class="form-label" for="tenantIndustry">Industry type</label>
+            <select id="tenantIndustry" class="form-input">
+              <option value="">Select Industry</option>
+              <option value="Technology">Technology</option>
+              <option value="Finance">Finance</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Education">Education</option>
+              <option value="Retail">Retail</option>
+              <option value="Manufacturing">Manufacturing</option>
+              <option value="Real Estate">Real Estate</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label" for="tenantCompanySize">Company Size</label>
-            <input type="text" id="tenantCompanySize" class="form-input" placeholder="e.g. 51-200" />
+            <select id="tenantCompanySize" class="form-input">
+              <option value="">Select Company Size</option>
+              <option value="1-10">1-10 employees</option>
+              <option value="11-50">11-50 employees</option>
+              <option value="51-200">51-200 employees</option>
+              <option value="201-500">201-500 employees</option>
+              <option value="500+">500+ employees</option>
+            </select>
           </div>
         </div>
 
         <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="tenantSubscriptionPlan">Subscription plan</label>
+            <select id="tenantSubscriptionPlan" class="form-input">
+              <option value="">Select Subscription Plan</option>
+              <!-- Loaded dynamically via JS -->
+            </select>
+          </div>
           <div class="form-group">
             <label class="form-label" for="tenantCountry">Country</label>
             <input type="text" id="tenantCountry" class="form-input" placeholder="e.g. United States" />
           </div>
+        </div>
+
+        <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="tenantTimezone">Timezone</label>
-            <input type="text" id="tenantTimezone" class="form-input" placeholder="e.g. America/New_York" />
+            <label class="form-label" for="tenantPassword">Set password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="tenantPassword" class="form-input" placeholder="Enter password" />
+              <button type="button" class="password-toggle-btn" onclick="TenantsModule.togglePasswordVisibility('tenantPassword', this)" aria-label="Toggle password visibility">
+                <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tenantConfirmPassword">Confirm password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="tenantConfirmPassword" class="form-input" placeholder="Confirm password" />
+              <button type="button" class="password-toggle-btn" onclick="TenantsModule.togglePasswordVisibility('tenantConfirmPassword', this)" aria-label="Toggle password visibility">
+                <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </form>

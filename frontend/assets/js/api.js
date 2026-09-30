@@ -103,6 +103,27 @@ const Api = (() => {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       });
+    },
+
+    async deleteTenant(id) {
+      return request(`/super-admin/tenants/${id}`, {
+        method: 'DELETE',
+      });
+    },
+
+    async assignSubscriptionPlan(tenantId, planId) {
+      return request(`/super-admin/tenants/${tenantId}/subscription-plan`, {
+        method: 'PATCH',
+        body: JSON.stringify({ subscription_plan_id: planId }),
+      });
+    },
+
+    async getSubscriptionPlans(params = {}) {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page);
+      if (params.page_size) query.append('page_size', params.page_size);
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/super-admin/subscription-plans${qs}`, { method: 'GET' });
     }
   };
 })();

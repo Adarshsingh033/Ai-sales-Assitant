@@ -110,6 +110,22 @@ async def update_tenant_status(
     service = TenantService(db)
     return await service.update_tenant_status(tenant_id, data, current_user, request=request)
 
+@router.delete(
+    "/{tenant_id}",
+    status_code=204,
+    summary="Delete Tenant",
+    description="Delete a tenant permanently. Accessible only by Super Admin.",
+)
+async def delete_tenant(
+    request: Request,
+    tenant_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_super_admin),
+) -> None:
+    service = TenantService(db)
+    await service.delete_tenant(tenant_id, current_user, request=request)
+
+
 @router.patch(
     "/{tenant_id}/subscription-plan",
     response_model=TenantResponse,
@@ -125,3 +141,4 @@ async def assign_subscription_plan(
 ) -> TenantResponse:
     service = TenantService(db)
     return await service.assign_subscription_plan(tenant_id, data.subscription_plan_id, current_user, request=request)
+

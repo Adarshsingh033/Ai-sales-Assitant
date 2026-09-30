@@ -14,7 +14,6 @@ from app.schemas.subscription_plan import (
     SubscriptionPlanCreate,
     SubscriptionPlanListResponse,
     SubscriptionPlanResponse,
-    SubscriptionPlanResponse,
     SubscriptionPlanStatusUpdate,
     SubscriptionPlanUpdate,
 )

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,978 +10,1334 @@
   <!-- Styles -->
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <link rel="stylesheet" href="../../assets/css/superadmin.css" />
+  <link rel="stylesheet" href="../../assets/css/superadmin_profile.css" />
   <link rel="stylesheet" href="../../assets/css/tenants.css" />
 </head>
+
 <body>
 
-<div class="admin-shell">
+  <div class="admin-shell">
 
-  <!-- ================================================================
+    <!-- ================================================================
        Sidebar
        ================================================================ -->
-  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Platform navigation">
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Platform navigation">
 
-    <!-- Logo -->
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-             stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.091Z" />
-        </svg>
-      </div>
-      <div>
-        <div class="sidebar-logo-text">AI Sales Assistant</div>
-        <div class="sidebar-logo-sub">Super Admin</div>
-      </div>
-    </div>
-
-    <!-- Navigation -->
-    <nav class="sidebar-nav">
-
-      <!-- Core -->
-      <span class="sidebar-section-label">Platform</span>
-
-      <a href="#" class="nav-item active" data-page="Dashboard" data-section="section-dashboard"
-         aria-current="page" aria-label="Dashboard">
-        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-        </svg>
-        <span class="nav-item-label">Dashboard</span>
-      </a>
-
-      <a href="#" class="nav-item" data-page="Tenants" data-section="section-tenants"
-         aria-label="Tenants">
-        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
-        </svg>
-        <span class="nav-item-label">Tenants</span>
-      </a>
-
-      <!-- Subscription Management Group -->
-      <div class="nav-group">
-        <div class="nav-item nav-parent-item open" id="navSubscriptionParent" aria-expanded="true" aria-controls="subscriptionSubmenu">
-          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-               viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
+            stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
-          </svg>
-          <span class="nav-item-label">Subscription Management</span>
-          <svg class="nav-parent-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+              d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.091Z" />
           </svg>
         </div>
-        <div class="nav-submenu open" id="subscriptionSubmenu">
-          <a href="#" class="nav-submenu-item" data-page="Subscription Plans" data-section="section-subscription-plans" aria-label="Plans">
-            Plans
-          </a>
-          <a href="#" class="nav-submenu-item" data-page="Billing Cycles" data-section="section-billing-cycles" aria-label="Billing Cycles">
-            Billing Cycles
-          </a>
+        <div>
+          <div class="sidebar-logo-text">AI Sales Assistant</div>
+          <div class="sidebar-logo-sub">Super Admin</div>
         </div>
       </div>
 
-      <!-- AI & Analytics -->
-      <span class="sidebar-section-label">Analytics</span>
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
 
-      <a href="#" class="nav-item" data-page="AI Usage" data-section="section-coming-soon"
-         aria-label="AI Usage">
-        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
-        </svg>
-        <span class="nav-item-label">AI Usage</span>
-        <span class="nav-coming-soon">Soon</span>
-      </a>
+        <!-- Core -->
+        <span class="sidebar-section-label">Platform</span>
 
-      <a href="#" class="nav-item" data-page="Platform Analytics" data-section="section-coming-soon"
-         aria-label="Platform Analytics">
-        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
-        </svg>
-        <span class="nav-item-label">Platform Analytics</span>
-        <span class="nav-coming-soon">Soon</span>
-      </a>
-
-      <!-- System -->
-      <span class="sidebar-section-label">System</span>
-
-      <a href="#" class="nav-item" data-page="System Health" data-section="section-system-health"
-         aria-label="System Health">
-        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M21 10.5h.375c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125H21M4.5 10.5H18V15H4.5v-4.5ZM3.75 18h15A2.25 2.25 0 0 0 21 15.75v-6a2.25 2.25 0 0 0-2.25-2.25h-15A2.25 2.25 0 0 0 1.5 9.75v6A2.25 2.25 0 0 0 3.75 18Z" />
-        </svg>
-        <span class="nav-item-label">System Health</span>
-      </a>
-
-      <a href="#" class="nav-item" data-page="Audit Logs" data-section="section-coming-soon"
-         aria-label="Audit Logs">
-        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-        </svg>
-        <span class="nav-item-label">Audit Logs</span>
-        <span class="nav-coming-soon">Soon</span>
-      </a>
-
-      <a href="#" class="nav-item" data-page="Settings" data-section="section-coming-soon"
-         aria-label="Settings">
-        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-        </svg>
-        <span class="nav-item-label">Settings</span>
-        <span class="nav-coming-soon">Soon</span>
-      </a>
-
-    </nav>
-
-    <!-- Profile -->
-    <div class="sidebar-footer">
-      <!-- Profile dropdown -->
-      <div id="profileDropdown" class="profile-dropdown" role="menu" aria-label="User options">
-        <div class="profile-dropdown-header">
-          <div class="profile-dropdown-name" data-user-name>—</div>
-          <div class="profile-dropdown-email" data-user-email>—</div>
-        </div>
-        <button class="dropdown-item" role="menuitem" aria-label="View profile">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-               stroke-width="1.6" stroke="currentColor">
+        <a href="#" class="nav-item active" data-page="Dashboard" data-section="section-dashboard" aria-current="page"
+          aria-label="Dashboard">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+              d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
           </svg>
-          Profile
-        </button>
-        <button class="dropdown-item danger" role="menuitem" data-action="logout" aria-label="Sign out">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-               stroke-width="1.6" stroke="currentColor">
+          <span class="nav-item-label">Dashboard</span>
+        </a>
+
+        <a href="#" class="nav-item" data-page="Tenants" data-section="section-tenants" aria-label="Tenants">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+              d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
           </svg>
-          Sign Out
-        </button>
-      </div>
+          <span class="nav-item-label">Tenants</span>
+        </a>
 
-      <div id="profileToggle" class="sidebar-profile" role="button"
-           aria-haspopup="true" aria-expanded="false" aria-controls="profileDropdown"
-           tabindex="0" aria-label="Open user menu">
-        <div class="sidebar-avatar" data-user-initials aria-hidden="true">SA</div>
-        <div class="sidebar-profile-info">
-          <div class="sidebar-profile-name" data-user-name>Loading…</div>
-          <div class="sidebar-profile-role" data-user-role>Super Admin</div>
+        <!-- Subscription Management Group -->
+        <div class="nav-group">
+          <div class="nav-item nav-parent-item open" id="navSubscriptionParent" aria-expanded="true"
+            aria-controls="subscriptionSubmenu">
+            <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="1.6" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+            </svg>
+            <span class="nav-item-label">Subscription Management</span>
+            <svg class="nav-parent-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+            </svg>
+          </div>
+          <div class="nav-submenu open" id="subscriptionSubmenu">
+            <a href="#" class="nav-submenu-item" data-page="Subscription Plans"
+              data-section="section-subscription-plans" aria-label="Plans">
+              Plans
+            </a>
+            <a href="#" class="nav-submenu-item" data-page="Billing Cycles" data-section="section-billing-cycles"
+              aria-label="Billing Cycles">
+              Billing Cycles
+            </a>
+          </div>
         </div>
-        <svg class="sidebar-profile-chevron" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
-        </svg>
+
+
+        <!-- System -->
+        <span class="sidebar-section-label">System</span>
+
+        <a href="#" class="nav-item" data-page="System Health" data-section="section-system-health"
+          aria-label="System Health">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 10.5h.375c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125H21M4.5 10.5H18V15H4.5v-4.5ZM3.75 18h15A2.25 2.25 0 0 0 21 15.75v-6a2.25 2.25 0 0 0-2.25-2.25h-15A2.25 2.25 0 0 0 1.5 9.75v6A2.25 2.25 0 0 0 3.75 18Z" />
+          </svg>
+          <span class="nav-item-label">System Health</span>
+        </a>
+
+        <a href="#" class="nav-item" data-page="Audit Logs" data-section="section-audit-logs" aria-label="Audit Logs">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+          </svg>
+          <span class="nav-item-label">Audit Logs</span>
+        </a>
+
+
+
+      </nav>
+
+      <!-- Profile -->
+      <div class="sidebar-footer">
+        <!-- Profile dropdown -->
+        <div id="profileDropdown" class="profile-dropdown" role="menu" aria-label="User options">
+          <button class="dropdown-item" role="menuitem" aria-label="View profile" data-page="Profile"
+            data-section="section-profile">
+            <svg class="dropdown-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="1.8" stroke="#8B7355" width="18" height="18">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+            <span>Profile</span>
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" role="menuitem" aria-label="Change password" data-page="Change Password"
+            data-section="section-change-password">
+            <svg class="dropdown-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="1.8" stroke="#8B7355" width="18" height="18">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+            <span>Change Password</span>
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" role="menuitem" data-action="logout" aria-label="Logout">
+            <svg class="dropdown-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="1.8" stroke="#8B7355" width="18" height="18">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
+
+        <div id="profileToggle" class="sidebar-profile" role="button" aria-haspopup="true" aria-expanded="false"
+          aria-controls="profileDropdown" tabindex="0" aria-label="Open user menu">
+          <div class="sidebar-avatar" data-user-initials data-user-avatar aria-hidden="true">SA</div>
+          <div class="sidebar-profile-info">
+            <div class="sidebar-profile-name" data-user-name>Super Admin</div>
+            <div class="sidebar-profile-role" data-user-role>Super Admin</div>
+          </div>
+        </div>
       </div>
-    </div>
 
-  </aside>
+    </aside>
 
-  <!-- ================================================================
+    <!-- ================================================================
        Topbar
        ================================================================ -->
-  <header class="topbar" role="banner">
-    <div class="topbar-left">
-      <span class="topbar-title" id="pageTitle">Dashboard</span>
-    </div>
-  </header>
+    <header class="topbar" role="banner">
+      <div class="topbar-left">
+        <span class="topbar-title" id="pageTitle">Dashboard</span>
+      </div>
+    </header>
 
-  <!-- ================================================================
+    <!-- ================================================================
        Main content
        ================================================================ -->
-  <main class="main-content" id="mainContent">
+    <main class="main-content" id="mainContent">
 
-    <!-- -----------------------------------------------------------------
+      <!-- -----------------------------------------------------------------
          Dashboard section
          ----------------------------------------------------------------- -->
-    <section id="section-dashboard" class="page-section">
-      <div class="page-header">
-        <h2>Platform Overview</h2>
-        <p>Welcome to the AI Sales Assistant Super Admin portal.</p>
-      </div>
-
-      <!-- Stats grid -->
-      <div class="stats-grid">
-
-        <div class="stat-card">
-          <div class="stat-card-header">
-            <span class="stat-label">Total Tenants</span>
-            <div class="stat-icon indigo" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                   stroke-width="1.6" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75" />
-              </svg>
-            </div>
-          </div>
-          <div class="stat-empty">No data yet</div>
-          <div class="stat-footer">Tenant module coming soon</div>
+      <section id="section-dashboard" class="page-section">
+        <div class="page-header">
+          <h2>Platform Overview</h2>
+          <p>Welcome to the AI Sales Assistant Super Admin portal.</p>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-card-header">
-            <span class="stat-label">Active Tenants</span>
-            <div class="stat-icon green" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                   stroke-width="1.6" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
+        <!-- Stats grid -->
+        <div class="stats-grid">
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Tenants</span>
+              <div class="stat-icon indigo" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75" />
+                </svg>
+              </div>
             </div>
+            <div class="stat-empty">No data yet</div>
+            <div class="stat-footer">Tenant module coming soon</div>
           </div>
-          <div class="stat-empty">No data yet</div>
-          <div class="stat-footer">Tenant module coming soon</div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Active Tenants</span>
+              <div class="stat-icon green" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+              </div>
+            </div>
+            <div class="stat-empty">No data yet</div>
+            <div class="stat-footer">Tenant module coming soon</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Subscription Plans</span>
+              <div class="stat-icon amber" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                </svg>
+              </div>
+            </div>
+            <div class="stat-empty">No data yet</div>
+            <div class="stat-footer">Plans module coming soon</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">AI API Calls</span>
+              <div class="stat-icon sky" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.091Z" />
+                </svg>
+              </div>
+            </div>
+            <div class="stat-empty">No data yet</div>
+            <div class="stat-footer">AI usage module coming soon</div>
+          </div>
+
         </div>
 
-        <div class="stat-card">
-          <div class="stat-card-header">
-            <span class="stat-label">Subscription Plans</span>
-            <div class="stat-icon amber" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                   stroke-width="1.6" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
-              </svg>
+        <!-- Content grid -->
+        <div class="content-grid">
+
+          <!-- System health (quick view) -->
+          <div class="content-card">
+            <div class="card-header">
+              <span class="card-title">System Status</span>
+              <span class="badge badge-success">Operational</span>
+            </div>
+            <div class="card-body">
+              <div class="status-row">
+                <span class="status-name">API Server</span>
+                <span class="status-indicator" style="color:var(--color-success)">
+                  <span class="status-dot ok" aria-hidden="true"></span>
+                  Online
+                </span>
+              </div>
+              <div class="status-row">
+                <span class="status-name">Database</span>
+                <span class="status-indicator" style="color:var(--color-success)">
+                  <span class="status-dot ok" aria-hidden="true"></span>
+                  Connected
+                </span>
+              </div>
+              <div class="status-row">
+                <span class="status-name">Authentication</span>
+                <span class="status-indicator" style="color:var(--color-success)">
+                  <span class="status-dot ok" aria-hidden="true"></span>
+                  Operational
+                </span>
+              </div>
+              <div class="status-row">
+                <span class="status-name">AI Services</span>
+                <span class="status-indicator" style="color:var(--color-gray-400)">
+                  <span class="status-dot" style="background:var(--color-gray-300)" aria-hidden="true"></span>
+                  Not configured
+                </span>
+              </div>
             </div>
           </div>
-          <div class="stat-empty">No data yet</div>
-          <div class="stat-footer">Plans module coming soon</div>
+
+          <!-- Getting started -->
+          <div class="content-card">
+            <div class="card-header">
+              <span class="card-title">Getting Started</span>
+            </div>
+            <div class="card-body">
+              <div class="status-row">
+                <span class="status-name">Platform authentication</span>
+                <span class="badge badge-success">Complete</span>
+              </div>
+              <div class="status-row">
+                <span class="status-name">Super Admin account</span>
+                <span class="badge badge-success">Active</span>
+              </div>
+              <div class="status-row">
+                <span class="status-name">Tenant management</span>
+                <span class="badge" style="background:var(--color-gray-100);color:var(--color-gray-400)">Coming
+                  soon</span>
+              </div>
+              <div class="status-row">
+                <span class="status-name">AI integrations</span>
+                <span class="badge" style="background:var(--color-gray-100);color:var(--color-gray-400)">Coming
+                  soon</span>
+              </div>
+            </div>
+          </div>
+
         </div>
+      </section>
 
-        <div class="stat-card">
-          <div class="stat-card-header">
-            <span class="stat-label">AI API Calls</span>
-            <div class="stat-icon sky" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                   stroke-width="1.6" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.091Z" />
-              </svg>
-            </div>
-          </div>
-          <div class="stat-empty">No data yet</div>
-          <div class="stat-footer">AI usage module coming soon</div>
-        </div>
-
-      </div>
-
-      <!-- Content grid -->
-      <div class="content-grid">
-
-        <!-- System health (quick view) -->
-        <div class="content-card">
-          <div class="card-header">
-            <span class="card-title">System Status</span>
-            <span class="badge badge-success">Operational</span>
-          </div>
-          <div class="card-body">
-            <div class="status-row">
-              <span class="status-name">API Server</span>
-              <span class="status-indicator" style="color:var(--color-success)">
-                <span class="status-dot ok" aria-hidden="true"></span>
-                Online
-              </span>
-            </div>
-            <div class="status-row">
-              <span class="status-name">Database</span>
-              <span class="status-indicator" style="color:var(--color-success)">
-                <span class="status-dot ok" aria-hidden="true"></span>
-                Connected
-              </span>
-            </div>
-            <div class="status-row">
-              <span class="status-name">Authentication</span>
-              <span class="status-indicator" style="color:var(--color-success)">
-                <span class="status-dot ok" aria-hidden="true"></span>
-                Operational
-              </span>
-            </div>
-            <div class="status-row">
-              <span class="status-name">AI Services</span>
-              <span class="status-indicator" style="color:var(--color-gray-400)">
-                <span class="status-dot" style="background:var(--color-gray-300)" aria-hidden="true"></span>
-                Not configured
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Getting started -->
-        <div class="content-card">
-          <div class="card-header">
-            <span class="card-title">Getting Started</span>
-          </div>
-          <div class="card-body">
-            <div class="status-row">
-              <span class="status-name">Platform authentication</span>
-              <span class="badge badge-success">Complete</span>
-            </div>
-            <div class="status-row">
-              <span class="status-name">Super Admin account</span>
-              <span class="badge badge-success">Active</span>
-            </div>
-            <div class="status-row">
-              <span class="status-name">Tenant management</span>
-              <span class="badge" style="background:var(--color-gray-100);color:var(--color-gray-400)">Coming soon</span>
-            </div>
-            <div class="status-row">
-              <span class="status-name">AI integrations</span>
-              <span class="badge" style="background:var(--color-gray-100);color:var(--color-gray-400)">Coming soon</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- -----------------------------------------------------------------
+      <!-- -----------------------------------------------------------------
          System Health section
          ----------------------------------------------------------------- -->
-    <section id="section-system-health" class="page-section" hidden>
-      <div class="page-header">
-        <h2>System Health</h2>
-        <p>Monitor the platform infrastructure status.</p>
-      </div>
-      <div class="status-card">
-        <div class="card-header">
-          <span class="card-title">Service Status</span>
-          <span class="badge badge-success">All Systems Operational</span>
+      <section id="section-system-health" class="page-section" hidden>
+        <div class="page-header">
+          <h2>System Health</h2>
+          <p>Monitor the platform infrastructure status.</p>
         </div>
-        <div class="card-body">
-          <div class="status-row">
-            <span class="status-name">FastAPI Application Server</span>
-            <span class="status-indicator" style="color:var(--color-success)">
-              <span class="status-dot ok"></span> Online
-            </span>
+        <div class="status-card">
+          <div class="card-header">
+            <span class="card-title">Service Status</span>
+            <span class="badge badge-success">All Systems Operational</span>
           </div>
-          <div class="status-row">
-            <span class="status-name">PostgreSQL Database</span>
-            <span class="status-indicator" style="color:var(--color-success)">
-              <span class="status-dot ok"></span> Connected
-            </span>
-          </div>
-          <div class="status-row">
-            <span class="status-name">JWT Authentication</span>
-            <span class="status-indicator" style="color:var(--color-success)">
-              <span class="status-dot ok"></span> Active
-            </span>
-          </div>
-          <div class="status-row">
-            <span class="status-name">AI / LLM Services</span>
-            <span class="status-indicator" style="color:var(--color-gray-400)">
-              <span class="status-dot" style="background:var(--color-gray-300)"></span> Not configured
-            </span>
-          </div>
-          <div class="status-row">
-            <span class="status-name">Email Service</span>
-            <span class="status-indicator" style="color:var(--color-gray-400)">
-              <span class="status-dot" style="background:var(--color-gray-300)"></span> Not configured
-            </span>
+          <div class="card-body">
+            <div class="status-row">
+              <span class="status-name">FastAPI Application Server</span>
+              <span class="status-indicator" style="color:var(--color-success)">
+                <span class="status-dot ok"></span> Online
+              </span>
+            </div>
+            <div class="status-row">
+              <span class="status-name">PostgreSQL Database</span>
+              <span class="status-indicator" style="color:var(--color-success)">
+                <span class="status-dot ok"></span> Connected
+              </span>
+            </div>
+            <div class="status-row">
+              <span class="status-name">JWT Authentication</span>
+              <span class="status-indicator" style="color:var(--color-success)">
+                <span class="status-dot ok"></span> Active
+              </span>
+            </div>
+            <div class="status-row">
+              <span class="status-name">AI / LLM Services</span>
+              <span class="status-indicator" style="color:var(--color-gray-400)">
+                <span class="status-dot" style="background:var(--color-gray-300)"></span> Not configured
+              </span>
+            </div>
+            <div class="status-row">
+              <span class="status-name">Email Service</span>
+              <span class="status-indicator" style="color:var(--color-gray-400)">
+                <span class="status-dot" style="background:var(--color-gray-300)"></span> Not configured
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- -----------------------------------------------------------------
+      <!-- -----------------------------------------------------------------
          Coming soon (shared placeholder for unimplemented sections)
          ----------------------------------------------------------------- -->
-    <section id="section-coming-soon" class="page-section" hidden>
-      <div class="page-header">
-        <h2 id="comingSoonTitle">Coming Soon</h2>
-        <p>This module is not yet implemented.</p>
-      </div>
-      <div class="content-card">
-        <div class="empty-state">
-          <div class="empty-state-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                 stroke-width="1.4" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-          </div>
-          <h3>Module not yet available</h3>
-          <p>This section will be implemented in an upcoming release. Check back soon.</p>
+      <section id="section-coming-soon" class="page-section" hidden>
+        <div class="page-header">
+          <h2 id="comingSoonTitle">Coming Soon</h2>
+          <p>This module is not yet implemented.</p>
         </div>
-      </div>
-    </section>
+        <div class="content-card">
+          <div class="empty-state">
+            <div class="empty-state-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </div>
+            <h3>Module not yet available</h3>
+            <p>This section will be implemented in an upcoming release. Check back soon.</p>
+          </div>
+        </div>
+      </section>
 
-    <!-- -----------------------------------------------------------------
+      <!-- -----------------------------------------------------------------
          Tenants section
          ----------------------------------------------------------------- -->
-    <section id="section-tenants" class="page-section" hidden>
-      <div class="tenant-page-header">
-        <div class="tenant-page-title">
-          <h2>Tenant Management</h2>
-          <p>Manage and monitor all organizations on the platform.</p>
-        </div>
-        
-        <div class="tenant-toolbar">
-          <div class="tenant-search-box">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-            <input type="text" id="tenantSearch" placeholder="Search tenants..." aria-label="Search tenants" />
+      <section id="section-tenants" class="page-section" hidden>
+        <div class="tenant-page-header">
+          <div class="tenant-page-title">
+            <h2>Tenant Management</h2>
+            <p>Manage and monitor all organizations on the platform.</p>
           </div>
-          <select id="tenantStatusFilter" aria-label="Filter by status" class="tenant-filter">
-            <option value="">All Statuses</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-          </select>
-          <select id="tenantIndustryFilter" aria-label="Filter by industry" class="tenant-filter">
-            <option value="">All Industries</option>
-            <option value="Technology">Technology</option>
-            <option value="Finance">Finance</option>
-            <option value="Healthcare">Healthcare</option>
-            <option value="Education">Education</option>
-            <option value="Retail">Retail</option>
-            <option value="Manufacturing">Manufacturing</option>
-            <option value="Other">Other</option>
-          </select>
-          <button class="btn-primary" onclick="TenantsModule.openCreateModal()">
-            Create Tenant
-          </button>
-        </div>
-      </div>
 
-      <div id="tenantTableContainer" class="table-container" style="display:none;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Tenant Name</th>
-              <th>Email</th>
-              <th>Industry</th>
-              <th>Plan</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tenantTableBody">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
-        
-        <div class="pagination">
-          <div class="pagination-info">
-            <span id="tenantPageIndicator">Page 1 of 1</span>
-            <span class="rows-label">Rows per page:</span>
-            <select class="rows-select" aria-label="Rows per page">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
+          <div class="tenant-toolbar">
+            <div class="tenant-search-box">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input type="text" id="tenantSearch" placeholder="Search tenants..." aria-label="Search tenants" />
+            </div>
+            <select id="tenantStatusFilter" aria-label="Filter by status" class="tenant-filter">
+              <option value="">All Statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
             </select>
-          </div>
-          <div class="pagination-controls">
-            <button class="page-icon-btn" id="btnTenantFirst" disabled aria-label="First page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" /></svg>
-            </button>
-            <button class="page-icon-btn" id="btnTenantPrev" disabled aria-label="Previous page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-            </button>
-            <button class="page-icon-btn active" id="btnTenantCurrent">1</button>
-            <button class="page-icon-btn" id="btnTenantNext" disabled aria-label="Next page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-            </button>
-            <button class="page-icon-btn" id="btnTenantLast" disabled aria-label="Last page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" /></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <div id="tenantEmptyState" class="empty-state" style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
-        <!-- Populated by JS -->
-      </div>
-    </section>
-
-    <!-- -----------------------------------------------------------------
-         Subscription Plans section
-         ----------------------------------------------------------------- -->
-    <section id="section-subscription-plans" class="page-section" hidden>
-      <div class="tenant-page-header">
-        <div class="tenant-page-title">
-          <h2>Subscription Plans</h2>
-          <p>Manage platform pricing tiers, billing cycles, and feature limits.</p>
-        </div>
-        
-        <div class="tenant-toolbar">
-          <div class="tenant-search-box">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-            <input type="text" id="planSearch" placeholder="Search plans..." aria-label="Search subscription plans" />
-          </div>
-          <select id="planStatusFilter" aria-label="Filter by status" class="tenant-filter">
-            <option value="">All Statuses</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-          </select>
-          <select id="planBillingCycleFilter" aria-label="Filter by billing cycle" class="tenant-filter">
-            <option value="">All Cycles</option>
-            <option value="MONTHLY">Monthly</option>
-            <option value="YEARLY">Yearly</option>
-          </select>
-          <button class="btn-primary" onclick="SubscriptionPlansModule.openCreateModal()">
-            Create Plan
-          </button>
-        </div>
-      </div>
-
-      <div id="planTableContainer" class="table-container" style="display:none;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Plan Name</th>
-              <th>Price</th>
-              <th>Billing Cycle</th>
-              <th>Users Limit</th>
-              <th>Branches Limit</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="planTableBody">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
-        
-        <div class="pagination">
-          <div class="pagination-info">
-            <span id="planPageIndicator">Page 1 of 1</span>
-            <span class="rows-label">Rows per page:</span>
-            <select class="rows-select" id="planRowsSelect" aria-label="Rows per page">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-          </div>
-          <div class="pagination-controls">
-            <button class="page-icon-btn" id="btnPlanFirst" disabled aria-label="First page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" /></svg>
-            </button>
-            <button class="page-icon-btn" id="btnPlanPrev" disabled aria-label="Previous page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-            </button>
-            <button class="page-icon-btn active" id="btnPlanCurrent">1</button>
-            <button class="page-icon-btn" id="btnPlanNext" disabled aria-label="Next page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-            </button>
-            <button class="page-icon-btn" id="btnPlanLast" disabled aria-label="Last page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" /></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <div id="planEmptyState" class="empty-state" style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
-        <!-- Populated by JS -->
-      </div>
-    </section>
-
-    <!-- -----------------------------------------------------------------
-         Billing Cycles section
-         ----------------------------------------------------------------- -->
-    <section id="section-billing-cycles" class="page-section" hidden>
-      <div class="tenant-page-header">
-        <div class="tenant-page-title">
-          <h2>Billing Cycles</h2>
-          <p>Manage subscription billing cycles, durations, and status.</p>
-        </div>
-        
-        <div class="tenant-toolbar">
-          <div class="tenant-search-box">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-            <input type="text" id="cycleSearch" placeholder="Search cycles..." aria-label="Search billing cycles" />
-          </div>
-          <select id="cycleStatusFilter" aria-label="Filter by status" class="tenant-filter">
-            <option value="">All Statuses</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-          </select>
-          <button class="btn-primary" onclick="BillingCyclesModule.openCreateModal()">
-            Create Billing Cycle
-          </button>
-        </div>
-      </div>
-
-      <div id="cycleTableContainer" class="table-container" style="display:none;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Duration</th>
-              <th>Description</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="cycleTableBody">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
-        
-        <div class="pagination">
-          <div class="pagination-info">
-            <span id="cyclePageIndicator">Page 1 of 1</span>
-            <span class="rows-label">Rows per page:</span>
-            <select class="rows-select" id="cycleRowsSelect" aria-label="Rows per page">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-          </div>
-          <div class="pagination-controls">
-            <button class="page-icon-btn" id="btnCycleFirst" disabled aria-label="First page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" /></svg>
-            </button>
-            <button class="page-icon-btn" id="btnCyclePrev" disabled aria-label="Previous page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-            </button>
-            <button class="page-icon-btn active" id="btnCycleCurrent">1</button>
-            <button class="page-icon-btn" id="btnCycleNext" disabled aria-label="Next page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-            </button>
-            <button class="page-icon-btn" id="btnCycleLast" disabled aria-label="Last page">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" /></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <div id="cycleEmptyState" class="empty-state" style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
-        <!-- Populated by JS -->
-      </div>
-    </section>
-
-  </main>
-</div>
-
-<!-- ================================================================
-     Modals
-     ================================================================ -->
-
-<!-- Create / Edit Tenant Modal -->
-<div id="tenantModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tenantModalTitle">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 id="tenantModalTitle" class="modal-title">Add Tenant</h3>
-      <button class="modal-close" onclick="TenantsModule.closeFormModal()" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <form id="tenantForm">
-        <input type="hidden" id="formTenantId" />
-        
-        <div class="form-group">
-          <label class="form-label" for="tenantName">Tenant Name *</label>
-          <input type="text" id="tenantName" class="form-input" required placeholder="e.g. Acme Corp" />
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="tenantEmail">Email</label>
-            <input type="email" id="tenantEmail" class="form-input" placeholder="admin@acme.com" />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="tenantPhone">Phone</label>
-            <input type="tel" id="tenantPhone" class="form-input" placeholder="+1 (555) 123-4567" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="tenantIndustry">Industry type</label>
-            <select id="tenantIndustry" class="form-input">
-              <option value="">Select Industry</option>
+            <select id="tenantIndustryFilter" aria-label="Filter by industry" class="tenant-filter">
+              <option value="">All Industries</option>
               <option value="Technology">Technology</option>
               <option value="Finance">Finance</option>
               <option value="Healthcare">Healthcare</option>
               <option value="Education">Education</option>
               <option value="Retail">Retail</option>
               <option value="Manufacturing">Manufacturing</option>
-              <option value="Real Estate">Real Estate</option>
               <option value="Other">Other</option>
             </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="tenantCompanySize">Company Size</label>
-            <select id="tenantCompanySize" class="form-input">
-              <option value="">Select Company Size</option>
-              <option value="1-10">1-10 employees</option>
-              <option value="11-50">11-50 employees</option>
-              <option value="51-200">51-200 employees</option>
-              <option value="201-500">201-500 employees</option>
-              <option value="500+">500+ employees</option>
-            </select>
+            <button class="btn-primary" onclick="TenantsModule.openCreateModal()">
+              Create Tenant
+            </button>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="tenantSubscriptionPlan">Subscription plan</label>
-            <select id="tenantSubscriptionPlan" class="form-input">
-              <option value="">Select Subscription Plan</option>
-              <!-- Loaded dynamically via JS -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="tenantCountry">Country</label>
-            <input type="text" id="tenantCountry" class="form-input" placeholder="e.g. United States" />
-          </div>
-        </div>
+        <div id="tenantTableContainer" class="table-container" style="display:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tenant Name</th>
+                <th>Email</th>
+                <th>Industry</th>
+                <th>Plan</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tenantTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="tenantPassword">Set password</label>
-            <div class="password-input-wrapper">
-              <input type="password" id="tenantPassword" class="form-input" placeholder="Enter password" />
-              <button type="button" class="password-toggle-btn" onclick="TenantsModule.togglePasswordVisibility('tenantPassword', this)" aria-label="Toggle password visibility">
-                <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          <div class="pagination">
+            <div class="pagination-info">
+              <span id="tenantPageIndicator">Page 1 of 1</span>
+              <span class="rows-label">Rows per page:</span>
+              <select class="rows-select" aria-label="Rows per page">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div class="pagination-controls">
+              <button class="page-icon-btn" id="btnTenantFirst" disabled aria-label="First page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
                 </svg>
-                <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+              </button>
+              <button class="page-icon-btn" id="btnTenantPrev" disabled aria-label="Previous page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn active" id="btnTenantCurrent">1</button>
+              <button class="page-icon-btn" id="btnTenantNext" disabled aria-label="Next page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn" id="btnTenantLast" disabled aria-label="Last page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" />
                 </svg>
               </button>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="tenantConfirmPassword">Confirm password</label>
-            <div class="password-input-wrapper">
-              <input type="password" id="tenantConfirmPassword" class="form-input" placeholder="Confirm password" />
-              <button type="button" class="password-toggle-btn" onclick="TenantsModule.togglePasswordVisibility('tenantConfirmPassword', this)" aria-label="Toggle password visibility">
-                <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                </svg>
-                <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-                </svg>
-              </button>
+        </div>
+
+        <div id="tenantEmptyState" class="empty-state"
+          style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- -----------------------------------------------------------------
+         Subscription Plans section
+         ----------------------------------------------------------------- -->
+      <section id="section-subscription-plans" class="page-section" hidden>
+        <div class="tenant-page-header">
+          <div class="tenant-page-title">
+            <h2>Subscription Plans</h2>
+            <p>Manage platform pricing tiers, billing cycles, and feature limits.</p>
+          </div>
+
+          <div class="tenant-toolbar">
+            <div class="tenant-search-box">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input type="text" id="planSearch" placeholder="Search plans..." aria-label="Search subscription plans" />
             </div>
-          </div>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="TenantsModule.closeFormModal()">Cancel</button>
-      <button type="submit" form="tenantForm" id="btnTenantSave" class="btn-primary">Save Tenant</button>
-    </div>
-  </div>
-</div>
-
-<!-- Tenant Details Modal -->
-<div id="tenantDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 class="modal-title">Tenant Details</h3>
-      <button class="modal-close" onclick="TenantsModule.closeDetailsModal()" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-      </button>
-    </div>
-    <div class="modal-body" id="tenantDetailsContent">
-      <!-- Injected by JS -->
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="TenantsModule.closeDetailsModal()">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- Confirmation Modal -->
-<div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
-  <div class="modal" style="max-width: 400px">
-    <div class="modal-header">
-      <h3 id="confirmTitle" class="modal-title">Confirm Action</h3>
-      <button class="modal-close" onclick="TenantsModule.closeConfirmModal()" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <p id="confirmText" style="font-size:14px; color:var(--color-gray-700)">Are you sure?</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="TenantsModule.closeConfirmModal()">Cancel</button>
-      <button id="btnConfirmAction" class="btn-primary" onclick="TenantsModule.executeStatusChange()">Confirm</button>
-    </div>
-  </div>
-</div>
-
-<!-- Create / Edit Subscription Plan Modal -->
-<div id="planModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 id="planModalTitle" class="modal-title">Create Subscription Plan</h3>
-      <button class="modal-close" onclick="SubscriptionPlansModule.closeFormModal()" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <form id="planForm">
-        <input type="hidden" id="formPlanId" />
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="planName">Plan Name *</label>
-            <input type="text" id="planName" class="form-input" required placeholder="e.g. Professional" />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="planDescription">Description</label>
-            <input type="text" id="planDescription" class="form-input" placeholder="e.g. Perfect for growing sales teams" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="planPrice">Price ($) *</label>
-            <input type="number" id="planPrice" class="form-input" step="0.01" min="0" required placeholder="49.99" />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="planCurrency">Currency</label>
-            <input type="text" id="planCurrency" class="form-input" value="USD" placeholder="USD" />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="planBillingCycle">Billing Cycle *</label>
-            <select id="planBillingCycle" class="form-input" required>
+            <select id="planStatusFilter" aria-label="Filter by status" class="tenant-filter">
+              <option value="">All Statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+            </select>
+            <select id="planBillingCycleFilter" aria-label="Filter by billing cycle" class="tenant-filter">
+              <option value="">All Cycles</option>
               <option value="MONTHLY">Monthly</option>
               <option value="YEARLY">Yearly</option>
             </select>
+            <button class="btn-primary" onclick="SubscriptionPlansModule.openCreateModal()">
+              Create Plan
+            </button>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="planMaxUsers">Max Users *</label>
-            <input type="number" id="planMaxUsers" class="form-input" min="1" required placeholder="10" />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="planMaxBranches">Max Branches *</label>
-            <input type="number" id="planMaxBranches" class="form-input" min="1" required placeholder="2" />
+        <div id="planTableContainer" class="table-container" style="display:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Plan Name</th>
+                <th>Price</th>
+                <th>Billing Cycle</th>
+                <th>Users Limit</th>
+                <th>Branches Limit</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="planTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+
+          <div class="pagination">
+            <div class="pagination-info">
+              <span id="planPageIndicator">Page 1 of 1</span>
+              <span class="rows-label">Rows per page:</span>
+              <select class="rows-select" id="planRowsSelect" aria-label="Rows per page">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div class="pagination-controls">
+              <button class="page-icon-btn" id="btnPlanFirst" disabled aria-label="First page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn" id="btnPlanPrev" disabled aria-label="Previous page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn active" id="btnPlanCurrent">1</button>
+              <button class="page-icon-btn" id="btnPlanNext" disabled aria-label="Next page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn" id="btnPlanLast" disabled aria-label="Last page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="SubscriptionPlansModule.closeFormModal()">Cancel</button>
-      <button type="submit" form="planForm" id="btnPlanSave" class="btn-primary">Save Plan</button>
+        <div id="planEmptyState" class="empty-state"
+          style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- -----------------------------------------------------------------
+         Billing Cycles section
+         ----------------------------------------------------------------- -->
+      <section id="section-billing-cycles" class="page-section" hidden>
+        <div class="tenant-page-header">
+          <div class="tenant-page-title">
+            <h2>Billing Cycles</h2>
+            <p>Manage subscription billing cycles, durations, and status.</p>
+          </div>
+
+          <div class="tenant-toolbar">
+            <div class="tenant-search-box">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input type="text" id="cycleSearch" placeholder="Search cycles..." aria-label="Search billing cycles" />
+            </div>
+            <select id="cycleStatusFilter" aria-label="Filter by status" class="tenant-filter">
+              <option value="">All Statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+            </select>
+            <button class="btn-primary" onclick="BillingCyclesModule.openCreateModal()">
+              Create Billing Cycle
+            </button>
+          </div>
+        </div>
+
+        <div id="cycleTableContainer" class="table-container" style="display:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Duration</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cycleTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+
+          <div class="pagination">
+            <div class="pagination-info">
+              <span id="cyclePageIndicator">Page 1 of 1</span>
+              <span class="rows-label">Rows per page:</span>
+              <select class="rows-select" id="cycleRowsSelect" aria-label="Rows per page">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div class="pagination-controls">
+              <button class="page-icon-btn" id="btnCycleFirst" disabled aria-label="First page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn" id="btnCyclePrev" disabled aria-label="Previous page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn active" id="btnCycleCurrent">1</button>
+              <button class="page-icon-btn" id="btnCycleNext" disabled aria-label="Next page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn" id="btnCycleLast" disabled aria-label="Last page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="cycleEmptyState" class="empty-state"
+          style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- -----------------------------------------------------------------
+         Audit Logs section
+         ----------------------------------------------------------------- -->
+      <section id="section-audit-logs" class="page-section" hidden>
+        <div class="tenant-page-header">
+          <div class="tenant-page-title">
+            <h2>Audit Logs</h2>
+            <p>Track system activity, user actions, and security events.</p>
+          </div>
+
+          <div class="tenant-toolbar">
+            <div class="tenant-search-box">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input type="text" id="auditSearch" placeholder="Search logs..." aria-label="Search audit logs" />
+            </div>
+            <select id="auditActionFilter" aria-label="Filter by action" class="tenant-filter">
+              <option value="">All Actions</option>
+              <option value="CREATE">Create</option>
+              <option value="UPDATE">Update</option>
+              <option value="DELETE">Delete</option>
+              <option value="LOGIN">Login</option>
+            </select>
+            <select id="auditResourceFilter" aria-label="Filter by resource" class="tenant-filter">
+              <option value="">All Resources</option>
+              <option value="USER">User</option>
+              <option value="TENANT">Tenant</option>
+              <option value="SUBSCRIPTION_PLAN">Subscription Plan</option>
+              <option value="BILLING_CYCLE">Billing Cycle</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="auditTableContainer" class="table-container" style="display:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>User ID</th>
+                <th>Action</th>
+                <th>Resource Type</th>
+                <th>Resource ID</th>
+                <th>IP Address</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+
+          <div class="pagination">
+            <div class="pagination-info">
+              <span id="auditPageIndicator">Page 1 of 1</span>
+              <span class="rows-label">Rows per page:</span>
+              <select class="rows-select" id="auditRowsSelect" aria-label="Rows per page">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div class="pagination-controls">
+              <button class="page-icon-btn" id="btnAuditFirst" disabled aria-label="First page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" /></svg>
+              </button>
+              <button class="page-icon-btn" id="btnAuditPrev" disabled aria-label="Previous page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+              </button>
+              <button class="page-icon-btn active" id="btnAuditCurrent">1</button>
+              <button class="page-icon-btn" id="btnAuditNext" disabled aria-label="Next page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+              </button>
+              <button class="page-icon-btn" id="btnAuditLast" disabled aria-label="Last page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="auditEmptyState" class="empty-state" style="display:none; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-lg);">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- -----------------------------------------------------------------
+         Profile section
+         ----------------------------------------------------------------- -->
+      <section id="section-profile" class="page-section" hidden>
+        <div class="page-header">
+          <h2>Profile</h2>
+          <p>Manage your personal details and profile image.</p>
+        </div>
+
+        <div class="profile-layout">
+          <!-- Left Column: User Summary -->
+          <div class="profile-sidebar-card">
+            <div class="profile-avatar-large-container">
+              <img id="profileImageDisplay" class="profile-avatar-large" src="" alt="Profile Image"
+                style="display: none;" />
+              <div id="profileInitialsDisplay" class="profile-avatar-large-fallback">SA</div>
+            </div>
+            <h3 class="profile-name-large" id="profileNameDisplay">Super Admin</h3>
+            <p class="profile-email-large" id="profileEmailDisplay">superadmin@example.com</p>
+            <span class="profile-role-badge">SUPER ADMIN</span>
+          </div>
+
+          <!-- Right Column: Personal Details Form -->
+          <div class="profile-details-card">
+            <div class="profile-card-header">
+              <h3>Personal Details</h3>
+            </div>
+
+            <form id="profileForm" class="profile-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="profileFirstName">First Name</label>
+                  <input type="text" id="profileFirstName" class="form-input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="profileLastName">Last Name</label>
+                  <input type="text" id="profileLastName" class="form-input" required />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="profilePhone">Phone Number (optional)</label>
+                  <input type="tel" id="profilePhone" class="form-input" placeholder="e.g. 322312321" />
+                  <span class="form-hint">Optional — leave blank if you prefer not to share</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="profileRole">Role</label>
+                  <input type="text" id="profileRole" class="form-input" value="Super Admin" disabled />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="profileEmail">Email</label>
+                <input type="email" id="profileEmail" class="form-input" disabled />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Profile Image</label>
+                <div class="profile-image-upload-wrapper">
+                  <div class="profile-image-preview-container" id="profileImagePreviewContainer" style="display: none;">
+                    <img id="profileImagePreview" src="" alt="Preview" />
+                    <button type="button" class="remove-image-btn" id="removeProfileImageBtn"
+                      aria-label="Remove image">&times;</button>
+                  </div>
+                  <div class="profile-image-upload-info">
+                    <p class="upload-hint">Recommended resolution: 512 x 512 px</p>
+                    <p class="upload-hint">Accepted: JPG, JPEG, PNG, WEBP</p>
+                    <p class="upload-hint">Max size: 2 MB</p>
+                    <label for="profileImageInput" class="upload-link-btn">Change image</label>
+                    <input type="file" id="profileImageInput" accept="image/jpeg,image/png,image/webp" hidden />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-primary" id="btnSaveProfile">Save Profile</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- -----------------------------------------------------------------
+         Change Password section
+         ----------------------------------------------------------------- -->
+      <section id="section-change-password" class="page-section" hidden>
+        <div class="page-header">
+          <h2>Change Password</h2>
+          <p>Update your account security password.</p>
+        </div>
+
+        <div class="profile-details-card">
+          <form id="changePasswordForm" class="profile-form">
+            <div class="form-row password-grid">
+              <div class="form-group password-group">
+                <label class="form-label" for="cpOldPassword">Old Password</label>
+                <div class="password-input-wrapper">
+                  <input type="password" id="cpOldPassword" class="form-input" required
+                    placeholder="Enter old password" />
+                  <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility">
+                    <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                    <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group password-group">
+                <label class="form-label" for="cpNewPassword">New Password</label>
+                <div class="password-input-wrapper">
+                  <input type="password" id="cpNewPassword" class="form-input" required placeholder="Enter new password"
+                    minlength="6" />
+                  <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility">
+                    <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                    <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group password-group">
+                <label class="form-label" for="cpConfirmPassword">Confirm Password</label>
+                <div class="password-input-wrapper">
+                  <input type="password" id="cpConfirmPassword" class="form-input" required
+                    placeholder="Enter confirm password" minlength="6" />
+                  <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility">
+                    <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                    <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 24px;">
+              <button type="submit" class="btn-primary" id="btnSavePassword">Save Password</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================================================================
+     Modals
+     ================================================================ -->
+
+  <!-- Create / Edit Tenant Modal -->
+  <div id="tenantModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tenantModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="tenantModalTitle" class="modal-title">Add Tenant</h3>
+        <button class="modal-close" onclick="TenantsModule.closeFormModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="tenantForm">
+          <input type="hidden" id="formTenantId" />
+
+          <div class="form-group">
+            <label class="form-label" for="tenantName">Tenant Name *</label>
+            <input type="text" id="tenantName" class="form-input" required placeholder="e.g. Acme Corp" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="tenantEmail">Email</label>
+              <input type="email" id="tenantEmail" class="form-input" placeholder="admin@acme.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="tenantPhone">Phone</label>
+              <input type="tel" id="tenantPhone" class="form-input" placeholder="+1 (555) 123-4567" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="tenantIndustry">Industry type</label>
+              <select id="tenantIndustry" class="form-input">
+                <option value="">Select Industry</option>
+                <option value="Technology">Technology</option>
+                <option value="Finance">Finance</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Education">Education</option>
+                <option value="Retail">Retail</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Real Estate">Real Estate</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="tenantCompanySize">Company Size</label>
+              <select id="tenantCompanySize" class="form-input">
+                <option value="">Select Company Size</option>
+                <option value="1-10">1-10 employees</option>
+                <option value="11-50">11-50 employees</option>
+                <option value="51-200">51-200 employees</option>
+                <option value="201-500">201-500 employees</option>
+                <option value="500+">500+ employees</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="tenantSubscriptionPlan">Subscription plan</label>
+              <select id="tenantSubscriptionPlan" class="form-input">
+                <option value="">Select Subscription Plan</option>
+                <!-- Loaded dynamically via JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="tenantCountry">Country</label>
+              <input type="text" id="tenantCountry" class="form-input" placeholder="e.g. United States" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="tenantPassword">Set password</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="tenantPassword" class="form-input" placeholder="Enter password" />
+                <button type="button" class="password-toggle-btn"
+                  onclick="TenantsModule.togglePasswordVisibility('tenantPassword', this)"
+                  aria-label="Toggle password visibility">
+                  <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                  <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="tenantConfirmPassword">Confirm password</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="tenantConfirmPassword" class="form-input" placeholder="Confirm password" />
+                <button type="button" class="password-toggle-btn"
+                  onclick="TenantsModule.togglePasswordVisibility('tenantConfirmPassword', this)"
+                  aria-label="Toggle password visibility">
+                  <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                  <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="TenantsModule.closeFormModal()">Cancel</button>
+        <button type="submit" form="tenantForm" id="btnTenantSave" class="btn-primary">Save Tenant</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Plan Details Modal -->
-<div id="planDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 class="modal-title">Subscription Plan Details</h3>
-      <button class="modal-close" onclick="SubscriptionPlansModule.closeDetailsModal()" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-      </button>
-    </div>
-    <div class="modal-body" id="planDetailsContent">
-      <!-- Injected by JS -->
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="SubscriptionPlansModule.closeDetailsModal()">Close</button>
+  <!-- Tenant Details Modal -->
+  <div id="tenantDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Tenant Details</h3>
+        <button class="modal-close" onclick="TenantsModule.closeDetailsModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="tenantDetailsContent">
+        <!-- Injected by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="TenantsModule.closeDetailsModal()">Close</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Create / Edit Billing Cycle Modal -->
-<div id="cycleModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cycleModalTitle">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 id="cycleModalTitle" class="modal-title">Create Billing Cycle</h3>
-      <button class="modal-close" onclick="BillingCyclesModule.closeFormModal()" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-      </button>
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width: 400px">
+      <div class="modal-header">
+        <h3 id="confirmTitle" class="modal-title">Confirm Action</h3>
+        <button class="modal-close" onclick="TenantsModule.closeConfirmModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmText" style="font-size:14px; color:var(--color-gray-700)">Are you sure?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="TenantsModule.closeConfirmModal()">Cancel</button>
+        <button id="btnConfirmAction" class="btn-primary" onclick="TenantsModule.executeStatusChange()">Confirm</button>
+      </div>
     </div>
-    <div class="modal-body">
-      <form id="cycleForm">
-        <input type="hidden" id="formCycleId" />
-        
-        <div class="form-row">
+  </div>
+
+  <!-- Create / Edit Subscription Plan Modal -->
+  <div id="planModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="planModalTitle" class="modal-title">Create Subscription Plan</h3>
+        <button class="modal-close" onclick="SubscriptionPlansModule.closeFormModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="planForm">
+          <input type="hidden" id="formPlanId" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="planName">Plan Name *</label>
+              <input type="text" id="planName" class="form-input" required placeholder="e.g. Professional" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="planDescription">Description</label>
+              <input type="text" id="planDescription" class="form-input"
+                placeholder="e.g. Perfect for growing sales teams" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="planPrice">Price ($) *</label>
+              <input type="number" id="planPrice" class="form-input" step="0.01" min="0" required placeholder="49.99" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="planCurrency">Currency</label>
+              <input type="text" id="planCurrency" class="form-input" value="USD" placeholder="USD" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="planBillingCycle">Billing Cycle *</label>
+              <select id="planBillingCycle" class="form-input" required>
+                <option value="MONTHLY">Monthly</option>
+                <option value="YEARLY">Yearly</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="planMaxUsers">Max Users *</label>
+              <input type="number" id="planMaxUsers" class="form-input" min="1" required placeholder="10" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="planMaxBranches">Max Branches *</label>
+              <input type="number" id="planMaxBranches" class="form-input" min="1" required placeholder="2" />
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="SubscriptionPlansModule.closeFormModal()">Cancel</button>
+        <button type="submit" form="planForm" id="btnPlanSave" class="btn-primary">Save Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plan Details Modal -->
+  <div id="planDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Subscription Plan Details</h3>
+        <button class="modal-close" onclick="SubscriptionPlansModule.closeDetailsModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="planDetailsContent">
+        <!-- Injected by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="SubscriptionPlansModule.closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create / Edit Billing Cycle Modal -->
+  <div id="cycleModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cycleModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="cycleModalTitle" class="modal-title">Create Billing Cycle</h3>
+        <button class="modal-close" onclick="BillingCyclesModule.closeFormModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="cycleForm">
+          <input type="hidden" id="formCycleId" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="cycleName">Name *</label>
+              <input type="text" id="cycleName" class="form-input" required placeholder="e.g. Semi-Annual" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cycleDuration">Duration (months) *</label>
+              <input type="number" id="cycleDuration" class="form-input" min="1" required placeholder="e.g. 6" />
+            </div>
+          </div>
+
           <div class="form-group">
-            <label class="form-label" for="cycleName">Name *</label>
-            <input type="text" id="cycleName" class="form-input" required placeholder="e.g. Semi-Annual" />
+            <label class="form-label" for="cycleDescription">Billing Description</label>
+            <input type="text" id="cycleDescription" class="form-input" placeholder="e.g. Billed every 6 months" />
           </div>
+
           <div class="form-group">
-            <label class="form-label" for="cycleDuration">Duration (months) *</label>
-            <input type="number" id="cycleDuration" class="form-input" min="1" required placeholder="e.g. 6" />
+            <label class="form-label">Status</label>
+            <div class="status-toggle-wrapper" onclick="BillingCyclesModule.toggleFormStatus()">
+              <span id="cycleFormStatusToggle" class="status-toggle active">
+                <span class="status-toggle-handle"></span>
+              </span>
+              <span id="cycleFormStatusLabel" class="status-toggle-label">Active</span>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label class="form-label" for="cycleDescription">Billing Description</label>
-          <input type="text" id="cycleDescription" class="form-input" placeholder="e.g. Billed every 6 months" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Status</label>
-          <div class="status-toggle-wrapper" onclick="BillingCyclesModule.toggleFormStatus()">
-            <span id="cycleFormStatusToggle" class="status-toggle active">
-              <span class="status-toggle-handle"></span>
-            </span>
-            <span id="cycleFormStatusLabel" class="status-toggle-label">Active</span>
-          </div>
-        </div>
-
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="BillingCyclesModule.closeFormModal()">Cancel</button>
-      <button type="submit" form="cycleForm" id="btnCycleSave" class="btn-primary">Save Billing Cycle</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="BillingCyclesModule.closeFormModal()">Cancel</button>
+        <button type="submit" form="cycleForm" id="btnCycleSave" class="btn-primary">Save Billing Cycle</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Billing Cycle Details Modal -->
-<div id="cycleDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 class="modal-title">Billing Cycle Details</h3>
-      <button class="modal-close" onclick="BillingCyclesModule.closeDetailsModal()" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-      </button>
-    </div>
-    <div class="modal-body" id="cycleDetailsContent">
-      <!-- Injected by JS -->
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="BillingCyclesModule.closeDetailsModal()">Close</button>
+  <!-- Billing Cycle Details Modal -->
+  <div id="cycleDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Billing Cycle Details</h3>
+        <button class="modal-close" onclick="BillingCyclesModule.closeDetailsModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="cycleDetailsContent">
+        <!-- Injected by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="BillingCyclesModule.closeDetailsModal()">Close</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Toast Container -->
-<div id="toastContainer" class="toast-container"></div>
+  <!-- Audit Log Details Modal -->
+  <div id="auditDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Audit Log Details</h3>
+        <button class="modal-close" onclick="AuditLogsModule.closeDetailsModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="auditDetailsContent">
+        <!-- Injected by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="AuditLogsModule.closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
 
-<!-- Scripts -->
-<script src="../../assets/js/config.js"></script>
-<script src="../../assets/js/api.js"></script>
-<script src="../../assets/js/auth.js"></script>
-<script src="../../assets/js/superadmin.js"></script>
-<script src="../../assets/js/tenants.js"></script>
-<script src="../../assets/js/billing_cycles.js"></script>
-<script src="../../assets/js/subscription_plans.js"></script>
+  <!-- Logout Modal -->
+  <div id="logoutModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+    <div class="modal" style="max-width: 440px; padding: 24px; border-radius: 12px;">
+      <div class="modal-header" style="border-bottom: none; padding: 0 0 16px 0;">
+        <h3 id="logoutModalTitle" class="modal-title"
+          style="display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 600;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+            stroke="currentColor" width="24" height="24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18.75 15l3-3-3-3m3 3H9" stroke="#8B7355" />
+          </svg>
+          Logout
+        </h3>
+        <button class="modal-close" onclick="LogoutModule.closeModal()" aria-label="Close"
+          style="top: 24px; right: 24px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20" color="#a0aec0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 0 0 24px 0;">
+        <p style="font-size: 15px; color: var(--color-gray-600); margin: 0;">Are you sure you want to logout?</p>
+      </div>
+      <div class="modal-footer"
+        style="border-top: none; padding: 0; justify-content: flex-end; gap: 12px; display: flex;">
+        <button class="btn-secondary"
+          style="flex: 1; justify-content: center; background: #E2E8F0; border-color: #E2E8F0; color: #1A202C;"
+          onclick="LogoutModule.closeModal()">Cancel</button>
+        <button id="btnLogoutConfirm" class="btn-primary"
+          style="flex: 1; justify-content: center; background: #8B7355; border-color: #8B7355;"
+          onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/auth.js"></script>
+  <script src="../../assets/js/superadmin.js"></script>
+  <script src="../../assets/js/tenants.js"></script>
+  <script src="../../assets/js/billing_cycles.js"></script>
+  <script src="../../assets/js/subscription_plans.js"></script>
+  <script src="../../assets/js/audit_logs.js"></script>
 
 </body>
+
 </html>

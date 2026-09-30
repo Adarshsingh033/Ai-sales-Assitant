@@ -9,11 +9,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
-from app.routers import auth
+from app.routers import auth, users
 from app.routers.super_admin import tenants as super_admin_tenants
 from app.routers.super_admin import subscription_plans as super_admin_subscription_plans
 from app.routers.super_admin import billing_cycles as super_admin_billing_cycles
 from app.routers.super_admin import audit_logs as super_admin_audit_logs
+from fastapi.staticfiles import StaticFiles
+import os
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -36,6 +38,12 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
+
+# ---------------------------------------------------------------------------
+# Static Files
+# ---------------------------------------------------------------------------
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # ---------------------------------------------------------------------------
 # CORS — origins from environment, never wildcard in production
@@ -79,6 +87,7 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(users.router, prefix="/api/v1")
 app.include_router(super_admin_tenants.router, prefix="/api/v1")
 app.include_router(super_admin_subscription_plans.router, prefix="/api/v1")
 app.include_router(super_admin_billing_cycles.router, prefix="/api/v1")

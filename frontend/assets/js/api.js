@@ -192,8 +192,35 @@ const Api = (() => {
       return request(`/super-admin/billing-cycles/${id}`, {
         method: 'DELETE',
       });
+    },
+
+    // -----------------------------------------------------------------------
+    // Audit Logs
+    // -----------------------------------------------------------------------
+    async getAuditLogs(params = {}) {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page);
+      if (params.page_size) query.append('page_size', params.page_size);
+      if (params.action) query.append('action', params.action);
+      if (params.resource_type) query.append('resource_type', params.resource_type);
+      if (params.resource_id) query.append('resource_id', params.resource_id);
+      
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/super-admin/audit-logs${qs}`, { method: 'GET' });
+    },
+
+    async getAuditLog(id) {
+      return request(`/super-admin/audit-logs/${id}`, { method: 'GET' });
     }
   };
+
+  // Expose Api to global window
+  window.Api = Api;
+
+  // Optional: add a global error handler for uncaught promise rejections
+  window.addEventListener('unhandledrejection', (event) => {
+    // console.error('Unhandled API Error:', event.reason);
+  });
 })();
 
 /**

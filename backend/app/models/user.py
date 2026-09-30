@@ -60,6 +60,8 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
+    phone_number: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    profile_image_url: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
 
     # ------------------------------------------------------------------
     # Credentials — only the hash is stored, never plain-text

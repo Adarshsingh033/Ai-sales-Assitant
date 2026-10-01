@@ -29,6 +29,7 @@ class AuthenticatedUser(BaseModel):
     email: str
     role: str
     tenant_id: Optional[UUID] = None
+    profile_image_url: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

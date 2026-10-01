@@ -14,7 +14,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, String
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -61,7 +61,7 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     phone_number: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
-    profile_image_url: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    profile_image_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # ------------------------------------------------------------------
     # Credentials — only the hash is stored, never plain-text

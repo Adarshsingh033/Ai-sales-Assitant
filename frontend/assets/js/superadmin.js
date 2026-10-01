@@ -40,7 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-user-email]').forEach(el => { el.textContent = user.email; });
     document.querySelectorAll('[data-user-role]').forEach(el => { el.textContent = roleDisplay; });
 
-    const profileImgSrc = user.profile_image_url ? `${CONFIG.API_BASE_URL}${user.profile_image_url}` : null;
+    let profileImgSrc = null;
+    if (user.profile_image_url) {
+      if (user.profile_image_url.startsWith('data:') || user.profile_image_url.startsWith('http')) {
+        profileImgSrc = user.profile_image_url;
+      } else {
+        profileImgSrc = `${CONFIG.API_BASE_URL}${user.profile_image_url}`;
+      }
+    }
     document.querySelectorAll('.topbar-avatar, .sidebar-avatar, [data-user-avatar]').forEach(el => {
       if (profileImgSrc) {
         el.style.backgroundImage = `url(${profileImgSrc})`;
@@ -172,7 +179,14 @@ const ProfileModule = {
     document.getElementById('profileInitialsDisplay').textContent = initials.toUpperCase();
     
     // Set profile images if any
-    const profileImgSrc = user.profile_image_url ? `${CONFIG.API_BASE_URL}${user.profile_image_url}` : null;
+    let profileImgSrc = null;
+    if (user.profile_image_url) {
+      if (user.profile_image_url.startsWith('data:') || user.profile_image_url.startsWith('http')) {
+        profileImgSrc = user.profile_image_url;
+      } else {
+        profileImgSrc = `${CONFIG.API_BASE_URL}${user.profile_image_url}`;
+      }
+    }
     if (profileImgSrc) {
       document.getElementById('profileImageDisplay').src = profileImgSrc;
       document.getElementById('profileImageDisplay').style.display = 'block';

@@ -59,15 +59,15 @@ async def update_my_profile(
         ext = profile_image.filename.split(".")[-1].lower()
         if ext not in ["jpg", "jpeg", "png", "webp"]:
             raise HTTPException(status_code=400, detail="Invalid image format. Allowed: jpg, jpeg, png, webp")
+        import base64
         
-        # Save file
-        filename = f"{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
-        file_path = UPLOAD_DIR / filename
+        # Read the file content and convert to base64
+        content = await profile_image.read()
+        b64_str = base64.b64encode(content).decode("utf-8")
         
-        with file_path.open("wb") as buffer:
-            shutil.copyfileobj(profile_image.file, buffer)
-            
-        current_user.profile_image_url = f"/uploads/profiles/{filename}"
+        # Save as a data URI
+        mime_type = "image/jpeg" if ext in ["jpg", "jpeg"] else f"image/{ext}"
+        current_user.profile_image_url = f"data:{mime_type};base64,{b64_str}"
 
     db.add(current_user)
     await db.commit()

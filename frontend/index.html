@@ -3,51 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="AI Sales Assistant — Intelligent SaaS platform for modern sales teams." />
-  <title>AI Sales Assistant</title>
-  <link rel="stylesheet" href="assets/css/global.css" />
-  <style>
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-      padding: 32px;
-    }
-    .splash { max-width: 480px; }
-    .splash-icon {
-      width: 64px; height: 64px;
-      background: var(--color-primary);
-      border-radius: 16px;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 24px;
-    }
-    .splash-icon svg { width: 36px; height: 36px; stroke: #fff; }
-    h1 { font-size: 28px; font-weight: 700; color: var(--color-gray-800); margin-bottom: 12px; }
-    p  { color: var(--color-gray-500); margin-bottom: 28px; line-height: 1.6; }
-  </style>
-</head>
-<body>
-  <div class="splash">
-    <div class="splash-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-           stroke-width="1.6" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.091Z" />
-      </svg>
-    </div>
-    <h1>AI Sales Assistant</h1>
-    <p>The intelligent multi-tenant SaaS platform for modern sales teams.</p>
-    <a href="pages/login.html" class="btn btn-primary">Sign In to Your Account</a>
-  </div>
+  <title>Redirecting...</title>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/auth.js"></script>
   <script>
-    // Redirect authenticated users to their dashboard
+    // Redirect authenticated users to their dashboard, otherwise to login
     if (typeof Auth !== 'undefined') {
-      Auth.redirectIfAuthenticated();
+      if (Auth.isAuthenticated()) {
+        Auth.redirectByRole();
+      } else {
+        window.location.replace('pages/login.html');
+      }
+    } else {
+      window.location.replace('pages/login.html');
     }
   </script>
+</head>
+<body>
 </body>
 </html>

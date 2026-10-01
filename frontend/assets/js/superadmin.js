@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.querySelectorAll('.topbar-avatar, .sidebar-avatar, [data-user-avatar]').forEach(el => {
       if (profileImgSrc) {
-        el.style.backgroundImage = `url(${profileImgSrc})`;
+        el.style.backgroundImage = `url("${profileImgSrc}")`;
         el.style.backgroundSize = 'cover';
         el.style.backgroundPosition = 'center';
         el.style.color = 'transparent';
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (sectionId === 'section-tenants' && typeof TenantsModule !== 'undefined') {
           TenantsModule.loadTenants();
         } else if (sectionId === 'section-profile') {
-          ProfileModule.init(user);
+          ProfileModule.init(Auth.getCurrentUser());
         }
       }
     });

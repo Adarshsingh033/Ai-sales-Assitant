@@ -102,5 +102,6 @@ class AuthService:
                 email=user.email,
                 role=user.role.value,
                 tenant_id=user.tenant_id,
+                profile_image_url=user.profile_image_url,
             ),
         )

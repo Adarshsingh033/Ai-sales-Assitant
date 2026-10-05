@@ -15,6 +15,7 @@ from app.routers.super_admin import subscription_plans as super_admin_subscripti
 from app.routers.super_admin import billing_cycles as super_admin_billing_cycles
 from app.routers.super_admin import audit_logs as super_admin_audit_logs
 from app.routers.super_admin import dashboard_stats as super_admin_dashboard_stats
+from app.routers.tenant_admin import sales_users as tenant_admin_sales_users
 from fastapi.staticfiles import StaticFiles
 import os
 
@@ -89,6 +90,7 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 # ---------------------------------------------------------------------------
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
+app.include_router(tenant_admin_sales_users.router, prefix="/api/v1")
 app.include_router(super_admin_tenants.router, prefix="/api/v1")
 app.include_router(super_admin_subscription_plans.router, prefix="/api/v1")
 app.include_router(super_admin_billing_cycles.router, prefix="/api/v1")

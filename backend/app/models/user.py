@@ -14,7 +14,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, String, Text
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -81,6 +81,13 @@ class User(Base):
     # ------------------------------------------------------------------
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Sales availability for lead assignment; forced to False on deactivation
+    is_available: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    # ------------------------------------------------------------------
+    # Session revocation — embedded in JWT as "tv"; bump to invalidate tokens
+    # ------------------------------------------------------------------
+    token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     # ------------------------------------------------------------------
     # Timestamps (UTC)
@@ -98,19 +105,18 @@ class User(Base):
     # ------------------------------------------------------------------
     # Constraints & indexes
     #
-    # Email uniqueness:
-    #   • Within a tenant → (tenant_id, email) unique
-    #   • Super Admin (tenant_id IS NULL) → email unique globally
-    #
-    # PostgreSQL partial-index approach is handled in the Alembic migration.
-    # The composite index below is the ORM-level definition that Alembic
-    # will include in autogeneration.
+    # Email uniqueness: globally unique (case-insensitive) across all
+    # tenants so login by email stays unambiguous. Enforced by the
+    # functional unique index uq_users_email_lower in the Alembic migration.
     # ------------------------------------------------------------------
     __table_args__ = (
         # Fast lookup by email
         Index("ix_users_email", "email"),
         # Fast lookup within tenant
         Index("ix_users_tenant_id_email", "tenant_id", "email"),
+        # Tenant-scoped user listing / filtering
+        Index("ix_users_tenant_role_active", "tenant_id", "role", "is_active"),
+        Index("ix_users_tenant_role_available", "tenant_id", "role", "is_available"),
     )
 
     def __repr__(self) -> str:

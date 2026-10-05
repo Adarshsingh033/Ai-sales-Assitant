@@ -10,6 +10,7 @@
   <!-- Styles -->
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <link rel="stylesheet" href="../../assets/css/superadmin.css" />
+  <link rel="stylesheet" href="../../assets/css/tenants.css" />
   <link rel="stylesheet" href="../../assets/css/dashboard.css" />
 </head>
 
@@ -168,9 +169,103 @@
          Other sections
          ================================================================= -->
       <section id="section-user-management" class="page-section" hidden>
-        <div class="page-header">
-          <h2>User Management</h2>
-          <p>Manage users within your tenant.</p>
+        <div class="tenant-page-header">
+          <div class="tenant-page-title">
+            <h2>User Management</h2>
+            <p>Create and manage sales users within your organization.</p>
+          </div>
+
+          <div class="tenant-toolbar">
+            <div class="tenant-search-box">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input type="text" id="salesUserSearch" placeholder="Search by name or email..." aria-label="Search sales users" />
+            </div>
+            <select id="salesUserStatusFilter" aria-label="Filter by status" class="tenant-filter">
+              <option value="">All Statuses</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+            <select id="salesUserAvailabilityFilter" aria-label="Filter by availability" class="tenant-filter">
+              <option value="">All Availability</option>
+              <option value="true">Available</option>
+              <option value="false">Unavailable</option>
+            </select>
+            <select id="salesUserSort" aria-label="Sort users" class="tenant-filter">
+              <option value="created_at:desc">Newest first</option>
+              <option value="created_at:asc">Oldest first</option>
+              <option value="first_name:asc">Name (A-Z)</option>
+              <option value="first_name:desc">Name (Z-A)</option>
+              <option value="email:asc">Email (A-Z)</option>
+              <option value="last_login_at:desc">Last login</option>
+            </select>
+            <button class="btn-primary" onclick="SalesUsersModule.openCreateModal()">
+              Create Sales User
+            </button>
+          </div>
+        </div>
+
+        <div id="salesUserTableContainer" class="table-container" style="display:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Availability</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="salesUserTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+
+          <div class="pagination">
+            <div class="pagination-info">
+              <span id="salesUserPageIndicator">Page 1 of 1</span>
+              <span class="rows-label">Rows per page:</span>
+              <select id="salesUserPageSize" class="rows-select" aria-label="Rows per page">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div class="pagination-controls">
+              <button class="page-icon-btn" id="btnSalesUserFirst" disabled aria-label="First page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn" id="btnSalesUserPrev" disabled aria-label="Previous page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn active" id="btnSalesUserCurrent">1</button>
+              <button class="page-icon-btn" id="btnSalesUserNext" disabled aria-label="Next page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+              <button class="page-icon-btn" id="btnSalesUserLast" disabled aria-label="Last page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -219,6 +314,215 @@
     </main>
   </div>
 
+  <!-- Create / Edit Sales User Modal -->
+  <div id="salesUserModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="salesUserModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="salesUserModalTitle" class="modal-title">Add Sales User</h3>
+        <button class="modal-close" onclick="SalesUsersModule.closeFormModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="salesUserForm">
+          <input type="hidden" id="formSalesUserId" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="salesUserFirstName">First Name *</label>
+              <input type="text" id="salesUserFirstName" class="form-input" required maxlength="100" placeholder="e.g. John" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="salesUserLastName">Last Name *</label>
+              <input type="text" id="salesUserLastName" class="form-input" required maxlength="100" placeholder="e.g. Doe" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="salesUserEmail">Email *</label>
+              <input type="email" id="salesUserEmail" class="form-input" required maxlength="255" placeholder="john.doe@company.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="salesUserPhone">Phone</label>
+              <input type="tel" id="salesUserPhone" class="form-input" maxlength="20" placeholder="+1 (555) 123-4567" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="salesUserAvailable">Availability</label>
+            <select id="salesUserAvailable" class="form-input">
+              <option value="true">Available for lead assignment</option>
+              <option value="false">Unavailable</option>
+            </select>
+          </div>
+
+          <div class="form-row" id="salesUserPasswordRow">
+            <div class="form-group">
+              <label class="form-label" for="salesUserPassword">Set password *</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="salesUserPassword" class="form-input" minlength="8" placeholder="Minimum 8 characters" autocomplete="new-password" />
+                <button type="button" class="password-toggle-btn"
+                  onclick="SalesUsersModule.togglePasswordVisibility('salesUserPassword', this)"
+                  aria-label="Toggle password visibility">
+                  <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                  <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="salesUserConfirmPassword">Confirm password *</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="salesUserConfirmPassword" class="form-input" minlength="8" placeholder="Confirm password" autocomplete="new-password" />
+                <button type="button" class="password-toggle-btn"
+                  onclick="SalesUsersModule.togglePasswordVisibility('salesUserConfirmPassword', this)"
+                  aria-label="Toggle password visibility">
+                  <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                  <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="SalesUsersModule.closeFormModal()">Cancel</button>
+        <button type="submit" form="salesUserForm" id="btnSalesUserSave" class="btn-primary">Save User</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sales User Details Modal -->
+  <div id="salesUserDetailsModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Sales User Details</h3>
+        <button class="modal-close" onclick="SalesUsersModule.closeDetailsModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="salesUserDetailsContent">
+        <!-- Injected by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="SalesUsersModule.closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div id="salesUserResetPasswordModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="salesUserResetTitle">
+    <div class="modal" style="max-width: 480px">
+      <div class="modal-header">
+        <h3 id="salesUserResetTitle" class="modal-title">Reset Password</h3>
+        <button class="modal-close" onclick="SalesUsersModule.closeResetPasswordModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="salesUserResetPasswordForm">
+          <input type="hidden" id="resetSalesUserId" />
+          <p id="salesUserResetText" style="font-size:14px; color:var(--color-gray-700); margin-bottom:16px;"></p>
+          <div class="form-group">
+            <label class="form-label" for="salesUserNewPassword">New password *</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="salesUserNewPassword" class="form-input" required minlength="8" placeholder="Minimum 8 characters" autocomplete="new-password" />
+              <button type="button" class="password-toggle-btn"
+                onclick="SalesUsersModule.togglePasswordVisibility('salesUserNewPassword', this)"
+                aria-label="Toggle password visibility">
+                <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                  stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                  stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="salesUserNewPasswordConfirm">Confirm new password *</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="salesUserNewPasswordConfirm" class="form-input" required minlength="8" placeholder="Confirm new password" autocomplete="new-password" />
+              <button type="button" class="password-toggle-btn"
+                onclick="SalesUsersModule.togglePasswordVisibility('salesUserNewPasswordConfirm', this)"
+                aria-label="Toggle password visibility">
+                <svg class="eye-icon eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                  stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                <svg class="eye-icon eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                  stroke-width="1.5" stroke="currentColor" width="18" height="18" style="display:none;">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="SalesUsersModule.closeResetPasswordModal()">Cancel</button>
+        <button type="submit" form="salesUserResetPasswordForm" id="btnSalesUserResetSave" class="btn-primary">Reset Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width: 400px">
+      <div class="modal-header">
+        <h3 id="confirmTitle" class="modal-title">Confirm Action</h3>
+        <button class="modal-close" onclick="SalesUsersModule.closeConfirmModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmText" style="font-size:14px; color:var(--color-gray-700)">Are you sure?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="SalesUsersModule.closeConfirmModal()">Cancel</button>
+        <button id="btnConfirmAction" class="btn-primary" onclick="SalesUsersModule.executeConfirmedAction()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
 
@@ -227,6 +531,7 @@
   <script src="../../assets/js/api.js"></script>
   <script src="../../assets/js/auth.js"></script>
   <script src="../../assets/js/tenantadmin.js"></script>
+  <script src="../../assets/js/sales_users.js"></script>
 
 </body>
 

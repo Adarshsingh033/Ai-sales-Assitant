@@ -44,6 +44,8 @@ class AuditLogAction(str, enum.Enum):
     USER_UPDATED = "USER_UPDATED"
     USER_ACTIVATED = "USER_ACTIVATED"
     USER_DEACTIVATED = "USER_DEACTIVATED"
+    USER_DELETED = "USER_DELETED"
+    USER_PASSWORD_RESET = "USER_PASSWORD_RESET"
 
 
 class AuditLogResourceType(str, enum.Enum):

@@ -13,6 +13,7 @@ from sqlalchemy.pool import StaticPool
 from app.core.database import Base, get_db
 from app.core.security import create_access_token
 from app.main import app
+from app.models.subscription_plan import SubscriptionPlan
 from app.models.tenant import Tenant
 from app.models.user import User, UserRole
 
@@ -107,6 +108,50 @@ async def tenant_admin_token(test_db: AsyncSession) -> str:
     await test_db.commit()
     await test_db.refresh(user)
     return create_access_token(str(user.id), user.role.value, str(tenant.id))
+
+
+@pytest_asyncio.fixture()
+async def make_tenant_admin(test_db: AsyncSession):
+    """
+    Factory: create a tenant (optionally with a subscription plan of the given
+    max_users) plus its Tenant Admin. Returns (token, tenant, admin_user).
+    """
+    import uuid
+
+    async def _factory(max_users: int | None = 5, plan_active: bool = True):
+        uid = uuid.uuid4().hex[:8]
+        plan_id = None
+        if max_users is not None:
+            plan = SubscriptionPlan(
+                name=f"Plan {uid}",
+                slug=f"plan-{uid}",
+                max_users=max_users,
+                is_active=plan_active,
+            )
+            test_db.add(plan)
+            await test_db.flush()
+            plan_id = plan.id
+
+        tenant = Tenant(name=f"Tenant {uid}", slug=f"tenant-{uid}", subscription_plan_id=plan_id)
+        test_db.add(tenant)
+        await test_db.flush()
+
+        admin = User(
+            first_name="Tenant",
+            last_name="Admin",
+            email=f"ta_{uid}@test.com",
+            password_hash="fake",
+            role=UserRole.TENANT_ADMIN,
+            tenant_id=tenant.id,
+            is_active=True,
+        )
+        test_db.add(admin)
+        await test_db.commit()
+        await test_db.refresh(admin)
+        token = create_access_token(str(admin.id), admin.role.value, str(tenant.id))
+        return token, tenant, admin
+
+    return _factory
 
 
 @pytest_asyncio.fixture()

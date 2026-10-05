@@ -33,6 +33,14 @@ class TenantService:
         self._repo = TenantRepository(db)
 
     async def create_tenant(self, data: TenantCreate, current_user: User, request: Optional[Request] = None) -> TenantResponse:
+        if data.email and data.password:
+            from app.repositories.user_repository import UserRepository
+            if await UserRepository(self._repo._session).email_exists(data.email):
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Email already exists.",
+                )
+
         base_slug = _generate_slug(data.name)
         slug = base_slug
         
@@ -70,7 +78,7 @@ class TenantService:
                 tenant_id=created_tenant.id,
                 first_name=first_name,
                 last_name=last_name,
-                email=data.email,
+                email=data.email.lower().strip(),
                 password_hash=hash_password(data.password),
                 role=UserRole.TENANT_ADMIN,
                 is_active=True,

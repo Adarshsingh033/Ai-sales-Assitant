@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import decode_access_token
-from app.models.tenant import TenantStatus
+from app.models.tenant import Tenant, TenantStatus
 from app.models.user import User, UserRole
 from app.repositories.tenant_repository import TenantRepository
 from app.repositories.user_repository import UserRepository
@@ -46,12 +46,17 @@ async def get_current_user(
         user_id: Optional[str] = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-    except JWTError:
+        user_uuid = UUID(user_id)
+    except (JWTError, ValueError):
         raise credentials_exception
 
     repo = UserRepository(db)
-    user = await repo.get_by_id(UUID(user_id))
+    user = await repo.get_by_id(user_uuid)
     if user is None:
+        raise credentials_exception
+    # Tokens issued before a revocation event (deactivation, password reset)
+    # carry a stale version and must be rejected.
+    if payload.get("tv", 0) != user.token_version:
         raise credentials_exception
     if not user.is_active:
         raise HTTPException(
@@ -132,3 +137,31 @@ def require_tenant_access(
     # If the user made it here, get_current_tenant already validated 
     # that they belong to this specific active tenant.
     return tenant
+
+
+class TenantAdminContext:
+    """Authenticated Tenant Admin plus their (active) tenant, resolved server-side."""
+
+    def __init__(self, user: User, tenant: Tenant) -> None:
+        self.user = user
+        self.tenant = tenant
+
+    @property
+    def tenant_id(self) -> UUID:
+        return self.tenant.id
+
+
+def require_tenant_admin_context(
+    current_user: User = Depends(get_current_user),
+    tenant: Tenant = Depends(get_current_tenant),
+) -> TenantAdminContext:
+    """
+    Enforce TENANT_ADMIN role (Super Admin excluded) and return the tenant
+    derived from the authenticated user's DB record — never from client input.
+    """
+    if current_user.role != UserRole.TENANT_ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tenant Admin access required.",
+        )
+    return TenantAdminContext(current_user, tenant)

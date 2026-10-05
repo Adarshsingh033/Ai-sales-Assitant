@@ -218,6 +218,61 @@ const Api = (() => {
 
     async getAuditLog(id) {
       return request(`/super-admin/audit-logs/${id}`, { method: 'GET' });
+    },
+
+    // -----------------------------------------------------------------------
+    // Sales User Management API (Tenant Admin)
+    // -----------------------------------------------------------------------
+    async getSalesUsers(params = {}) {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page);
+      if (params.page_size) query.append('page_size', params.page_size);
+      if (params.search) query.append('search', params.search);
+      if (params.is_active !== undefined && params.is_active !== '') query.append('is_active', params.is_active);
+      if (params.is_available !== undefined && params.is_available !== '') query.append('is_available', params.is_available);
+      if (params.sort_by) query.append('sort_by', params.sort_by);
+      if (params.sort_order) query.append('sort_order', params.sort_order);
+
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/users${qs}`, { method: 'GET' });
+    },
+
+    async getSalesUser(id) {
+      return request(`/users/${id}`, { method: 'GET' });
+    },
+
+    async createSalesUser(data) {
+      return request('/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateSalesUser(id, data) {
+      return request(`/users/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateSalesUserStatus(id, isActive) {
+      return request(`/users/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ is_active: isActive }),
+      });
+    },
+
+    async resetSalesUserPassword(id, newPassword) {
+      return request(`/users/${id}/reset-password`, {
+        method: 'POST',
+        body: JSON.stringify({ new_password: newPassword }),
+      });
+    },
+
+    async deleteSalesUser(id) {
+      return request(`/users/${id}`, {
+        method: 'DELETE',
+      });
     }
   };
 

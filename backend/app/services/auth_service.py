@@ -87,6 +87,7 @@ class AuthService:
             subject=str(user.id),
             role=user.role.value,
             tenant_id=tenant_str,
+            extra_claims={"tv": user.token_version},
         )
 
         # ------------------------------------------------------------------

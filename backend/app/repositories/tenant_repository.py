@@ -21,6 +21,12 @@ class TenantRepository:
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_id_for_update(self, tenant_id: uuid.UUID) -> Optional[Tenant]:
+        """Row-lock the tenant to serialize operations bound by plan limits."""
+        stmt = select(Tenant).where(Tenant.id == tenant_id).with_for_update()
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def get_by_slug(self, slug: str) -> Optional[Tenant]:
         stmt = select(Tenant).where(Tenant.slug == slug)
         result = await self._session.execute(stmt)

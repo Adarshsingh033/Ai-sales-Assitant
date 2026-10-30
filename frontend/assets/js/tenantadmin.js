@@ -70,12 +70,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const section = document.getElementById(sectionId);
         if (section) section.hidden = false;
 
-        if (sectionId === 'section-user-management' && typeof SalesUsersModule !== 'undefined') {
+        if (sectionId === 'section-dashboard' && typeof TenantDashboardModule !== 'undefined') {
+          TenantDashboardModule.init();
+        } else if (sectionId === 'section-leads' && typeof LeadsModule !== 'undefined') {
+          LeadsModule.init();
+        } else if (sectionId === 'section-conversations' && typeof ConversationsModule !== 'undefined') {
+          ConversationsModule.init();
+        } else if (sectionId === 'section-products' && typeof ProductsModule !== 'undefined') {
+          ProductsModule.init();
+        } else if (sectionId === 'section-knowledge' && typeof KnowledgeModule !== 'undefined') {
+          KnowledgeModule.init();
+        } else if (sectionId === 'section-ai-config' && typeof AIConfigModule !== 'undefined') {
+          AIConfigModule.init();
+        } else if (sectionId === 'section-user-management' && typeof SalesUsersModule !== 'undefined') {
           SalesUsersModule.loadUsers();
         }
       }
     });
   });
+
+  // Initialize initial section & chat simulator
+  if (typeof TenantDashboardModule !== 'undefined') {
+    TenantDashboardModule.init();
+  }
+  if (typeof ChatSimulatorModule !== 'undefined') {
+    ChatSimulatorModule.init();
+  }
 });
 
 /**

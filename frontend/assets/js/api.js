@@ -16,10 +16,10 @@ const Api = (() => {
   async function request(path, options = {}) {
     const url = CONFIG.API_ROOT + path;
 
-    const headers = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
+    const headers = { ...options.headers };
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     // Attach Bearer token if available
     const token = Auth.getToken();
@@ -272,6 +272,266 @@ const Api = (() => {
     async deleteSalesUser(id) {
       return request(`/users/${id}`, {
         method: 'DELETE',
+      });
+    },
+
+    // -----------------------------------------------------------------------
+    // Tenant Sales Dashboard & Intelligence (Phase 1 MVP)
+    // -----------------------------------------------------------------------
+    async getTenantDashboard() {
+      return request('/tenant-admin/dashboard', { method: 'GET' });
+    },
+
+    // -----------------------------------------------------------------------
+    // Leads & Pipeline
+    // -----------------------------------------------------------------------
+    async getLeads(params = {}) {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page);
+      if (params.page_size) query.append('page_size', params.page_size);
+      if (params.search) query.append('search', params.search);
+      const statusVal = params.status || params.stage;
+      if (statusVal) query.append('status', statusVal);
+      if (params.priority) query.append('priority', params.priority);
+      if (params.min_score !== undefined && params.min_score !== '') query.append('min_score', params.min_score);
+
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/tenant-admin/leads${qs}`, { method: 'GET' });
+    },
+
+    async getLead(id) {
+      return request(`/tenant-admin/leads/${id}`, { method: 'GET' });
+    },
+
+    async updateLead(id, data) {
+      return request(`/tenant-admin/leads/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async deleteLead(id) {
+      return request(`/tenant-admin/leads/${id}`, {
+        method: 'DELETE',
+      });
+    },
+
+    async getLeadPipelineStats() {
+      return request('/tenant-admin/leads/stats/pipeline', { method: 'GET' });
+    },
+
+    // -----------------------------------------------------------------------
+    // Conversations & Human Takeover
+    // -----------------------------------------------------------------------
+    async getConversations(params = {}) {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page);
+      if (params.page_size) query.append('page_size', params.page_size);
+      if (params.status) query.append('status', params.status);
+      if (params.channel) query.append('channel', params.channel);
+      if (params.search) query.append('search', params.search);
+
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/tenant-admin/conversations${qs}`, { method: 'GET' });
+    },
+
+    async getConversation(id) {
+      return request(`/tenant-admin/conversations/${id}`, { method: 'GET' });
+    },
+
+    async getConversationMessages(id) {
+      return request(`/tenant-admin/conversations/${id}/messages`, { method: 'GET' });
+    },
+
+    async takeoverConversation(id) {
+      return request(`/tenant-admin/conversations/${id}/takeover`, { method: 'POST' });
+    },
+
+    async handbackConversation(id) {
+      return request(`/tenant-admin/conversations/${id}/handback`, { method: 'POST' });
+    },
+
+    async resolveConversation(id) {
+      return request(`/tenant-admin/conversations/${id}/resolve`, { method: 'POST' });
+    },
+
+    async sendHumanReply(id, message) {
+      return request(`/tenant-admin/conversations/${id}/reply`, {
+        method: 'POST',
+        body: JSON.stringify({ content: message }),
+      });
+    },
+
+    // -----------------------------------------------------------------------
+    // Products Catalog
+    // -----------------------------------------------------------------------
+    async getProducts(params = {}) {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page);
+      if (params.page_size) query.append('page_size', params.page_size);
+      if (params.search) query.append('search', params.search);
+      if (params.category) query.append('category', params.category);
+      if (params.is_active !== undefined && params.is_active !== '') query.append('is_active', params.is_active);
+
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/tenant-admin/products${qs}`, { method: 'GET' });
+    },
+
+    async getProduct(id) {
+      return request(`/tenant-admin/products/${id}`, { method: 'GET' });
+    },
+
+    async createProduct(data) {
+      return request('/tenant-admin/products', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateProduct(id, data) {
+      return request(`/tenant-admin/products/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async deleteProduct(id) {
+      return request(`/tenant-admin/products/${id}`, {
+        method: 'DELETE',
+      });
+    },
+
+    // -----------------------------------------------------------------------
+    // Knowledge Base & RAG
+    // -----------------------------------------------------------------------
+    async getKnowledgeDocuments() {
+      return request('/tenant-admin/knowledge/documents', { method: 'GET' });
+    },
+
+    async uploadKnowledgeDocument(formData) {
+      return request('/tenant-admin/knowledge/upload', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+
+    async deleteKnowledgeDocument(id) {
+      return request(`/tenant-admin/knowledge/documents/${id}`, {
+        method: 'DELETE',
+      });
+    },
+
+    async searchKnowledge(query, limit = 5) {
+      return request('/tenant-admin/knowledge/test-search', {
+        method: 'POST',
+        body: JSON.stringify({ query, top_k: limit }),
+      });
+    },
+
+    // -----------------------------------------------------------------------
+    // AI Assistant Config
+    // -----------------------------------------------------------------------
+    async getAIConfig() {
+      return request('/tenant-admin/ai-config', { method: 'GET' });
+    },
+
+    async updateAIConfig(data) {
+      return request('/tenant-admin/ai-config', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    // -----------------------------------------------------------------------
+    // Chat Simulator
+    // -----------------------------------------------------------------------
+    async simulateChat(data) {
+      return request('/tenant-admin/chat/simulate', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    /**
+     * POST /api/v1/tenant-admin/chat/simulate-stream
+     * Streams responses token-by-token via Server-Sent Events (SSE)
+     * @param {Object} data - { message, session_id, customer_name, customer_phone }
+     * @param {Function} onToken - callback(tokenText)
+     * @param {Function} onDone - callback(finalMetadataObject)
+     * @param {Function} onError - callback(error)
+     */
+    async simulateChatStream(data, onToken, onDone, onError) {
+      const url = CONFIG.API_ROOT + '/tenant-admin/chat/simulate-stream';
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      const token = Auth.getToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          let errText = `Request failed (${response.status})`;
+          try {
+            const errJson = await response.json();
+            errText = errJson.detail || errText;
+          } catch {}
+          if (onError) onError(new Error(errText));
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // keep partial line in buffer
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || !trimmed.startsWith('data: ')) continue;
+            const dataStr = trimmed.slice(6).trim();
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.token && onToken) {
+                onToken(parsed.token);
+              }
+              if (parsed.done && onDone) {
+                onDone(parsed);
+              }
+            } catch (parseErr) {
+              // ignore parse errors for chunks
+            }
+          }
+        }
+      } catch (err) {
+        if (onError) onError(err);
+      }
+    },
+
+
+    async getChatHistory(sessionId) {
+      return request(`/tenant-admin/chat/history/${encodeURIComponent(sessionId)}`, {
+        method: 'GET',
+      });
+    },
+
+    async resetSimulatorSession(data = {}) {
+      return request('/tenant-admin/chat/reset-session', {
+        method: 'POST',
+        body: JSON.stringify(data),
       });
     }
   };

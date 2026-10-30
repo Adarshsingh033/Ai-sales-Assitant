@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../../assets/css/superadmin.css" />
   <link rel="stylesheet" href="../../assets/css/tenants.css" />
   <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../../assets/css/tenant_sales.css" />
 </head>
 
 <body>
@@ -41,7 +42,7 @@
       <!-- Navigation -->
       <nav class="sidebar-nav">
 
-        <span class="sidebar-section-label">Main</span>
+        <span class="sidebar-section-label">Sales & Pipeline</span>
 
         <a href="#" class="nav-item active" data-page="Dashboard" data-section="section-dashboard" aria-current="page"
           aria-label="Dashboard">
@@ -53,6 +54,55 @@
           <span class="nav-item-label">Dashboard</span>
         </a>
 
+        <a href="#" class="nav-item" data-page="Leads & Pipeline" data-section="section-leads" aria-label="Leads & Pipeline">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+          </svg>
+          <span class="nav-item-label">Leads & Pipeline</span>
+        </a>
+
+        <a href="#" class="nav-item" data-page="Live Conversations" data-section="section-conversations" aria-label="Live Conversations">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a.75.75 0 0 1-.974-.974 5.95 5.95 0 0 1 1.057-4.035C4.03 14.556 3 13.336 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+          </svg>
+          <span class="nav-item-label">Live Conversations</span>
+        </a>
+
+        <span class="sidebar-section-label">AI & Knowledge</span>
+
+        <a href="#" class="nav-item" data-page="Product Catalog" data-section="section-products" aria-label="Product Catalog">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+          </svg>
+          <span class="nav-item-label">Product Catalog</span>
+        </a>
+
+        <a href="#" class="nav-item" data-page="Knowledge Base" data-section="section-knowledge" aria-label="Knowledge Base">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+          </svg>
+          <span class="nav-item-label">Knowledge Base</span>
+        </a>
+
+        <a href="#" class="nav-item" data-page="AI Configuration" data-section="section-ai-config" aria-label="AI Configuration">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.091Z" />
+          </svg>
+          <span class="nav-item-label">AI Configuration</span>
+        </a>
+
+        <span class="sidebar-section-label">Organization</span>
+
         <a href="#" class="nav-item" data-page="User Management" data-section="section-user-management" aria-label="User Management">
           <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke-width="1.6" stroke="currentColor">
@@ -60,65 +110,6 @@
               d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
           </svg>
           <span class="nav-item-label">User Management</span>
-        </a>
-
-        <a href="#" class="nav-item" data-page="Team Management" data-section="section-team-management" aria-label="Team Management">
-          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            stroke-width="1.6" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-          </svg>
-          <span class="nav-item-label">Team Management</span>
-        </a>
-
-        <span class="sidebar-section-label">Operations</span>
-
-        <a href="#" class="nav-item" data-page="ICP Configuration" data-section="section-icp" aria-label="ICP Configuration">
-          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            stroke-width="1.6" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-          </svg>
-          <span class="nav-item-label">ICP Configuration</span>
-        </a>
-
-        <a href="#" class="nav-item" data-page="Lead Sources" data-section="section-lead-sources" aria-label="Lead Sources">
-          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            stroke-width="1.6" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.974 0-5.699-1.09-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
-          </svg>
-          <span class="nav-item-label">Lead Sources</span>
-        </a>
-
-        <a href="#" class="nav-item" data-page="Lead Scoring Settings" data-section="section-lead-scoring" aria-label="Lead Scoring Settings">
-          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            stroke-width="1.6" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
-          </svg>
-          <span class="nav-item-label">Lead Scoring Settings</span>
-        </a>
-
-        <span class="sidebar-section-label">System</span>
-
-        <a href="#" class="nav-item" data-page="Settings" data-section="section-settings" aria-label="Settings">
-          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            stroke-width="1.6" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0Z" />
-          </svg>
-          <span class="nav-item-label">Settings</span>
-        </a>
-
-        <a href="#" class="nav-item" data-page="AI Audit Log" data-section="section-ai-audit-log" aria-label="AI Audit Log">
-          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            stroke-width="1.6" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-          </svg>
-          <span class="nav-item-label">AI Audit Log</span>
         </a>
 
       </nav>
@@ -159,8 +150,128 @@
       <section id="section-dashboard" class="page-section">
         <div class="db-welcome-banner">
           <div class="db-welcome-text">
-            <h2>Welcome back, Admin 👋</h2>
-            <p>Here's what's happening on the platform right now.</p>
+            <h2>Sales Command Center 👋</h2>
+            <p>Live AI qualification intelligence, pipeline overview, and incoming conversations.</p>
+          </div>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="db-kpi-grid">
+          <div class="db-kpi-card accent-amber">
+            <div class="db-kpi-header">
+              <span class="db-kpi-label">Total Leads</span>
+              <div class="db-kpi-icon amber">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+            </div>
+            <div class="db-kpi-value" id="statTotalLeads">0</div>
+            <div class="db-kpi-footer">Captured across channels</div>
+          </div>
+
+          <div class="db-kpi-card accent-green">
+            <div class="db-kpi-header">
+              <span class="db-kpi-label">Pipeline Value</span>
+              <div class="db-kpi-icon green">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+            </div>
+            <div class="db-kpi-value" id="statPipelineValue">$0</div>
+            <div class="db-kpi-footer">Estimated deal value</div>
+          </div>
+
+          <div class="db-kpi-card accent-rose">
+            <div class="db-kpi-header">
+              <span class="db-kpi-label">Hot Leads</span>
+              <div class="db-kpi-icon rose">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              </div>
+            </div>
+            <div class="db-kpi-value" id="statHotLeads">0</div>
+            <div class="db-kpi-footer">High intent & budget</div>
+          </div>
+
+          <div class="db-kpi-card accent-blue">
+            <div class="db-kpi-header">
+              <span class="db-kpi-label">Avg Lead Score</span>
+              <div class="db-kpi-icon blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
+              </div>
+            </div>
+            <div class="db-kpi-value" id="statAvgScore">0</div>
+            <div class="db-kpi-footer">Out of 100 max score</div>
+          </div>
+        </div>
+
+        <!-- Secondary Grid -->
+        <div class="db-secondary-grid">
+          <div class="db-stat-pill">
+            <div class="db-stat-pill-icon purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.587-1.112l-3.826.956.956-3.826A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2z"/></svg>
+            </div>
+            <div class="db-stat-pill-text">
+              <div class="db-stat-pill-value" id="statAiConversations">0</div>
+              <div class="db-stat-pill-label">Autonomous AI Conversations</div>
+            </div>
+          </div>
+
+          <div class="db-stat-pill">
+            <div class="db-stat-pill-icon orange">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            </div>
+            <div class="db-stat-pill-text">
+              <div class="db-stat-pill-value" id="statHumanTakeover">0</div>
+              <div class="db-stat-pill-label">Human Agent Takeovers</div>
+            </div>
+          </div>
+
+          <div class="db-stat-pill">
+            <div class="db-stat-pill-icon cyan">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="db-stat-pill-text">
+              <div class="db-stat-pill-value">WhatsApp & Web</div>
+              <div class="db-stat-pill-label">Active Sales Channels</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Column Bottom Layout -->
+        <div class="db-bottom-grid">
+          <!-- Recent Leads Panel -->
+          <div class="db-panel">
+            <div class="db-panel-header">
+              <span class="db-panel-title">Recent Qualified Leads</span>
+              <button class="btn-secondary" style="font-size:12px; padding:4px 10px;" onclick="document.querySelector('.nav-item[data-section=\'section-leads\']')?.click()">View All</button>
+            </div>
+            <div class="db-panel-body" style="padding:0;">
+              <table class="data-table" style="border:none;">
+                <thead>
+                  <tr>
+                    <th>Lead</th>
+                    <th>Score</th>
+                    <th>Stage</th>
+                    <th>Value</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardRecentLeadsBody">
+                  <tr><td colspan="5" class="db-empty">Loading recent leads...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Conversations Panel -->
+          <div class="db-panel">
+            <div class="db-panel-header">
+              <span class="db-panel-title">Active Conversations</span>
+              <button class="btn-secondary" style="font-size:12px; padding:4px 10px;" onclick="document.querySelector('.nav-item[data-section=\'section-conversations\']')?.click()">Open Inbox</button>
+            </div>
+            <div class="db-panel-body">
+              <ul class="db-activity-list" id="dashboardRecentConversationsList">
+                <li class="db-empty">Loading active conversations...</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -269,46 +380,399 @@
         </div>
       </section>
 
-      <section id="section-team-management" class="page-section" hidden>
-        <div class="page-header">
-          <h2>Team Management</h2>
-          <p>Organize your sales users into teams.</p>
+      <!-- =================================================================
+         Leads & Pipeline Section
+         ================================================================= -->
+      <section id="section-leads" class="page-section" hidden>
+        <div class="tenant-page-header">
+          <div class="tenant-page-title">
+            <h2>Leads & Pipeline</h2>
+            <p>Track, qualify, and advance customer leads captured autonomously by your AI Assistant.</p>
+          </div>
+          <div class="tenant-toolbar">
+            <div class="tenant-search-box">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input type="text" id="leadSearchInput" placeholder="Search by name, company, or phone..." aria-label="Search leads" />
+            </div>
+            <select id="leadStageFilter" class="tenant-filter" aria-label="Filter by stage">
+              <option value="">All Pipeline Stages</option>
+              <option value="NEW">New</option>
+              <option value="CONTACTED">Contacted</option>
+              <option value="QUALIFIED">Qualified</option>
+              <option value="PROPOSAL_SENT">Proposal Sent</option>
+              <option value="CLOSED_WON">Closed Won</option>
+              <option value="CLOSED_LOST">Closed Lost</option>
+            </select>
+            <select id="leadPriorityFilter" class="tenant-filter" aria-label="Filter by priority">
+              <option value="">All Priorities</option>
+              <option value="HOT">Hot Leads (70+)</option>
+              <option value="WARM">Warm Leads (40-69)</option>
+              <option value="COLD">Cold Leads (0-39)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Lead / Company</th>
+                <th>Contact</th>
+                <th>Score</th>
+                <th>Priority</th>
+                <th>Stage</th>
+                <th>Est. Value</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="leadsTableBody">
+              <tr><td colspan="7" class="db-empty">Loading leads...</td></tr>
+            </tbody>
+          </table>
+
+          <div class="pagination">
+            <div class="pagination-info">
+              <span id="leadsPageIndicator">Page 1 of 1</span>
+              <span class="rows-label">Rows:</span>
+              <select id="leadsPageSize" class="rows-select">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div class="pagination-controls">
+              <button class="page-icon-btn" id="btnLeadsFirst" disabled>«</button>
+              <button class="page-icon-btn" id="btnLeadsPrev" disabled>‹</button>
+              <button class="page-icon-btn active" id="btnLeadsCurrent">1</button>
+              <button class="page-icon-btn" id="btnLeadsNext" disabled>›</button>
+              <button class="page-icon-btn" id="btnLeadsLast" disabled>»</button>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="section-icp" class="page-section" hidden>
-        <div class="page-header">
-          <h2>ICP Configuration</h2>
-          <p>Define your Ideal Customer Profile.</p>
+      <!-- =================================================================
+         Live Conversations & Inbox Section
+         ================================================================= -->
+      <section id="section-conversations" class="page-section" hidden>
+        <div class="tenant-page-header" style="margin-bottom:14px;">
+          <div class="tenant-page-title">
+            <h2>Live Conversations & Inbox</h2>
+            <p>Unified inbox across WhatsApp & Web Chat with seamless one-click human takeover.</p>
+          </div>
+        </div>
+
+        <div class="conversations-layout">
+          <!-- Left: Thread List -->
+          <div class="inbox-list-pane">
+            <div class="inbox-search-header">
+              <input type="text" id="inboxSearchInput" class="inbox-search-input" placeholder="Search customer or phone..." />
+              <div class="inbox-filter-tabs">
+                <button class="inbox-filter-btn active" data-filter="">All</button>
+                <button class="inbox-filter-btn" data-filter="ACTIVE_AI">AI</button>
+                <button class="inbox-filter-btn" data-filter="HUMAN_TAKEOVER">Human</button>
+                <button class="inbox-filter-btn" data-filter="RESOLVED">Resolved</button>
+              </div>
+            </div>
+            <ul class="inbox-thread-list" id="inboxThreadList">
+              <li class="db-empty">Loading conversations...</li>
+            </ul>
+          </div>
+
+          <!-- Right: Active Message Thread -->
+          <div class="inbox-chat-pane">
+            <!-- Empty state -->
+            <div id="inboxEmptyPane" style="display:none; height:100%; align-items:center; justify-content:center; flex-direction:column; color:#94a3b8; gap:10px;">
+              <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a.75.75 0 0 1-.974-.974 5.95 5.95 0 0 1 1.057-4.035C4.03 14.556 3 13.336 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" /></svg>
+              <p>Select a conversation from the list to view message history.</p>
+            </div>
+
+            <!-- Active Conversation UI -->
+            <div id="inboxActivePane" style="display:flex; flex-direction:column; height:100%; min-height:0; overflow:hidden;">
+              <div class="inbox-chat-header">
+                <div class="inbox-chat-customer">
+                  <div class="inbox-customer-avatar" id="inboxChatAvatar">CU</div>
+                  <div class="inbox-chat-customer-details">
+                    <h3 id="inboxChatCustomerName">Customer Name</h3>
+                    <p id="inboxChatCustomerPhone">+1 555-0199 • WhatsApp</p>
+                  </div>
+                </div>
+                <div class="inbox-chat-actions">
+                  <span id="inboxChatStatusBadge"></span>
+                  <button id="btnTakeover" class="btn-primary" style="font-size:12px; padding:6px 12px;" onclick="ConversationsModule.takeover()">Take Over</button>
+                  <button id="btnHandback" class="btn-secondary" style="font-size:12px; padding:6px 12px; display:none;" onclick="ConversationsModule.handback()">Hand Back to AI</button>
+                  <button id="btnResolve" class="btn-secondary" style="font-size:12px; padding:6px 12px;" onclick="ConversationsModule.resolve()">Mark Resolved</button>
+                </div>
+              </div>
+
+              <!-- Message History -->
+              <div class="inbox-chat-messages" id="inboxMessagesContainer">
+                <div class="db-empty">Loading message thread...</div>
+              </div>
+
+              <!-- Chat Composer / Takeover Notice -->
+              <div class="inbox-chat-composer">
+                <div id="inboxTakeoverNotice" class="takeover-notice-bar" style="display:none;"></div>
+                <div class="inbox-composer-row">
+                  <input type="text" id="inboxReplyInput" class="inbox-composer-input" placeholder="Type a message as a human sales agent... (Press Enter to send)" disabled />
+                  <button id="btnSendReply" class="btn-primary" style="padding:0 18px;" onclick="ConversationsModule.sendReply()" disabled>Send</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="section-lead-sources" class="page-section" hidden>
-        <div class="page-header">
-          <h2>Lead Sources</h2>
-          <p>Manage integrations and lead generation sources.</p>
+      <!-- =================================================================
+         Product Catalog Section
+         ================================================================= -->
+      <section id="section-products" class="page-section" hidden>
+        <div class="tenant-page-header">
+          <div class="tenant-page-title">
+            <h2>Product Catalog</h2>
+            <p>Manage your product portfolio, pricing, features, and stock availability for AI recommendations.</p>
+          </div>
+          <div class="tenant-toolbar">
+            <div class="tenant-search-box">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input type="text" id="productSearchInput" placeholder="Search product name or SKU..." />
+            </div>
+            <select id="productCategoryFilter" class="tenant-filter">
+              <option value="">All Categories</option>
+              <option value="Software">Software</option>
+              <option value="Services">Services</option>
+              <option value="Hardware">Hardware</option>
+              <option value="General">General</option>
+            </select>
+            <button type="button" class="btn-primary" onclick="ProductsModule.openCreateModal()">
+              + Add Product
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Product Name & Description</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody">
+              <tr><td colspan="6" class="db-empty">Loading products...</td></tr>
+            </tbody>
+          </table>
+
+          <div class="pagination">
+            <div class="pagination-info">
+              <span id="productsPageIndicator">Page 1 of 1</span>
+            </div>
+            <div class="pagination-controls">
+              <button class="page-icon-btn" id="btnProductsFirst" disabled>«</button>
+              <button class="page-icon-btn" id="btnProductsPrev" disabled>‹</button>
+              <button class="page-icon-btn active" id="btnProductsCurrent">1</button>
+              <button class="page-icon-btn" id="btnProductsNext" disabled>›</button>
+              <button class="page-icon-btn" id="btnProductsLast" disabled>»</button>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="section-lead-scoring" class="page-section" hidden>
-        <div class="page-header">
-          <h2>Lead Scoring Settings</h2>
-          <p>Configure how leads are scored by the AI.</p>
+      <!-- =================================================================
+         Knowledge Base Section
+         ================================================================= -->
+      <section id="section-knowledge" class="page-section" hidden>
+        <div class="tenant-page-header">
+          <div class="tenant-page-title">
+            <h2>Knowledge Base & RAG Indexing</h2>
+            <p>Upload sales collateral, FAQs, and price lists. The AI indexes files locally into vector embeddings.</p>
+          </div>
+        </div>
+
+        <div class="kb-grid">
+          <!-- Upload Box -->
+          <div class="kb-card">
+            <h3 style="font-size:16px; margin:0 0 12px 0; color:#1e293b;">Upload Document</h3>
+            <div class="kb-dropzone" id="kbDropzone">
+              <svg class="kb-dropzone-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+              </svg>
+              <div style="font-weight:600; font-size:14px; color:#1e293b;">Click to browse or drag & drop</div>
+              <div style="font-size:12px; color:#64748b; margin-top:4px;">Supports PDF, DOCX, and TXT files (Up to 15MB)</div>
+              <input type="file" id="kbFileInput" accept=".pdf,.docx,.txt" style="display:none;" />
+              <div id="kbSelectedFileName" class="kb-file-selected"></div>
+            </div>
+
+            <div style="margin-top:16px; display:flex; gap:10px;">
+              <input type="text" id="kbDocTitle" class="form-input" placeholder="Document Title (optional)" style="flex:1;" />
+              <button id="btnUploadKbDoc" class="btn-primary" style="white-space:nowrap;">Upload & Index</button>
+            </div>
+          </div>
+
+          <!-- Semantic Search Tester -->
+          <div class="kb-card">
+            <h3 style="font-size:16px; margin:0 0 4px 0; color:#1e293b;">Test Knowledge Retrieval</h3>
+            <p style="font-size:12.5px; color:#64748b; margin:0 0 12px 0;">Verify how the AI retrieves relevant knowledge chunks for buyer queries.</p>
+            <div style="display:flex; gap:10px;">
+              <input type="text" id="kbTestSearchInput" class="form-input" placeholder="e.g. What is your cancellation or warranty policy?" style="flex:1;" />
+              <button id="btnKbTestSearch" class="btn-secondary" style="white-space:nowrap;">Search</button>
+            </div>
+            <div id="kbSearchResults" class="kb-search-results">
+              <div class="db-empty" style="padding:20px 0;">Type a question above and click Search to test vector similarity.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Document List Table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Document Title & Filename</th>
+                <th>Type</th>
+                <th>File Size</th>
+                <th>Indexed Chunks</th>
+                <th>Uploaded</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="knowledgeTableBody">
+              <tr><td colspan="6" class="db-empty">Loading documents...</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
-      <section id="section-settings" class="page-section" hidden>
-        <div class="page-header">
-          <h2>Settings</h2>
-          <p>Configure tenant-wide settings.</p>
+      <!-- =================================================================
+         AI Assistant Configuration Section
+         ================================================================= -->
+      <section id="section-ai-config" class="page-section" hidden>
+        <div class="tenant-page-header">
+          <div class="tenant-page-title">
+            <h2>AI Assistant Configuration</h2>
+            <p>Customize your assistant's tone, sales behavior, qualification questions, and WhatsApp Cloud API credentials.</p>
+          </div>
         </div>
-      </section>
 
-      <section id="section-ai-audit-log" class="page-section" hidden>
-        <div class="page-header">
-          <h2>AI Audit Log</h2>
-          <p>View AI interactions and system logs.</p>
-        </div>
+        <form id="aiConfigForm" style="display:flex; flex-direction:column; gap:24px; max-width:860px;">
+          <!-- Card 1: Identity & Persona -->
+          <div class="kb-card">
+            <h3 style="font-size:16px; margin:0 0 16px 0; color:#1e293b; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+              Assistant Identity & Tone
+            </h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+              <div class="form-group">
+                <label class="form-label" for="aiAssistantName">Assistant Name *</label>
+                <input type="text" id="aiAssistantName" class="form-input" value="Ava" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="aiTone">Conversation Tone</label>
+                <select id="aiTone" class="form-input">
+                  <option value="Friendly">Friendly & Approachable</option>
+                  <option value="Professional">Professional & Formal</option>
+                  <option value="Consultative">Consultative & Solution-Oriented</option>
+                  <option value="Direct">Direct & Concise</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+              <div class="form-group">
+                <label class="form-label" for="aiGroqModel">Groq LLM Model</label>
+                <select id="aiGroqModel" class="form-input">
+                  <option value="openai/gpt-oss-20b">OpenAI GPT-OSS 20B (High Speed & Accurate)</option>
+                  <option value="qwen/qwen3.8-27b">Qwen 3.8 27B (High Quality Reasoning)</option>
+                  <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile</option>
+                  <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="aiGroqApiKey">Groq API Key (Optional)</label>
+                <input type="password" id="aiGroqApiKey" class="form-input" placeholder="Leave blank to use platform key" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label" for="aiGreeting">Greeting Message</label>
+              <input type="text" id="aiGreeting" class="form-input" placeholder="Hello! How can I assist you today?" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="aiSystemPrompt">Custom System Instructions & Business Rules</label>
+              <textarea id="aiSystemPrompt" class="form-input" rows="4" placeholder="Specific instructions for how Ava represents your company, FAQs to highlight, or special constraints."></textarea>
+            </div>
+          </div>
+
+          <!-- Card 2: Qualification Guardrails -->
+          <div class="kb-card">
+            <h3 style="font-size:16px; margin:0 0 16px 0; color:#1e293b; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+              Sales Guardrails & Qualification
+            </h3>
+            <div class="form-group" style="margin-bottom:16px; max-width:320px;">
+              <label class="form-label" for="aiMaxDiscount">Maximum Discount Allowed (%)</label>
+              <input type="number" id="aiMaxDiscount" class="form-input" min="0" max="100" value="10" />
+              <span style="font-size:11.5px; color:#64748b;">The AI will never offer or agree to discounts exceeding this percentage.</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label" for="aiQualificationQuestions">Key Qualification Questions (One per line)</label>
+              <textarea id="aiQualificationQuestions" class="form-input" rows="3" placeholder="What timeline do you have in mind?&#10;What is your target budget for this project?&#10;How many team members will be using this?"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="aiHandoffTriggers">Human Takeover Keywords (Comma-separated)</label>
+              <input type="text" id="aiHandoffTriggers" class="form-input" placeholder="speak to human, sales rep, agent, angry, lawsuit, manager" />
+            </div>
+          </div>
+
+          <!-- Card 3: WhatsApp Cloud API -->
+          <div class="kb-card">
+            <h3 style="font-size:16px; margin:0 0 16px 0; color:#1e293b; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+              WhatsApp Cloud API Integration (Free Tier)
+            </h3>
+            <p style="font-size:12.5px; color:#64748b; margin-top:-8px; margin-bottom:16px;">
+              Connect your Meta Developer WhatsApp test number (No credit card or banking details required for developer test sandbox).
+            </p>
+
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Webhook Callback URL (Paste into Meta App Dashboard)</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="aiWhatsappWebhookUrl" class="form-input" readonly style="background:#f8fafc;" />
+                <button type="button" id="btnCopyWebhookUrl" class="btn-secondary" style="white-space:nowrap;">Copy URL</button>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+              <div class="form-group">
+                <label class="form-label" for="aiWhatsappVerifyToken">Verify Token (Custom Secret)</label>
+                <input type="text" id="aiWhatsappVerifyToken" class="form-input" placeholder="e.g. my_secret_token_123" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="aiWhatsappPhoneId">Phone Number ID</label>
+                <input type="text" id="aiWhatsappPhoneId" class="form-input" placeholder="e.g. 104857291827462" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="aiWhatsappAccessToken">System User Access Token</label>
+              <input type="password" id="aiWhatsappAccessToken" class="form-input" placeholder="EAABw..." />
+            </div>
+          </div>
+
+          <div>
+            <button type="submit" id="btnSaveAiConfig" class="btn-primary" style="padding:12px 28px; font-size:14px;">
+              Save Changes
+            </button>
+          </div>
+        </form>
       </section>
 
     </main>
@@ -523,6 +987,216 @@
     </div>
   </div>
 
+  <!-- Lead Detail & Qualification Modal -->
+  <div id="leadDetailModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width: 650px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h3 class="modal-title" id="leadModalName">Lead Details</h3>
+          <span id="leadModalScore"></span>
+          <span id="leadModalPriority"></span>
+        </div>
+        <button class="modal-close" onclick="LeadsModule.closeLeadDetail()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <!-- Contact summary row -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px;">
+          <div>
+            <div style="color:#64748b; font-size:11px; text-transform:uppercase; font-weight:700;">Company</div>
+            <div id="leadModalCompany" style="font-weight:600; color:#1e293b; margin-top:2px;">—</div>
+          </div>
+          <div>
+            <div style="color:#64748b; font-size:11px; text-transform:uppercase; font-weight:700;">Phone / WhatsApp</div>
+            <div id="leadModalPhone" style="font-weight:600; color:#1e293b; margin-top:2px;">—</div>
+          </div>
+          <div style="grid-column: span 2;">
+            <div style="color:#64748b; font-size:11px; text-transform:uppercase; font-weight:700;">Email</div>
+            <div id="leadModalEmail" style="color:#1e293b; margin-top:2px;">—</div>
+          </div>
+        </div>
+
+        <!-- AI Qualification Summary Box -->
+        <div style="background:#fdfcf9; border:1px solid #e8dec8; border-radius:10px; padding:14px 18px;">
+          <div style="font-weight:700; font-size:12px; color:#8B7355; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+            <span>🤖 AI Qualification Summary</span>
+          </div>
+          <div id="leadModalAiSummary" style="font-size:13px; color:#334155; line-height:1.5;"></div>
+        </div>
+
+        <!-- Pain points / Needs -->
+        <div>
+          <div style="font-weight:700; font-size:12px; color:#475569; margin-bottom:6px;">Identified Requirements & Pain Points</div>
+          <div id="leadModalPainPoints" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        </div>
+
+        <!-- Stage & Value change row -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="form-group">
+            <label class="form-label" for="leadModalStage">Pipeline Stage</label>
+            <select id="leadModalStage" class="form-input">
+              <option value="NEW">New</option>
+              <option value="CONTACTED">Contacted</option>
+              <option value="QUALIFIED">Qualified</option>
+              <option value="PROPOSAL_SENT">Proposal Sent</option>
+              <option value="CLOSED_WON">Closed Won</option>
+              <option value="CLOSED_LOST">Closed Lost</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="leadModalPrioritySelect">Priority</label>
+            <select id="leadModalPrioritySelect" class="form-input">
+              <option value="HOT">Hot</option>
+              <option value="WARM">Warm</option>
+              <option value="COLD">Cold</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="leadModalValue">Estimated Value ($)</label>
+          <input type="number" id="leadModalValue" class="form-input" placeholder="e.g. 5000" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="leadModalNotes">Internal Rep Notes</label>
+          <textarea id="leadModalNotes" class="form-input" rows="2" placeholder="Add custom notes or instructions for the sales team..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between;">
+        <button type="button" class="btn-secondary" onclick="LeadsModule.openLeadConversation()">
+          💬 Open Conversation
+        </button>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn-secondary" onclick="LeadsModule.closeLeadDetail()">Cancel</button>
+          <button type="button" class="btn-primary" onclick="LeadsModule.saveLeadChanges()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Product Modal -->
+  <div id="productModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width: 580px; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 id="productModalTitle" class="modal-title">Add New Product</h3>
+        <button class="modal-close" onclick="ProductsModule.closeModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; max-height: calc(90vh - 140px); padding: 24px;">
+        <form id="productForm">
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="productName">Product / Service Name *</label>
+              <input type="text" id="productName" class="form-input" required placeholder="e.g. Enterprise Cloud ERP" />
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="productSku">SKU / Code</label>
+                <input type="text" id="productSku" class="form-input" placeholder="e.g. ERP-ENT-01" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="productCategory">Category</label>
+                <input type="text" id="productCategory" class="form-input" placeholder="e.g. Software, Services, Hardware" />
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:2fr 1fr; gap:14px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="productPrice">Price *</label>
+                <input type="number" id="productPrice" class="form-input" required min="0" step="0.01" placeholder="499.00" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="productCurrency">Currency</label>
+                <select id="productCurrency" class="form-input">
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="INR">INR (₹)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="productDescription">Description</label>
+              <textarea id="productDescription" class="form-input" rows="2" placeholder="Clear summary of value proposition..."></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="productFeatures">Key Features (One per line)</label>
+              <textarea id="productFeatures" class="form-input" rows="3" placeholder="24/7 Priority Support&#10;Unlimited Cloud Storage&#10;API Integrations"></textarea>
+            </div>
+
+            <div style="display:flex; gap:20px; margin-top:4px;">
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                <input type="checkbox" id="productIsActive" checked />
+                <span>Active in Product Catalog</span>
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid var(--color-border); display: flex; justify-content: flex-end; gap: 12px; background: #f9fafb;">
+        <button type="button" class="btn-secondary" onclick="ProductsModule.closeModal()">Cancel</button>
+        <button type="submit" form="productForm" id="btnProductSave" class="btn-primary">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Web Chat Simulator Widget -->
+  <button id="chatSimulatorToggle" class="chat-sim-toggle-btn" aria-label="Open AI Chat Simulator">
+    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a.75.75 0 0 1-.974-.974 5.95 5.95 0 0 1 1.057-4.035C4.03 14.556 3 13.336 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+    </svg>
+    <span>Test AI Assistant</span>
+  </button>
+
+  <div id="chatSimulatorDrawer" class="chat-sim-drawer">
+    <div class="chat-sim-header">
+      <div class="chat-sim-header-title">
+        <span>🤖 Sales Assistant Simulator</span>
+      </div>
+      <div class="chat-sim-header-actions">
+        <button id="btnSimReset" class="chat-sim-icon-btn" title="Reset Session / New Customer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+        <button id="btnSimClose" class="chat-sim-icon-btn" title="Close Drawer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live AI Lead Intelligence Inspector -->
+    <div class="chat-sim-intel-bar">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" id="simCustomerPhone" value="+15550199001" style="font-size:11px; width:95px; padding:2px 4px; border:1px solid #cbd5e1; border-radius:4px;" title="Customer Phone" />
+        <input type="text" id="simCustomerName" value="Alex Mercer" style="font-size:11px; width:80px; padding:2px 4px; border:1px solid #cbd5e1; border-radius:4px;" title="Customer Name" />
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <span id="simLeadScore" class="chat-sim-intel-score">Score: —</span>
+        <span id="simLeadStage" style="font-weight:600; color:#64748b; font-size:11px;">Stage: NEW</span>
+      </div>
+    </div>
+
+    <!-- Message Bubbles -->
+    <div id="simMessagesContainer" class="chat-sim-messages">
+      <!-- Injected by chat_simulator.js -->
+    </div>
+
+    <!-- Input Bar -->
+    <div class="chat-sim-input-bar">
+      <input type="text" id="simMessageInput" class="chat-sim-input" placeholder="Type a message as customer... (Enter to send)" />
+      <button id="btnSimSend" class="btn-primary" style="padding:0 14px;">Send</button>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
 
@@ -532,6 +1206,13 @@
   <script src="../../assets/js/auth.js"></script>
   <script src="../../assets/js/tenantadmin.js"></script>
   <script src="../../assets/js/sales_users.js"></script>
+  <script src="../../assets/js/tenant_dashboard.js"></script>
+  <script src="../../assets/js/leads.js"></script>
+  <script src="../../assets/js/conversations.js"></script>
+  <script src="../../assets/js/products.js"></script>
+  <script src="../../assets/js/knowledge.js"></script>
+  <script src="../../assets/js/ai_config.js"></script>
+  <script src="../../assets/js/chat_simulator.js"></script>
 
 </body>
 

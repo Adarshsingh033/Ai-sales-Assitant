@@ -45,6 +45,20 @@ class Settings(BaseSettings):
     SUPERADMIN_FIRST_NAME: str = "Super"
     SUPERADMIN_LAST_NAME: str = "Admin"
 
+    # ------------------------------------------------------------------
+    # AI & LLM (Groq & Embeddings)
+    # ------------------------------------------------------------------
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
+    JINA_API_KEY: str = ""
+
+    # ------------------------------------------------------------------
+    # WhatsApp Integration (Meta Cloud API / Webhook)
+    # ------------------------------------------------------------------
+    WHATSAPP_VERIFY_TOKEN: str = "ai_sales_verify_token"
+    WHATSAPP_ACCESS_TOKEN: str = ""
+    WHATSAPP_PHONE_NUMBER_ID: str = ""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

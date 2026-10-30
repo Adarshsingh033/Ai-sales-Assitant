@@ -45,22 +45,33 @@ class AIAssistantConfig(Base):
     max_discount_percent: Mapped[float] = mapped_column(Float, nullable=False, default=10.0)
     qualification_threshold: Mapped[int] = mapped_column(Integer, nullable=False, default=60)
 
-    # Optional tenant-level override for Groq API key and model
-    groq_api_key: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    # Optional tenant-level override for Groq API key and model (key is encrypted at rest — see core.crypto)
+    groq_api_key: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     groq_model: Mapped[str] = mapped_column(String(100), nullable=False, default="llama-3.3-70b-versatile")
+    # Cheaper/faster model for query rewrite, lead analysis and summaries (falls back to LLM_FAST_MODEL)
+    fast_model: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    language: Mapped[str] = mapped_column(String(30), nullable=False, default="auto")  # "auto" mirrors the customer
 
-    # WhatsApp Channel configuration
+    # WhatsApp Channel configuration (access token / app secret are encrypted at rest)
     whatsapp_phone_number_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    whatsapp_access_token: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    whatsapp_access_token: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    whatsapp_app_secret: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     whatsapp_verify_token: Mapped[str] = mapped_column(String(100), nullable=False, default="ai_sales_verify_token")
+    # Approved Meta template used to re-open a conversation outside the 24h window (optional)
+    whatsapp_followup_template: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
     is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     # Automation & Assignment Settings
     auto_followup_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     followup_delay_hours: Mapped[int] = mapped_column(Integer, nullable=False, default=24)
+    max_followups: Mapped[int] = mapped_column(Integer, nullable=False, default=3)
+    followup_mode: Mapped[str] = mapped_column(String(20), nullable=False, default="AUTO")  # AUTO | APPROVAL
     round_robin_assignment: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     notification_sound_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    # Optional monthly AI token budget (None = unlimited). Over budget → graceful handoff instead of AI reply.
+    monthly_token_limit: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=_utcnow

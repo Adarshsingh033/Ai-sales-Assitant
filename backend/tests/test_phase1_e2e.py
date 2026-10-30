@@ -46,7 +46,7 @@ async def e2e_tenant_token(test_db: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_complete_phase1_mvp_flow(client: AsyncClient, e2e_tenant_token):
+async def test_complete_phase1_mvp_flow(client: AsyncClient, e2e_tenant_token, fake_llm):
     token, tenant, user = e2e_tenant_token
     auth_headers = {"Authorization": f"Bearer {token}"}
 
@@ -129,19 +129,17 @@ async def test_complete_phase1_mvp_flow(client: AsyncClient, e2e_tenant_token):
     # -------------------------------------------------------------------------
     # 4. Simulate Buyer Interaction & Autonomous Lead Qualification
     # -------------------------------------------------------------------------
-    sim_groq_resp = "OmniSuite Enterprise is $12,000/year and comes with a 30-day money-back guarantee and 99.99% uptime SLA."
-    sim_groq_extraction = (
-        '{"intent": "purchase_intent", "buying_intent": true, "customer_name": "Jordan Smith", '
-        '"company": "Apex Dynamics", "budget": 12000, "timeline": "Q1 2026", '
-        '"requirements": "OmniSuite ERP with uptime SLA", "score": 92, "qualification_score": 92, '
-        '"score_reason": "High intent buyer with verified budget and urgent timeline", '
-        '"priority": "HOT", "recommended_next_step": "Send proposal and schedule executive demo", '
-        '"needs_human_handoff": false}'
-    )
+    # $12,000 is the catalog price of OmniSuite Enterprise created above, so the price guardrail passes.
+    fake_llm.replies = [
+        "OmniSuite Enterprise is $12,000/year and comes with a 30-day money-back guarantee and 99.99% uptime SLA."
+    ]
+    fake_llm.analysis = {
+        "intent": "purchase_request", "buying_intent": True, "budget": 12000, "quantity": 50,
+        "timeline": "within 30 days", "requirements": "OmniSuite ERP with uptime SLA",
+        "company_size": 200, "customer_facts": {"company": "Apex Dynamics"},
+    }
 
-    with patch("app.services.groq_client.GroqClient.chat_completion") as mock_groq:
-        mock_groq.side_effect = [sim_groq_resp, sim_groq_extraction]
-
+    if True:
         sim_post_resp = await client.post(
             "/api/v1/tenant-admin/chat/simulate",
             headers=auth_headers,
@@ -154,7 +152,7 @@ async def test_complete_phase1_mvp_flow(client: AsyncClient, e2e_tenant_token):
         assert sim_post_resp.status_code == 200
         sim_data = sim_post_resp.json()
         assert "OmniSuite" in sim_data["reply"]
-        assert sim_data["score"] == 92
+        assert sim_data["score"] >= 90  # purchase request 80 + budget + timeline + quantity + company size
         conversation_id = sim_data["session_id"]
 
     # -------------------------------------------------------------------------
@@ -166,7 +164,7 @@ async def test_complete_phase1_mvp_flow(client: AsyncClient, e2e_tenant_token):
     assert len(leads_list) >= 1
     lead = leads_list[0]
     lead_id = lead["id"]
-    assert lead["score"] == 92
+    assert lead["score"] >= 90
     assert lead["priority"] == "HOT"
     assert lead["budget"] == 12000.0
 

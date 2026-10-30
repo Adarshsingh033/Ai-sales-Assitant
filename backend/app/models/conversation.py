@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Index, String, Text
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -51,6 +51,9 @@ class Conversation(Base):
     )
 
     ai_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # Number of messages already folded into `ai_summary` (rolling summary / long-conversation memory)
+    summary_message_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    handoff_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     detected_intent: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     last_activity_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=_utcnow

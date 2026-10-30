@@ -51,6 +51,12 @@ const AIConfigModule = (() => {
     if (autoFollowEl) autoFollowEl.checked = config.auto_followup_enabled !== false;
 
     setValue('aiFollowupDelayHours', config.followup_delay_hours || 24);
+    setValue('aiMaxFollowups', config.max_followups ?? 3);
+    setValue('aiFollowupMode', config.followup_mode || 'AUTO');
+    setValue('aiWhatsappFollowupTemplate', config.whatsapp_followup_template || '');
+    setValue('aiLanguage', config.language || 'auto');
+    setValue('aiMonthlyTokenLimit', config.monthly_token_limit ?? '');
+    setValue('aiTelegramLink', config.telegram_start_link || '');
 
     const roundRobinEl = document.getElementById('aiRoundRobin');
     if (roundRobinEl) roundRobinEl.checked = config.round_robin_assignment !== false;
@@ -96,6 +102,11 @@ const AIConfigModule = (() => {
       whatsapp_phone_number_id: document.getElementById('aiWhatsappPhoneId')?.value.trim() || null,
       auto_followup_enabled: document.getElementById('aiAutoFollowup') ? document.getElementById('aiAutoFollowup').checked : true,
       followup_delay_hours: parseInt(document.getElementById('aiFollowupDelayHours')?.value, 10) || 24,
+      max_followups: parseInt(document.getElementById('aiMaxFollowups')?.value, 10) || 3,
+      followup_mode: document.getElementById('aiFollowupMode')?.value || 'AUTO',
+      whatsapp_followup_template: document.getElementById('aiWhatsappFollowupTemplate')?.value.trim() || null,
+      language: document.getElementById('aiLanguage')?.value.trim() || 'auto',
+      monthly_token_limit: parseInt(document.getElementById('aiMonthlyTokenLimit')?.value, 10) || null,
       round_robin_assignment: document.getElementById('aiRoundRobin') ? document.getElementById('aiRoundRobin').checked : true,
       notification_sound_enabled: document.getElementById('aiNotificationSound') ? document.getElementById('aiNotificationSound').checked : true,
     };

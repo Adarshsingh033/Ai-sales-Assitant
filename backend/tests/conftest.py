@@ -1,6 +1,13 @@
 """
 Shared pytest configuration — async test support and fixtures.
 """
+import os
+
+# Offline, deterministic embeddings for the whole suite (must be set before the app settings load).
+os.environ["EMBEDDING_PROVIDER"] = "hash"
+os.environ["VECTOR_BACKEND"] = "numpy"
+os.environ["AI_WORKER_ENABLED"] = "false"
+
 import asyncio
 from typing import AsyncGenerator
 
@@ -22,6 +29,43 @@ from app.models.user import User, UserRole
 # For integration tests, point TEST_DATABASE_URL at a real test DB.
 # ---------------------------------------------------------------------------
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+
+@pytest.fixture(autouse=True)
+def _ai_test_isolation(monkeypatch):
+    """
+    No test may reach a real LLM or reuse state from another test:
+    the default LLM refuses every call (tests that need a model install a FakeLLM), and the in-process AI
+    caches (retrieval index, circuit breakers, quota totals, query embeddings) start empty.
+    """
+    from app.core.config import settings
+    from app.services.ai import llm as llm_mod
+    from app.services.ai import quota
+    from app.services.ai.vector_store import invalidate_tenant_index
+    from app.services import rag_service
+
+    from tests.helpers import NullLLM
+
+    monkeypatch.setattr(settings, "GROQ_API_KEY", "")
+    llm_mod.set_llm_override(NullLLM())
+    llm_mod.reset_breakers()
+    quota.reset_cache()
+    invalidate_tenant_index()
+    rag_service._query_cache.clear()
+    yield
+    llm_mod.set_llm_override(None)
+
+
+@pytest.fixture()
+def fake_llm():
+    """A scriptable LLM installed for the duration of one test."""
+    from app.services.ai import llm as llm_mod
+
+    from tests.helpers import FakeLLM
+
+    fake = FakeLLM()
+    llm_mod.set_llm_override(fake)
+    return fake
 
 
 @pytest_asyncio.fixture(scope="session")

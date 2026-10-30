@@ -59,10 +59,14 @@ class FollowUpSchedule(Base):
     )
     status: Mapped[str] = mapped_column(
         String(30), nullable=False, default="PENDING"
-    )  # PENDING, DISPATCHED, CANCELLED, RESPONDED
+    )  # PENDING, PROCESSING, AWAITING_APPROVAL, NEEDS_REP, DISPATCHED, CANCELLED, RESPONDED, SKIPPED, FAILED
 
-    custom_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    custom_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # the drafted / sent text
     attempt_number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    max_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=3)
+    channel: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    stop_reason: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    locked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=_utcnow

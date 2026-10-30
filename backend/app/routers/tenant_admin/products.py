@@ -2,6 +2,7 @@
 Product Catalog endpoints for Tenant Admin and Sales Users.
 Provides tenant-scoped CRUD operations for products and services.
 """
+import logging
 import math
 import uuid
 from typing import Optional
@@ -21,7 +22,24 @@ from app.schemas.product import (
     ProductUpdate,
 )
 
+from app.services.jobs import JobQueue
+from app.services.rag_service import RAGService
+
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/tenant-admin/products", tags=["Tenant Admin Products"])
+
+
+async def _sync_product_index(db: AsyncSession, product: Product) -> None:
+    """Keep the AI's product index current. Never fails the request: on error the work is queued for retry."""
+    try:
+        await RAGService.index_product(db, product)
+    except Exception as exc:
+        logger.warning("Inline product indexing failed (%s); queued for the worker", exc)
+        await db.rollback()
+        await JobQueue.enqueue(
+            db, "INDEX_PRODUCT", {"product_id": str(product.id)}, tenant_id=product.tenant_id, dedupe=True
+        )
 
 
 @router.post(
@@ -55,6 +73,7 @@ async def create_product(
     db.add(product)
     await db.commit()
     await db.refresh(product)
+    await _sync_product_index(db, product)
     return ProductResponse.model_validate(product)
 
 
@@ -162,6 +181,7 @@ async def update_product(
 
     await db.commit()
     await db.refresh(product)
+    await _sync_product_index(db, product)
     return ProductResponse.model_validate(product)
 
 
@@ -183,5 +203,6 @@ async def delete_product(
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
 
+    await RAGService.remove_product(db, product.tenant_id, product.id)
     await db.delete(product)
     await db.commit()

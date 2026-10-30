@@ -415,6 +415,10 @@ const Api = (() => {
       });
     },
 
+    async reindexKnowledgeDocument(id) {
+      return request(`/tenant-admin/knowledge/documents/${id}/reindex`, { method: 'POST' });
+    },
+
     async deleteKnowledgeDocument(id) {
       return request(`/tenant-admin/knowledge/documents/${id}`, {
         method: 'DELETE',

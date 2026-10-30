@@ -42,10 +42,49 @@ const KnowledgeModule = (() => {
       const res = await Api.getKnowledgeDocuments();
       documents = Array.isArray(res) ? res : (res?.items || []);
       renderDocumentsTable();
+      schedulePollIfNeeded();
     } catch (err) {
       console.error('Failed to load knowledge documents:', err);
       if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="db-empty" style="color:#e11d48;">Error: ${escapeHtml(err.message)}</td></tr>`;
     }
+  }
+
+  // Indexing runs in the background for large files: show progress and keep refreshing until it settles.
+  let pollTimer = null;
+
+  function statusBadge(d) {
+    const status = d.status || 'INDEXED';
+    if (status === 'PENDING' || status === 'PROCESSING') {
+      return `<div style="font-size:12px; color:#b45309;">&#8987; Indexing in background&hellip;</div>`;
+    }
+    if (status === 'FAILED') {
+      return `<div style="font-size:12px; color:#dc2626;" title="${escapeHtml(d.error_message || '')}">&#9888; Indexing failed${d.error_message ? ': ' + escapeHtml(d.error_message.slice(0, 80)) : ''}</div>`;
+    }
+    return `<div style="font-size:12px; color:#16a34a;">&#10003; Indexed</div>`;
+  }
+
+  function schedulePollIfNeeded() {
+    clearTimeout(pollTimer);
+    if (documents.some(d => d.status === 'PENDING' || d.status === 'PROCESSING')) {
+      pollTimer = setTimeout(async () => {
+        try {
+          const res = await Api.getKnowledgeDocuments();
+          documents = Array.isArray(res) ? res : (res?.items || []);
+          renderDocumentsTable();
+          schedulePollIfNeeded();
+        } catch (_) { /* keep the last good view; try again on the next user action */ }
+      }, 3000);
+    }
+  }
+
+  async function retryDocument(docId) {
+    try {
+      await Api.reindexKnowledgeDocument(docId);
+      if (window.showToast) window.showToast('Re-indexing started', 'success');
+    } catch (err) {
+      if (window.showToast) window.showToast('Re-index failed: ' + err.message, 'error');
+    }
+    loadDocuments();
   }
 
   function renderDocumentsTable() {
@@ -60,8 +99,8 @@ const KnowledgeModule = (() => {
     tbody.innerHTML = documents.map(d => `
       <tr>
         <td>
-          <div style="font-weight:600; color:#1e293b;">${escapeHtml(d.filename || 'Document')}</div>
-          <div style="font-size:12px; color:#64748b;">${escapeHtml(d.status || 'INDEXED')}</div>
+          <div style="font-weight:600; color:#1e293b;">${escapeHtml(d.filename || 'Document')}${d.version > 1 ? ` <span style="font-size:11px; color:#64748b;">v${d.version}</span>` : ''}</div>
+          ${statusBadge(d)}
         </td>
         <td><span class="priority-pill cold">${escapeHtml((d.file_type || 'TXT').toUpperCase())}</span></td>
         <td style="font-size:12.5px; color:#64748b;">${formatBytes(d.file_size)}</td>
@@ -70,6 +109,7 @@ const KnowledgeModule = (() => {
         </td>
         <td style="font-size:12px; color:#94a3b8;">${formatDate(d.created_at)}</td>
         <td>
+          ${d.status === 'FAILED' ? `<button class="btn-secondary" style="padding:4px 8px; font-size:12px; margin-right:6px;" onclick="KnowledgeModule.retryDocument('${d.id}')">Retry</button>` : ''}
           <button class="btn-secondary" style="padding:4px 8px; font-size:12px; color:#dc2626;" onclick="KnowledgeModule.deleteDocument('${d.id}')">
             Delete
           </button>
@@ -80,10 +120,10 @@ const KnowledgeModule = (() => {
 
   function handleFileSelection(file) {
     if (!file) return;
-    const allowed = ['.pdf', '.docx', '.txt'];
+    const allowed = ['.pdf', '.docx', '.txt', '.md', '.csv'];
     const ext = '.' + file.name.split('.').pop().toLowerCase();
     if (!allowed.includes(ext)) {
-      if (window.showToast) window.showToast('Please select a supported file (.pdf, .docx, .txt)', 'error');
+      if (window.showToast) window.showToast('Please select a supported file (.pdf, .docx, .txt, .md, .csv)', 'error');
       return;
     }
 
@@ -120,7 +160,14 @@ const KnowledgeModule = (() => {
     try {
       const res = await Api.uploadKnowledgeDocument(formData);
       const chunkCount = res.chunk_count ?? res.total_chunks ?? 0;
-      if (window.showToast) window.showToast(`Document indexed successfully into ${chunkCount} chunks!`, 'success');
+      if (window.showToast) {
+        window.showToast(
+          res.status === 'INDEXED'
+            ? `Document indexed successfully into ${chunkCount} chunks!`
+            : `Document uploaded (${chunkCount} chunks) - indexing continues in the background.`,
+          'success'
+        );
+      }
 
       selectedFile = null;
       if (titleInput) titleInput.value = '';
@@ -253,6 +300,7 @@ const KnowledgeModule = (() => {
     },
     loadDocuments,
     deleteDocument,
+    retryDocument,
     testSearch
   };
 })();

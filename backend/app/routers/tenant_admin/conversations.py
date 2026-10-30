@@ -3,6 +3,7 @@ Conversation Management & Human Handoff endpoints for Tenant Admin and Sales Use
 Provides real-time conversation viewing, human takeover, and agent replies.
 """
 import uuid
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -10,7 +11,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import require_sales_user
 from app.models.ai_assistant_config import AIAssistantConfig
@@ -23,7 +23,7 @@ from app.schemas.conversation import (
     HumanReplyRequest,
     MessageResponse,
 )
-from app.services.whatsapp_service import WhatsAppService
+from app.services.channels import ChannelSender
 
 router = APIRouter(prefix="/tenant-admin/conversations", tags=["Tenant Admin Conversations"])
 
@@ -49,6 +49,17 @@ def _to_conv_response(c: Conversation) -> ConversationResponse:
         created_at=c.created_at,
         messages=msgs_resp,
     )
+
+
+async def _reload(db: AsyncSession, conversation_id: uuid.UUID, tenant_id: uuid.UUID) -> Conversation:
+    """Re-read a conversation with its customer and messages, whatever the session already holds."""
+    stmt = (
+        select(Conversation)
+        .options(selectinload(Conversation.customer), selectinload(Conversation.messages))
+        .where(Conversation.id == conversation_id, Conversation.tenant_id == tenant_id)
+        .execution_options(populate_existing=True)
+    )
+    return (await db.execute(stmt)).scalar_one()
 
 
 @router.get(
@@ -160,9 +171,8 @@ async def takeover_conversation(
     conv.status = "ESCALATED_HUMAN"
     conv.assigned_user_id = current_user.id
     await db.commit()
-    await db.refresh(conv)
 
-    return _to_conv_response(conv)
+    return _to_conv_response(await _reload(db, conv.id, current_user.tenant_id))
 
 
 @router.post(
@@ -191,7 +201,7 @@ async def human_reply(
     # Mark as human escalated and assign to user
     conv.status = "ESCALATED_HUMAN"
     conv.assigned_user_id = current_user.id
-    conv.last_activity_at = current_user.updated_at
+    conv.last_activity_at = datetime.now(timezone.utc)
 
     msg = Message(
         conversation_id=conv.id,
@@ -202,24 +212,12 @@ async def human_reply(
     await db.commit()
     await db.refresh(msg)
 
-    # If WhatsApp channel, dispatch to customer's phone
-    if conv.channel == "WHATSAPP" and conv.customer and conv.customer.phone:
-        stmt_cfg = select(AIAssistantConfig).where(AIAssistantConfig.tenant_id == current_user.tenant_id)
-        config = (await db.execute(stmt_cfg)).scalar_one_or_none()
-        phone_id = (config.whatsapp_phone_number_id if config else None) or settings.WHATSAPP_PHONE_NUMBER_ID
-        token = (config.whatsapp_access_token if config else None) or settings.WHATSAPP_ACCESS_TOKEN
-        if phone_id and token:
-            await WhatsAppService.send_whatsapp_message(
-                phone_number_id=phone_id,
-                access_token=token,
-                to_phone=conv.customer.phone,
-                message_text=data.content.strip(),
-            )
-    # If Telegram channel, dispatch to customer on Telegram
-    elif conv.channel == "TELEGRAM" and conv.customer and conv.customer.phone:
-        from app.services.telegram_service import telegram_service
-        chat_id = conv.customer.phone.replace("+tg_", "").replace("tg_", "")
-        await telegram_service.send_message(chat_id=chat_id, text=data.content.strip())
+    # Deliver on the customer's channel (WhatsApp / Telegram); the web simulator needs no delivery
+    if conv.customer:
+        config = (
+            await db.execute(select(AIAssistantConfig).where(AIAssistantConfig.tenant_id == current_user.tenant_id))
+        ).scalar_one_or_none()
+        await ChannelSender.send(db, conv, conv.customer, config, data.content.strip())
 
     return MessageResponse.model_validate(msg)
 
@@ -248,9 +246,8 @@ async def handback_conversation(
 
     conv.status = "ACTIVE_AI"
     await db.commit()
-    await db.refresh(conv)
 
-    return _to_conv_response(conv)
+    return _to_conv_response(await _reload(db, conv.id, current_user.tenant_id))
 
 
 @router.post(
@@ -277,6 +274,5 @@ async def resolve_conversation(
 
     conv.status = "RESOLVED"
     await db.commit()
-    await db.refresh(conv)
 
-    return _to_conv_response(conv)
+    return _to_conv_response(await _reload(db, conv.id, current_user.tenant_id))

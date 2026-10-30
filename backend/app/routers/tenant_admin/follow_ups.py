@@ -6,10 +6,11 @@ from typing import Any, Dict, List, Optional
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.dependencies import require_tenant_admin
+from app.core.dependencies import require_sales_user, require_tenant_admin
 from app.models.user import User
 from app.services.follow_up_service import FollowUpService
 
@@ -43,6 +44,35 @@ async def process_due_followups(
         tenant_id=current_user.tenant_id,
     )
     return {"success": True, "dispatched_count": dispatched}
+
+
+class ApproveRequest(BaseModel):
+    message: Optional[str] = Field(None, max_length=1000, description="Optional edited text to send instead of the AI draft")
+
+
+@router.post("/{schedule_id}/approve", summary="Approve (and optionally edit) an AI follow-up draft")
+async def approve_followup(
+    schedule_id: uuid.UUID,
+    data: ApproveRequest = ApproveRequest(),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_sales_user),
+) -> Dict[str, Any]:
+    """Send a follow-up that is waiting for approval (followup_mode = APPROVAL)."""
+    res = await FollowUpService.approve(db, current_user.tenant_id, schedule_id, data.message)
+    if not res["ok"]:
+        raise HTTPException(status_code=404, detail=res["detail"])
+    return res
+
+
+@router.post("/{schedule_id}/reject", summary="Reject an AI follow-up draft")
+async def reject_followup(
+    schedule_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_sales_user),
+) -> Dict[str, bool]:
+    if not await FollowUpService.reject(db, current_user.tenant_id, schedule_id):
+        raise HTTPException(status_code=404, detail="Follow-up not found or not awaiting a decision.")
+    return {"success": True}
 
 
 @router.delete("/{schedule_id}", summary="Cancel Follow-Up Schedule")

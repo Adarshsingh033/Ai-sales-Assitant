@@ -78,27 +78,25 @@ async def test_whatsapp_webhook_verification(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_chat_simulation_lead_capture_and_scoring(client: AsyncClient, tenant_and_user_token):
+async def test_chat_simulation_lead_capture_and_scoring(client: AsyncClient, tenant_and_user_token, fake_llm):
     token, tenant, user = tenant_and_user_token
 
-    # Mock Groq replies
+    # The assistant quotes the catalog price ($999 is in the fixture catalog, so the price guardrail passes)
     mock_reply = "We offer the Enterprise CRM Suite at $999/month. Would you like to schedule a quick demo?"
-    mock_intel_json = (
-        '{"intent": "pricing_inquiry", "buying_intent": true, "budget": 999.0, '
-        '"timeline": "immediate", "requirements": "Enterprise CRM with demo", '
-        '"score": 85, "score_reason": "Confirmed budget and requested demo.", '
-        '"needs_human_handoff": false}'
-    )
+    fake_llm.replies = [mock_reply]
+    fake_llm.analysis = {
+        "intent": "pricing_inquiry", "buying_intent": True, "budget": 999.0, "timeline": "immediate",
+        "requirements": "Enterprise CRM with demo",
+    }
 
-    with patch("app.services.groq_client.GroqClient.chat_completion") as mock_chat:
-        mock_chat.side_effect = [mock_reply, mock_intel_json]
+    if True:
 
         # Customer sends first inquiry
         sim_resp = await client.post(
             "/api/v1/tenant-admin/chat/simulate",
             headers={"Authorization": f"Bearer {token}"},
             json={
-                "message": "Hi, what is the price of Enterprise CRM Suite? We have budget for 10 users.",
+                "message": "Hi, what is the price of Enterprise CRM Suite? Our budget is $999 a month and we need it immediately.",
                 "customer_name": "Alice Johnson",
                 "customer_phone": "+15559876543",
             },
@@ -106,7 +104,9 @@ async def test_chat_simulation_lead_capture_and_scoring(client: AsyncClient, ten
         assert sim_resp.status_code == 200
         data = sim_resp.json()
         assert data["reply"] == mock_reply
-        assert data["score"] == 85
+        # deterministic rubric: pricing inquiry 50 + buying intent 10 + budget 8 + immediate timeline 10
+        assert data["score"] == 78
+        assert "budget stated" in data["score_reason"]
         assert data["lead_id"] is not None
         session_id = data["session_id"]
 
@@ -123,19 +123,20 @@ async def test_chat_simulation_lead_capture_and_scoring(client: AsyncClient, ten
 
 
 @pytest.mark.asyncio
-async def test_leads_pipeline_stats_and_updates(client: AsyncClient, tenant_and_user_token):
+async def test_leads_pipeline_stats_and_updates(client: AsyncClient, tenant_and_user_token, fake_llm):
     token, tenant, user = tenant_and_user_token
 
     # Create lead via chat simulation
-    with patch("app.services.groq_client.GroqClient.chat_completion") as mock_chat:
-        mock_chat.side_effect = [
-            "Certainly!",
-            '{"intent": "quote_request", "buying_intent": true, "budget": 5000.0, "timeline": "within 30 days", "requirements": "Custom setup", "score": 90, "score_reason": "High intent quote request", "needs_human_handoff": false}',
-        ]
+    fake_llm.replies = ["Certainly!"]
+    fake_llm.analysis = {
+        "intent": "quote_request", "buying_intent": True, "budget": 5000.0, "timeline": "within 30 days",
+        "requirements": "Custom setup",
+    }
+    if True:
         await client.post(
             "/api/v1/tenant-admin/chat/simulate",
             headers={"Authorization": f"Bearer {token}"},
-            json={"message": "I need a quote for enterprise plan.", "customer_name": "Bob Prospect"},
+            json={"message": "I need a quote for the enterprise plan. Budget is 5000 and we need it within 30 days.", "customer_name": "Bob Prospect"},
         )
 
     # 1. Pipeline stats
@@ -157,7 +158,7 @@ async def test_leads_pipeline_stats_and_updates(client: AsyncClient, tenant_and_
     lead_items = leads_resp.json()["items"]
     assert len(lead_items) >= 1
     lead_id = lead_items[0]["id"]
-    assert lead_items[0]["score"] == 90
+    assert lead_items[0]["score"] == 89  # quote 65 + intent 10 + budget 8 + timeline 6
 
     # 3. Update lead stage to PROPOSAL
     up_resp = await client.put(
@@ -171,12 +172,13 @@ async def test_leads_pipeline_stats_and_updates(client: AsyncClient, tenant_and_
 
 
 @pytest.mark.asyncio
-async def test_conversations_human_takeover_and_reply(client: AsyncClient, tenant_and_user_token):
+async def test_conversations_human_takeover_and_reply(client: AsyncClient, tenant_and_user_token, fake_llm):
     token, tenant, user = tenant_and_user_token
 
     # Start simulation
-    with patch("app.services.groq_client.GroqClient.chat_completion") as mock_chat:
-        mock_chat.side_effect = ["Hello!", '{"intent": "general_inquiry", "score": 30, "needs_human_handoff": false}']
+    fake_llm.replies = ["Hello!"]
+    fake_llm.analysis = {"intent": "general_inquiry"}
+    if True:
         sim_res = await client.post(
             "/api/v1/tenant-admin/chat/simulate",
             headers={"Authorization": f"Bearer {token}"},

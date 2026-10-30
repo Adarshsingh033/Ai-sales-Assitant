@@ -134,10 +134,27 @@ async def health_check() -> dict:
 @app.on_event("startup")
 async def _startup() -> None:
     logger.info("Application starting — env=%s", settings.APP_ENV)
+
+    # Vector search: pgvector when the extension is installed, otherwise the portable numpy backend.
+    from app.core.database import engine
+    from app.services.ai.vector_store import init_vector_backend
+    await init_vector_backend(engine)
+
+    # Load the embedding model in the background so the first customer message does not pay for it (several seconds).
+    import asyncio
+
+    from app.services.ai.embeddings import get_embedding_provider
+
+    asyncio.get_running_loop().run_in_executor(None, lambda: get_embedding_provider().embed(["warm-up"]))
+
+    # Durable job queue + follow-up scheduler (set AI_WORKER_ENABLED=false to run it as a separate process)
+    if settings.AI_WORKER_ENABLED:
+        from app.services.jobs import worker
+        await worker.start()
+
     if settings.TELEGRAM_BOT_ENABLED and settings.TELEGRAM_BOT_TOKEN:
-        import asyncio
         from app.services.telegram_service import telegram_service
-        asyncio.create_task(telegram_service.start_polling())
+        telegram_service.launch()
         logger.info("Telegram Bot integration launched in background.")
 
 
@@ -147,3 +164,8 @@ async def _shutdown() -> None:
     if settings.TELEGRAM_BOT_ENABLED:
         from app.services.telegram_service import telegram_service
         await telegram_service.stop_polling()
+    if settings.AI_WORKER_ENABLED:
+        from app.services.jobs import worker
+        await worker.stop()
+    from app.services.ai.llm import close_http_clients
+    await close_http_clients()

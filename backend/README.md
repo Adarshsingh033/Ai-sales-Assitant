@@ -270,3 +270,78 @@ pytest -v
 | APP_ENV                       |          | `development` / `production`           |
 | APP_HOST                      |          | Default: 0.0.0.0                       |
 | APP_PORT                      |          | Default: 8000                          |
+
+---
+
+## AI Platform (v2)
+
+Every customer turn — on WhatsApp, Telegram or the web simulator — goes through one pipeline
+(`app/services/ai/orchestrator.py`):
+
+```
+channel adapter ─► (dedup · tenant routing · ordering) ─► ConversationOrchestrator
+   verify signature      │
+   idempotent by msg id  ├─ 1 persist inbound message (committed first)
+   ack fast, queue job   ├─ 2 opt-out / AI-off / monthly token budget
+                         ├─ 3 context: persona+rules · customer memory · rolling summary ·
+                         │     hybrid-retrieved knowledge · relevant products + live stock
+                         ├─ 4 generate (streaming) with tools: check_stock · get_product_details ·
+                         │     calculate_discount · search_knowledge · request_human_handoff
+                         ├─ 5 guardrails: discount limit · unverified prices · prompt leaks ·
+                         │     regenerate once, else escalate to a human
+                         ├─ 6 persist reply + AITrace + real token usage
+                         └─ 7 analysis (fast model → grounded signals → deterministic lead score,
+                               memory, summary, handoff) — after the customer has their answer
+```
+
+| Area | Where | Notes |
+|---|---|---|
+| LLM gateway | `services/ai/llm.py` | OpenAI-compatible (Groq default). Pooled client, retry+backoff (honours `Retry-After`), per-key/model circuit breaker, fallback only on model/transient errors, tool calling, streaming with real usage. |
+| RAG | `services/rag_service.py`, `ai/chunking.py`, `ai/vector_store.py` | Structure-aware chunks (headings/pages), multilingual embeddings, dense + BM25 with rank fusion, per-tenant isolation, document versions/dedup/status, products indexed too. |
+| Vector backend | `VECTOR_BACKEND=auto` | **pgvector** (HNSW) when the extension exists, else portable **numpy**. Embeddings are always stored as float32 bytes, so switching needs no data migration. |
+| Jobs | `services/jobs.py` | Postgres queue (`FOR UPDATE SKIP LOCKED`), per-customer ordering, retries with backoff, crash recovery. Also runs the follow-up scheduler. |
+| Follow-ups | `services/follow_up_service.py` | AI-drafted, guardrail-checked, really delivered; max attempts; stops on reply / opt-out / human takeover / closed lead; WhatsApp 24h-window aware; quiet hours; optional rep approval. |
+| Observability | `GET /tenant-admin/ai-usage/{stats,traces,traces/{id}}` | Per-turn retrieval, tool calls, guardrail actions, timings, tokens. |
+| Secrets | `core/crypto.py` | Tenant API keys / WhatsApp tokens encrypted at rest (`ENCRYPTION_KEY`). |
+
+### Upgrade steps
+
+```bash
+pip install -r requirements.txt
+alembic upgrade head                      # schema + converts existing embeddings + encrypts stored secrets
+python -m app.scripts.reindex_knowledge   # re-embeds with the multilingual model, indexes products
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+The first reindex downloads the embedding model (~220 MB, once).
+
+### pgvector on Windows without Docker
+
+`pip install pgvector` only installs the Python client (already in `requirements.txt`). The **extension** must exist
+inside PostgreSQL. Until it does, the app transparently uses the numpy backend. To install it (needs Visual Studio Build
+Tools and an elevated prompt), open an *x64 Native Tools Command Prompt for VS* **as Administrator**:
+
+```bat
+set "PGROOT=C:\Program Files\PostgreSQL\18"
+cd %TEMP%
+git clone --branch <latest tag, 0.8.1 or newer> https://github.com/pgvector/pgvector.git
+cd pgvector
+nmake /F Makefile.win
+nmake /F Makefile.win install
+```
+
+Restart the API. The log line `Vector backend: pgvector (HNSW, dim=384)` confirms it; the app creates the extension and
+the `knowledge_vectors` table itself and back-fills it from the stored embeddings.
+
+### Channels
+
+* **WhatsApp** — set the tenant's *phone number id* and an app secret (`WHATSAPP_APP_SECRET` or per tenant). Unsigned or
+  mis-signed webhooks are rejected; unknown phone-number ids are ignored (never routed to another tenant).
+* **Telegram** — one shared bot. Customers open `https://t.me/<bot>?start=<tenant-slug>` (shown in AI Settings); each chat is
+  pinned to that tenant. With exactly one active tenant, unpinned chats are pinned to it automatically.
+
+### Operating notes
+
+* Free-tier Groq limits (tokens/minute) apply: the gateway waits on `429`s, and the prompt budget is `AI_PROMPT_TOKEN_BUDGET`.
+* Models your key cannot access are probed once, then skipped for 15 minutes.
+* Tests never reach a real LLM: `tests/helpers.py` provides `NullLLM` (default) and a scriptable `FakeLLM` (`fake_llm` fixture).

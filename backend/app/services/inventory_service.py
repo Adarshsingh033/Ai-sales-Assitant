@@ -184,6 +184,46 @@ class InventoryService:
         return inv
 
     @staticmethod
+    async def get_stock_for_products(
+        db: AsyncSession,
+        tenant_id: uuid.UUID,
+        product_ids: List[uuid.UUID],
+    ) -> Dict[uuid.UUID, List[Dict[str, Any]]]:
+        """Per-warehouse availability for just the given products (used by the AI tools and prompt builder)."""
+        if not product_ids:
+            return {}
+        stmt = (
+            select(ProductInventory)
+            .options(selectinload(ProductInventory.warehouse))
+            .where(ProductInventory.tenant_id == tenant_id, ProductInventory.product_id.in_(product_ids))
+        )
+        out: Dict[uuid.UUID, List[Dict[str, Any]]] = {}
+        for inv in (await db.execute(stmt)).scalars().all():
+            out.setdefault(inv.product_id, []).append(
+                {
+                    "warehouse": inv.warehouse.name if inv.warehouse else "Warehouse",
+                    "city": inv.warehouse.city if inv.warehouse else None,
+                    "available": int(inv.quantity_available),
+                    "low_stock": inv.quantity_available <= inv.low_stock_threshold,
+                }
+            )
+        return out
+
+    @staticmethod
+    def summarize_stock(rows: Optional[List[Dict[str, Any]]]) -> Optional[str]:
+        """Compact one-line stock description for prompts; None when the product has no inventory records."""
+        if not rows:
+            return None
+        total = sum(r["available"] for r in rows)
+        if total <= 0:
+            return "OUT OF STOCK"
+        where = ", ".join(
+            f"{r['available']} at {r['warehouse']}" + (f" ({r['city']})" if r.get("city") else "")
+            for r in rows if r["available"] > 0
+        )
+        return f"{total} units available — {where}"
+
+    @staticmethod
     async def get_inventory_context_for_ai(
         db: AsyncSession,
         tenant_id: uuid.UUID,

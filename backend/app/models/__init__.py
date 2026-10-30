@@ -16,6 +16,10 @@ from app.models.ai_usage_log import AIUsageLog
 from app.models.notification import Notification
 from app.models.follow_up import FollowUpSchedule
 from app.models.inventory import Warehouse, ProductInventory
+from app.models.ai_job import AIJob
+from app.models.ai_trace import AITrace
+from app.models.customer_memory import CustomerMemory
+from app.models.channel import ChannelBinding, InboundEvent
 
 __all__ = [
     "Tenant",

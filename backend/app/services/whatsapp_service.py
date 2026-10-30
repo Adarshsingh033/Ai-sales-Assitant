@@ -1,59 +1,85 @@
 """
 Meta WhatsApp Cloud API Service.
-Handles inbound webhook messages, customer identification, AI sales dispatch,
-and outbound message delivery via official Meta WhatsApp Graph API.
+
+Inbound  verify the webhook signature, resolve the tenant STRICTLY by phone_number_id, de-duplicate by message id,
+         enqueue one job per message and acknowledge immediately (Meta retries slow webhooks).
+Outbound free-text messages (inside the 24h window) and approved templates (outside it).
 """
+import hashlib
+import hmac
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.crypto import decrypt_secret
 from app.models.ai_assistant_config import AIAssistantConfig
-from app.models.conversation import Conversation
-from app.models.customer import Customer
-from app.services.ai_sales_engine import AISalesEngine
+from app.services.channels import InboundProcessor
+from app.services.jobs import JobQueue, lane_key
 
 logger = logging.getLogger(__name__)
 
 META_GRAPH_URL = "https://graph.facebook.com/v21.0"
 
 
+def verify_signature(raw_body: bytes, header: Optional[str], app_secret: Optional[str]) -> bool:
+    """Validate Meta's X-Hub-Signature-256 header (`sha256=<hex hmac of the raw body>`)."""
+    if not header or not app_secret:
+        return False
+    expected = "sha256=" + hmac.new(app_secret.encode(), raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, header.strip())
+
+
+def extract_messages(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Flatten every entry/change/message of a webhook payload into simple dicts (text and button replies)."""
+    out: List[Dict[str, Any]] = []
+    for entry in payload.get("entry") or []:
+        for change in entry.get("changes") or []:
+            value = change.get("value") or {}
+            phone_number_id = (value.get("metadata") or {}).get("phone_number_id")
+            names = {
+                c.get("wa_id"): (c.get("profile") or {}).get("name") for c in value.get("contacts") or []
+            }
+            for msg in value.get("messages") or []:
+                kind = msg.get("type")
+                if kind == "text":
+                    text = (msg.get("text") or {}).get("body", "")
+                elif kind == "interactive":
+                    inter = msg.get("interactive") or {}
+                    reply = inter.get("button_reply") or inter.get("list_reply") or {}
+                    text = reply.get("title", "")
+                elif kind == "button":
+                    text = (msg.get("button") or {}).get("text", "")
+                else:
+                    continue  # media/status events are not handled yet
+                sender = msg.get("from")
+                if sender and text.strip():
+                    out.append(
+                        {
+                            "phone_number_id": phone_number_id,
+                            "message_id": msg.get("id"),
+                            "from": sender,
+                            "text": text.strip(),
+                            "name": names.get(sender),
+                        }
+                    )
+    return out
+
+
 class WhatsAppService:
     @staticmethod
-    async def send_whatsapp_message(
-        phone_number_id: str,
-        access_token: str,
-        to_phone: str,
-        message_text: str,
-    ) -> bool:
-        """
-        Send outbound text message via Meta WhatsApp Cloud API.
-        """
-        if not phone_number_id or not access_token:
-            logger.warning("WhatsApp credentials missing; skipping outbound delivery.")
-            return False
+    async def _post(phone_number_id: str, access_token: str, body: Dict[str, Any]) -> bool:
+        from app.services.ai.llm import get_http_client
 
         url = f"{META_GRAPH_URL}/{phone_number_id}/messages"
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json",
-        }
-        payload = {
-            "messaging_product": "whatsapp",
-            "recipient_type": "individual",
-            "to": to_phone,
-            "type": "text",
-            "text": {"body": message_text},
-        }
-
+        headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                res = await client.post(url, headers=headers, json=payload)
+            res = await get_http_client().post(url, headers=headers, json=body, timeout=15.0)
             if res.status_code not in (200, 201):
-                logger.error("WhatsApp delivery failed (%s): %s", res.status_code, res.text)
+                logger.error("WhatsApp delivery failed (%s): %s", res.status_code, res.text[:300])
                 return False
             return True
         except Exception as exc:
@@ -61,123 +87,93 @@ class WhatsAppService:
             return False
 
     @classmethod
-    async def process_inbound_webhook(
+    async def send_whatsapp_message(
+        cls, phone_number_id: str, access_token: str, to_phone: str, message_text: str
+    ) -> bool:
+        """Send a free-form text message (only valid inside the 24h customer-service window)."""
+        if not phone_number_id or not access_token:
+            logger.warning("WhatsApp credentials missing; skipping outbound delivery.")
+            return False
+        return await cls._post(
+            phone_number_id,
+            access_token,
+            {
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": to_phone,
+                "type": "text",
+                "text": {"body": message_text},
+            },
+        )
+
+    @classmethod
+    async def send_whatsapp_template(
         cls,
-        db: AsyncSession,
-        payload: Dict[str, Any],
-    ) -> Optional[Dict[str, Any]]:
-        """
-        Parse Meta WhatsApp Cloud API webhook, invoke AISalesEngine, and reply back.
-        """
-        try:
-            entries = payload.get("entry", [])
-            if not entries:
-                return None
-            changes = entries[0].get("changes", [])
-            if not changes:
-                return None
-            change = changes[0].get("value", {})
-            metadata = change.get("metadata", {})
-            phone_number_id = metadata.get("phone_number_id")
+        phone_number_id: str,
+        access_token: str,
+        to_phone: str,
+        template_name: str,
+        params: List[str],
+        language: str = "en",
+    ) -> bool:
+        """Send an approved template (the only message type allowed outside the 24h window)."""
+        components = (
+            [{"type": "body", "parameters": [{"type": "text", "text": p} for p in params]}] if params else []
+        )
+        return await cls._post(
+            phone_number_id,
+            access_token,
+            {
+                "messaging_product": "whatsapp",
+                "to": to_phone,
+                "type": "template",
+                "template": {"name": template_name, "language": {"code": language}, "components": components},
+            },
+        )
 
-            messages = change.get("messages", [])
-            if not messages:
-                return None  # Status updates, delivery receipts
-
-            msg_obj = messages[0]
-            if msg_obj.get("type") != "text":
-                return None  # For MVP, focus on text messages
-
-            from_phone = msg_obj.get("from")
-            text_body = msg_obj.get("text", {}).get("body", "").strip()
-            if not from_phone or not text_body:
-                return None
-
-            contacts = change.get("contacts", [])
-            contact_name = contacts[0].get("profile", {}).get("name") if contacts else None
-
-            # Find matching tenant by whatsapp_phone_number_id or default to first configured tenant
-            stmt_cfg = select(AIAssistantConfig).where(
-                AIAssistantConfig.whatsapp_phone_number_id == phone_number_id
-            )
-            config = (await db.execute(stmt_cfg)).scalar_one_or_none()
-            if not config:
-                # Fallback to any enabled config
-                stmt_any = select(AIAssistantConfig).limit(1)
-                config = (await db.execute(stmt_any)).scalar_one_or_none()
-                if not config:
-                    logger.error("No tenant AI assistant found for inbound WhatsApp message.")
-                    return None
-
-            tenant_id = config.tenant_id
-
-            # Find or create customer
-            stmt_cust = select(Customer).where(
-                Customer.tenant_id == tenant_id,
-                Customer.phone == from_phone,
-            )
-            customer = (await db.execute(stmt_cust)).scalar_one_or_none()
-            if not customer:
-                customer = Customer(
-                    tenant_id=tenant_id,
-                    phone=from_phone,
-                    name=contact_name or f"WhatsApp User ({from_phone[-4:]})",
-                )
-                db.add(customer)
-                await db.flush()
-
-            # Find or create active conversation
-            stmt_conv = select(Conversation).where(
-                Conversation.tenant_id == tenant_id,
-                Conversation.customer_id == customer.id,
-                Conversation.channel == "WHATSAPP",
-                Conversation.status.in_(["ACTIVE_AI", "WAITING_SALES", "ESCALATED_HUMAN"]),
-            ).order_by(Conversation.created_at.desc())
-            conversation = (await db.execute(stmt_conv)).scalars().first()
-
-            if not conversation:
-                conversation = Conversation(
-                    tenant_id=tenant_id,
-                    customer_id=customer.id,
-                    channel="WHATSAPP",
-                    status="ACTIVE_AI",
-                )
-                db.add(conversation)
-                await db.flush()
-
-            # If human sales rep has taken over, don't generate AI reply
-            if conversation.status == "ESCALATED_HUMAN":
-                # Just save customer message
-                from datetime import datetime, timezone
-                from app.models.conversation import Message
-                db.add(Message(conversation_id=conversation.id, sender_type="CUSTOMER", content=text_body))
-                conversation.last_activity_at = datetime.now(timezone.utc)
-                await db.commit()
-                return {"status": "saved_for_human"}
-
-            # Process with AI Sales Engine
-            result = await AISalesEngine.process_customer_message(
-                db=db,
-                tenant_id=tenant_id,
-                customer_id=customer.id,
-                conversation_id=conversation.id,
-                user_message_text=text_body,
-            )
-
-            # Send reply back via WhatsApp Cloud API
-            access_token = config.whatsapp_access_token or settings.WHATSAPP_ACCESS_TOKEN
-            active_phone_id = config.whatsapp_phone_number_id or settings.WHATSAPP_PHONE_NUMBER_ID
-
-            if access_token and active_phone_id:
-                await cls.send_whatsapp_message(
-                    phone_number_id=active_phone_id,
-                    access_token=access_token,
-                    to_phone=from_phone,
-                    message_text=result["reply"],
-                )
-
-            return result
-
-        except Exception as exc:
-            logger.error("Failed to process WhatsApp webhook payload: %s", exc)
+    @staticmethod
+    async def find_config(db: AsyncSession, phone_number_id: Optional[str]) -> Optional[AIAssistantConfig]:
+        """Strict tenant resolution — an unknown phone_number_id is never routed to some other tenant."""
+        if not phone_number_id:
             return None
+        return (
+            await db.execute(
+                select(AIAssistantConfig).where(AIAssistantConfig.whatsapp_phone_number_id == phone_number_id)
+            )
+        ).scalars().first()
+
+    @staticmethod
+    def app_secret_for(config: Optional[AIAssistantConfig]) -> Optional[str]:
+        return (decrypt_secret(config.whatsapp_app_secret) if config else None) or settings.WHATSAPP_APP_SECRET or None
+
+    @classmethod
+    async def process_inbound_webhook(cls, db: AsyncSession, payload: Dict[str, Any]) -> Dict[str, int]:
+        """Queue every new text message in the payload. Returns counters (queued / duplicates / ignored)."""
+        counters = {"queued": 0, "duplicates": 0, "ignored": 0}
+        for msg in extract_messages(payload):
+            config = await cls.find_config(db, msg["phone_number_id"])
+            if config is None:
+                logger.warning("WhatsApp message for unknown phone_number_id %s ignored", msg["phone_number_id"])
+                counters["ignored"] += 1
+                continue
+            if msg["message_id"] and not await InboundProcessor.claim_event(
+                db, "WHATSAPP", msg["message_id"], config.tenant_id
+            ):
+                counters["duplicates"] += 1
+                continue
+            await JobQueue.enqueue(
+                db,
+                "INBOUND_MESSAGE",
+                {
+                    "channel": "WHATSAPP",
+                    "phone": msg["from"],
+                    "text": msg["text"],
+                    "customer_name": msg["name"] or f"WhatsApp User ({msg['from'][-4:]})",
+                },
+                tenant_id=config.tenant_id,
+                conversation_id=lane_key(config.tenant_id, msg["from"]),
+                commit=False,
+            )
+            await db.commit()
+            counters["queued"] += 1
+        return counters

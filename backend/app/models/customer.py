@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Index, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -37,6 +37,9 @@ class Customer(Base):
     phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, index=True)
     email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
     company_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    preferred_language: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    # Set when the customer asks to stop; blocks every automated outbound message.
+    do_not_contact: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=_utcnow

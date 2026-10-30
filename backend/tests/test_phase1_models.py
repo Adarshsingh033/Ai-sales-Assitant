@@ -8,6 +8,7 @@ Verifies creation, relationships, cascade deletes, and tenant scoping for:
   - Lead & LeadStatsProvider
 """
 import json
+import struct
 import uuid
 import pytest
 from sqlalchemy import select
@@ -85,13 +86,13 @@ async def test_knowledge_document_and_chunks_cascade(test_db: AsyncSession):
     test_db.add(doc)
     await test_db.flush()
 
-    dummy_embedding = json.dumps([0.1, 0.2, 0.3, 0.4])
+    dummy_embedding = struct.pack("<4f", 0.1, 0.2, 0.3, 0.4)
     chunk1 = KnowledgeChunk(
         tenant_id=tenant.id,
         document_id=doc.id,
         chunk_index=0,
         content="Pricing starts at $99 per user per month.",
-        embedding_json=dummy_embedding,
+        embedding=dummy_embedding,
         token_count=12,
     )
     chunk2 = KnowledgeChunk(
@@ -99,7 +100,7 @@ async def test_knowledge_document_and_chunks_cascade(test_db: AsyncSession):
         document_id=doc.id,
         chunk_index=1,
         content="We provide 24/7 priority support on enterprise plans.",
-        embedding_json=dummy_embedding,
+        embedding=dummy_embedding,
         token_count=15,
     )
     test_db.add_all([chunk1, chunk2])

@@ -56,6 +56,12 @@ class AIAssistantConfig(Base):
 
     is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
+    # Automation & Assignment Settings
+    auto_followup_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    followup_delay_hours: Mapped[int] = mapped_column(Integer, nullable=False, default=24)
+    round_robin_assignment: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    notification_sound_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=_utcnow
     )

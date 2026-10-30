@@ -43,8 +43,11 @@ const TenantDashboardModule = (() => {
 
   async function loadDashboard() {
     try {
-      const stats = await Api.getTenantDashboard();
-      renderStats(stats);
+      const [stats, aiUsage] = await Promise.all([
+        Api.getTenantDashboard(),
+        Api.getAIUsageStats(30).catch(() => null),
+      ]);
+      renderStats(stats, aiUsage);
       isLoaded = true;
     } catch (err) {
       console.error('Failed to load tenant dashboard stats:', err);
@@ -52,7 +55,7 @@ const TenantDashboardModule = (() => {
     }
   }
 
-  function renderStats(stats) {
+  function renderStats(stats, aiUsage) {
     // 1. KPI Cards
     const totalLeadsEl = document.getElementById('statTotalLeads');
     if (totalLeadsEl) totalLeadsEl.textContent = stats.total_leads ?? 0;
@@ -74,6 +77,23 @@ const TenantDashboardModule = (() => {
 
     const humanTakeoverEl = document.getElementById('statHumanTakeover');
     if (humanTakeoverEl) humanTakeoverEl.textContent = stats.escalated_conversations ?? stats.human_takeover_conversations ?? 0;
+
+    // AI Usage Metrics
+    if (aiUsage) {
+      const tokensEl = document.getElementById('statTotalTokens');
+      if (tokensEl) {
+        const total = aiUsage.total_tokens || 0;
+        tokensEl.textContent = total > 1000000 ? (total / 1000000).toFixed(1) + 'M' : (total > 1000 ? (total / 1000).toFixed(1) + 'k' : total);
+      }
+      const savingsEl = document.getElementById('statEstSavings');
+      if (savingsEl) savingsEl.textContent = formatCurrency(aiUsage.estimated_savings_usd || 0);
+
+      const latencyEl = document.getElementById('statAvgLatency');
+      if (latencyEl) latencyEl.textContent = `${Math.round(aiUsage.avg_latency_ms || 250)}ms`;
+
+      const aiCallsEl = document.getElementById('statAiRequests');
+      if (aiCallsEl) aiCallsEl.textContent = aiUsage.total_requests || 0;
+    }
 
     // 2. Recent Leads
     const leadsTableBody = document.getElementById('dashboardRecentLeadsBody');

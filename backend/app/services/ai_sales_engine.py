@@ -100,6 +100,11 @@ class AISalesEngine:
             else f"This is an ONGOING conversation. DO NOT say 'Hi there!', 'Hello!', or re-introduce yourself. Jump directly into your helpful, context-aware reply."
         )
 
+        # 5b. Fetch live warehouse inventory context
+        from app.services.inventory_service import InventoryService
+        inventory_context = await InventoryService.get_inventory_context_for_ai(db, tenant_id)
+        inventory_section = f"\n\n{inventory_context}\n" if inventory_context else ""
+
         # 6. Formulate system prompt
         system_prompt = f"""You are '{config.assistant_name}', an expert digital sales assistant for this company.
 Communication style: {config.personality}.
@@ -115,7 +120,7 @@ COMPANY VERIFIED KNOWLEDGE:
 {knowledge_context}
 
 PRODUCT CATALOG:
-{product_list_str}
+{product_list_str}{inventory_section}
 
 CRITICAL SALES & CONVERSATIONAL RULES:
 - GREETING: {greeting_instruction}
@@ -123,6 +128,7 @@ CRITICAL SALES & CONVERSATIONAL RULES:
   1. DO NOT reset the conversation or ask generic discovery questions ('How can I help you today?', 'What is your budget?', etc.).
   2. Maintain context and advance the sale: warmly offer clear next steps, such as sending a direct purchase/checkout link, booking a quick 15-minute product demo, or asking if they have specific questions before getting started.
 - NATURAL SALES PACING: Keep responses concise (2 to 4 sentences maximum), human-like, and proactive. Ask at most ONE natural question or call-to-action per turn. Never bombard the prospect with a bulleted list of discovery questions.
+- INVENTORY & STOCK: When prospects ask about product availability or stock levels, cite accurate quantities and warehouse hubs from the inventory section.
 - IDENTITY: Always speak as '{config.assistant_name}'. Never say you are an AI language model.
 - Formatting: Never output markdown code blocks or JSON in customer replies."""
 
@@ -206,6 +212,16 @@ CRITICAL SALES & CONVERSATIONAL RULES:
 
         if lead_intel.get("needs_human_handoff"):
             conv.status = "WAITING_SALES"
+            from app.services.notification_service import NotificationService
+            await NotificationService.create_notification(
+                db=db,
+                tenant_id=tenant_id,
+                title="🚨 Human Takeover Requested",
+                message=f"Customer requested human sales rep in conversation.",
+                notif_type="HUMAN_TAKEOVER_REQUESTED",
+                recipient_user_id=conv.assigned_user_id,
+                link_url=f"#/conversations?id={conversation_id}",
+            )
 
         # 10. Automatic Lead creation / update
         lead_id = None
@@ -218,6 +234,22 @@ CRITICAL SALES & CONVERSATIONAL RULES:
                 conversation_id=conversation_id,
                 lead_intel=lead_intel,
             )
+
+        # 11. Record AI Usage metrics
+        from app.services.ai_usage_tracker import AIUsageTracker
+        prompt_len = sum(len(m.content) for m in conversation_history) + len(user_message_text)
+        est_prompt_tokens = max(1, prompt_len // 4)
+        est_completion_tokens = max(1, len(ai_reply) // 4)
+        await AIUsageTracker.log_usage(
+            db=db,
+            tenant_id=tenant_id,
+            model=groq_client.model,
+            action_type="SALES_CHAT",
+            prompt_tokens=est_prompt_tokens,
+            completion_tokens=est_completion_tokens,
+            latency_ms=250,
+            customer_id=customer_id,
+        )
 
         await db.commit()
 
@@ -473,4 +505,29 @@ Extract sales intelligence as valid JSON ONLY with these fields:
                 lead.status = "NEW"
 
         await db.flush()
+
+        # Automated Round-Robin Lead Assignment
+        if not lead.assigned_user_id:
+            from app.services.lead_assignment_service import LeadAssignmentService
+            assigned_rep = await LeadAssignmentService.assign_lead_round_robin(
+                db=db,
+                tenant_id=tenant_id,
+                lead_id=lead.id,
+                conversation_id=conversation_id,
+                trigger_notification=True,
+            )
+            if assigned_rep:
+                lead.assigned_user_id = assigned_rep.id
+
+        # Schedule automated follow-up for qualifying lead
+        from app.services.follow_up_service import FollowUpService
+        await FollowUpService.schedule_followup_if_eligible(
+            db=db,
+            tenant_id=tenant_id,
+            lead_id=lead.id,
+            customer_id=customer_id,
+            conversation_id=conversation_id,
+            trigger_reason="INACTIVITY_24H",
+        )
+
         return lead.id

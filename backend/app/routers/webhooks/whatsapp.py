@@ -12,6 +12,9 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.services.whatsapp_service import WhatsAppService
 
+from sqlalchemy import select
+from app.models.ai_assistant_config import AIAssistantConfig
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/webhooks/whatsapp", tags=["WhatsApp Webhook"])
@@ -26,15 +29,23 @@ async def verify_webhook(
     hub_mode: str = Query(..., alias="hub.mode"),
     hub_challenge: str = Query(..., alias="hub.challenge"),
     hub_verify_token: str = Query(..., alias="hub.verify_token"),
+    db: AsyncSession = Depends(get_db),
 ) -> Response:
     """
     Handles Meta's verification challenge during webhook setup.
     """
-    if hub_mode == "subscribe" and hub_verify_token == settings.WHATSAPP_VERIFY_TOKEN:
-        logger.info("WhatsApp webhook verified successfully!")
-        return Response(content=hub_challenge, media_type="text/plain")
+    if hub_mode == "subscribe":
+        if hub_verify_token == settings.WHATSAPP_VERIFY_TOKEN:
+            logger.info("WhatsApp webhook verified successfully with settings token!")
+            return Response(content=hub_challenge, media_type="text/plain")
 
-    logger.warning("WhatsApp webhook verification failed. Token mismatch.")
+        stmt = select(AIAssistantConfig).where(AIAssistantConfig.whatsapp_verify_token == hub_verify_token)
+        cfg = (await db.execute(stmt)).scalar_one_or_none()
+        if cfg:
+            logger.info("WhatsApp webhook verified successfully with tenant config token!")
+            return Response(content=hub_challenge, media_type="text/plain")
+
+    logger.warning("WhatsApp webhook verification failed. Token mismatch: %s", hub_verify_token)
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="Verification token mismatch.",

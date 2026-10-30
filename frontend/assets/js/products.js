@@ -91,8 +91,9 @@ const ProductsModule = (() => {
         </td>
         <td>
           <div style="display:flex; gap:6px;">
-            <button class="btn-secondary" style="padding:4px 8px; font-size:12px;" onclick="ProductsModule.openEditModal('${p.id}')">Edit</button>
-            <button class="btn-secondary" style="padding:4px 8px; font-size:12px; color:#dc2626;" onclick="ProductsModule.deleteProduct('${p.id}')">Delete</button>
+            <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:12px;" onclick="ProductsModule.openEditModal('${p.id}')">Edit</button>
+            <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:12px; color:#0369a1;" onclick="InventoryModule.openStockModal('${p.id}', '', 0, 0, 5, '${escapeHtml(p.name).replace(/'/g, "\\'")}')">Stock</button>
+            <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:12px; color:#dc2626;" onclick="ProductsModule.deleteProduct('${p.id}')">Delete</button>
           </div>
         </td>
       </tr>

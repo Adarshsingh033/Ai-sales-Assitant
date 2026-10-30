@@ -70,8 +70,13 @@ class WhatsAppService:
         Parse Meta WhatsApp Cloud API webhook, invoke AISalesEngine, and reply back.
         """
         try:
-            entry = payload.get("entry", [])[0]
-            change = entry.get("changes", [])[0].get("value", {})
+            entries = payload.get("entry", [])
+            if not entries:
+                return None
+            changes = entries[0].get("changes", [])
+            if not changes:
+                return None
+            change = changes[0].get("value", {})
             metadata = change.get("metadata", {})
             phone_number_id = metadata.get("phone_number_id")
 
@@ -143,9 +148,10 @@ class WhatsAppService:
             # If human sales rep has taken over, don't generate AI reply
             if conversation.status == "ESCALATED_HUMAN":
                 # Just save customer message
+                from datetime import datetime, timezone
                 from app.models.conversation import Message
                 db.add(Message(conversation_id=conversation.id, sender_type="CUSTOMER", content=text_body))
-                conversation.last_activity_at = config.updated_at
+                conversation.last_activity_at = datetime.now(timezone.utc)
                 await db.commit()
                 return {"status": "saved_for_human"}
 

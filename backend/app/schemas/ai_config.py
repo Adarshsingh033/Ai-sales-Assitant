@@ -21,6 +21,10 @@ class AIAssistantConfigBase(BaseModel):
     whatsapp_phone_number_id: Optional[str] = Field(None, max_length=100)
     whatsapp_verify_token: str = Field(default="ai_sales_verify_token", max_length=100)
     is_enabled: bool = True
+    auto_followup_enabled: bool = True
+    followup_delay_hours: int = Field(default=24, ge=1, le=168)
+    round_robin_assignment: bool = True
+    notification_sound_enabled: bool = True
 
 
 class AIAssistantConfigUpdate(BaseModel):
@@ -36,6 +40,10 @@ class AIAssistantConfigUpdate(BaseModel):
     whatsapp_access_token: Optional[str] = Field(None, max_length=512)
     whatsapp_verify_token: Optional[str] = Field(None, max_length=100)
     is_enabled: Optional[bool] = None
+    auto_followup_enabled: Optional[bool] = None
+    followup_delay_hours: Optional[int] = Field(None, ge=1, le=168)
+    round_robin_assignment: Optional[bool] = None
+    notification_sound_enabled: Optional[bool] = None
 
 
 class AIAssistantConfigResponse(AIAssistantConfigBase):

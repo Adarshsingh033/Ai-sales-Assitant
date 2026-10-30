@@ -12,6 +12,10 @@ from app.models.knowledge import KnowledgeDocument, KnowledgeChunk
 from app.models.customer import Customer
 from app.models.conversation import Conversation, Message
 from app.models.lead import Lead
+from app.models.ai_usage_log import AIUsageLog
+from app.models.notification import Notification
+from app.models.follow_up import FollowUpSchedule
+from app.models.inventory import Warehouse, ProductInventory
 
 __all__ = [
     "Tenant",
@@ -31,4 +35,9 @@ __all__ = [
     "Conversation",
     "Message",
     "Lead",
+    "AIUsageLog",
+    "Notification",
+    "FollowUpSchedule",
+    "Warehouse",
+    "ProductInventory",
 ]

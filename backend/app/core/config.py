@@ -59,6 +59,12 @@ class Settings(BaseSettings):
     WHATSAPP_ACCESS_TOKEN: str = ""
     WHATSAPP_PHONE_NUMBER_ID: str = ""
 
+    # ------------------------------------------------------------------
+    # Telegram Integration
+    # ------------------------------------------------------------------
+    TELEGRAM_BOT_TOKEN: str = ""
+    TELEGRAM_BOT_ENABLED: bool = False
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -78,6 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
           ConversationsModule.init();
         } else if (sectionId === 'section-products' && typeof ProductsModule !== 'undefined') {
           ProductsModule.init();
+        } else if (sectionId === 'section-inventory' && typeof InventoryModule !== 'undefined') {
+          InventoryModule.loadData();
         } else if (sectionId === 'section-knowledge' && typeof KnowledgeModule !== 'undefined') {
           KnowledgeModule.init();
         } else if (sectionId === 'section-ai-config' && typeof AIConfigModule !== 'undefined') {

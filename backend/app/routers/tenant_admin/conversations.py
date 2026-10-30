@@ -206,8 +206,8 @@ async def human_reply(
     if conv.channel == "WHATSAPP" and conv.customer and conv.customer.phone:
         stmt_cfg = select(AIAssistantConfig).where(AIAssistantConfig.tenant_id == current_user.tenant_id)
         config = (await db.execute(stmt_cfg)).scalar_one_or_none()
-        phone_id = config.whatsapp_phone_number_id if config else None
-        token = config.whatsapp_access_token if config else None
+        phone_id = (config.whatsapp_phone_number_id if config else None) or settings.WHATSAPP_PHONE_NUMBER_ID
+        token = (config.whatsapp_access_token if config else None) or settings.WHATSAPP_ACCESS_TOKEN
         if phone_id and token:
             await WhatsAppService.send_whatsapp_message(
                 phone_number_id=phone_id,
@@ -215,6 +215,11 @@ async def human_reply(
                 to_phone=conv.customer.phone,
                 message_text=data.content.strip(),
             )
+    # If Telegram channel, dispatch to customer on Telegram
+    elif conv.channel == "TELEGRAM" and conv.customer and conv.customer.phone:
+        from app.services.telegram_service import telegram_service
+        chat_id = conv.customer.phone.replace("+tg_", "").replace("tg_", "")
+        await telegram_service.send_message(chat_id=chat_id, text=data.content.strip())
 
     return MessageResponse.model_validate(msg)
 

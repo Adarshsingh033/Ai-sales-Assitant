@@ -23,6 +23,10 @@ from app.routers.tenant_admin import chat_simulator as tenant_admin_chat_simulat
 from app.routers.tenant_admin import leads as tenant_admin_leads
 from app.routers.tenant_admin import conversations as tenant_admin_conversations
 from app.routers.tenant_admin import dashboard_stats as tenant_admin_dashboard_stats
+from app.routers.tenant_admin import ai_usage as tenant_admin_ai_usage
+from app.routers.tenant_admin import notifications as tenant_admin_notifications
+from app.routers.tenant_admin import inventory as tenant_admin_inventory
+from app.routers.tenant_admin import follow_ups as tenant_admin_follow_ups
 from app.routers.webhooks import whatsapp as webhooks_whatsapp
 from fastapi.staticfiles import StaticFiles
 import os
@@ -106,6 +110,10 @@ app.include_router(tenant_admin_chat_simulator.router, prefix="/api/v1")
 app.include_router(tenant_admin_leads.router, prefix="/api/v1")
 app.include_router(tenant_admin_conversations.router, prefix="/api/v1")
 app.include_router(tenant_admin_dashboard_stats.router, prefix="/api/v1")
+app.include_router(tenant_admin_ai_usage.router, prefix="/api/v1")
+app.include_router(tenant_admin_notifications.router, prefix="/api/v1")
+app.include_router(tenant_admin_inventory.router, prefix="/api/v1")
+app.include_router(tenant_admin_follow_ups.router, prefix="/api/v1")
 app.include_router(webhooks_whatsapp.router, prefix="/api/v1")
 app.include_router(super_admin_tenants.router, prefix="/api/v1")
 app.include_router(super_admin_subscription_plans.router, prefix="/api/v1")
@@ -126,8 +134,16 @@ async def health_check() -> dict:
 @app.on_event("startup")
 async def _startup() -> None:
     logger.info("Application starting — env=%s", settings.APP_ENV)
+    if settings.TELEGRAM_BOT_ENABLED and settings.TELEGRAM_BOT_TOKEN:
+        import asyncio
+        from app.services.telegram_service import telegram_service
+        asyncio.create_task(telegram_service.start_polling())
+        logger.info("Telegram Bot integration launched in background.")
 
 
 @app.on_event("shutdown")
 async def _shutdown() -> None:
     logger.info("Application shutting down")
+    if settings.TELEGRAM_BOT_ENABLED:
+        from app.services.telegram_service import telegram_service
+        await telegram_service.stop_polling()

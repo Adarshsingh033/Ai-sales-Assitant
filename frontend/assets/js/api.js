@@ -533,6 +533,73 @@ const Api = (() => {
         method: 'POST',
         body: JSON.stringify(data),
       });
+    },
+
+    // ---------------------------------------------------------------------
+    // AI Usage Monitoring API
+    // ---------------------------------------------------------------------
+    async getAIUsageStats(days = 30) {
+      return request(`/tenant-admin/ai-usage/stats?days=${days}`, { method: 'GET' });
+    },
+
+    // ---------------------------------------------------------------------
+    // In-App & Browser Notifications API
+    // ---------------------------------------------------------------------
+    async getNotifications(limit = 25, unreadOnly = false) {
+      return request(`/tenant-admin/notifications?limit=${limit}&unread_only=${unreadOnly}`, { method: 'GET' });
+    },
+
+    async getUnreadNotificationCount() {
+      return request('/tenant-admin/notifications/unread-count', { method: 'GET' });
+    },
+
+    async markNotificationRead(id) {
+      return request(`/tenant-admin/notifications/${id}/read`, { method: 'POST' });
+    },
+
+    async markAllNotificationsRead() {
+      return request('/tenant-admin/notifications/read-all', { method: 'POST' });
+    },
+
+    // ---------------------------------------------------------------------
+    // Warehouse & Custom ERP Inventory API
+    // ---------------------------------------------------------------------
+    async getWarehouses() {
+      return request('/tenant-admin/inventory/warehouses', { method: 'GET' });
+    },
+
+    async createWarehouse(data) {
+      return request('/tenant-admin/inventory/warehouses', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async getInventory(lowStockOnly = false) {
+      return request(`/tenant-admin/inventory/stock?low_stock_only=${lowStockOnly}`, { method: 'GET' });
+    },
+
+    async updateInventoryStock(data) {
+      return request('/tenant-admin/inventory/stock', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    // ---------------------------------------------------------------------
+    // Automated Follow-Ups API
+    // ---------------------------------------------------------------------
+    async getFollowUps(status = '') {
+      const q = status ? `?status=${encodeURIComponent(status)}` : '';
+      return request(`/tenant-admin/follow-ups${q}`, { method: 'GET' });
+    },
+
+    async processDueFollowUps() {
+      return request('/tenant-admin/follow-ups/process-due', { method: 'POST' });
+    },
+
+    async cancelFollowUp(id) {
+      return request(`/tenant-admin/follow-ups/${id}`, { method: 'DELETE' });
     }
   };
 

@@ -46,6 +46,17 @@ const AIConfigModule = (() => {
     setValue('aiWhatsappVerifyToken', config.whatsapp_verify_token || '');
     setValue('aiWhatsappAccessToken', config.whatsapp_access_token || '');
     setValue('aiWhatsappPhoneId', config.whatsapp_phone_number_id || '');
+
+    const autoFollowEl = document.getElementById('aiAutoFollowup');
+    if (autoFollowEl) autoFollowEl.checked = config.auto_followup_enabled !== false;
+
+    setValue('aiFollowupDelayHours', config.followup_delay_hours || 24);
+
+    const roundRobinEl = document.getElementById('aiRoundRobin');
+    if (roundRobinEl) roundRobinEl.checked = config.round_robin_assignment !== false;
+
+    const notifSoundEl = document.getElementById('aiNotificationSound');
+    if (notifSoundEl) notifSoundEl.checked = config.notification_sound_enabled !== false;
   }
 
   function setupWebhookUrl() {
@@ -83,6 +94,10 @@ const AIConfigModule = (() => {
       whatsapp_verify_token: document.getElementById('aiWhatsappVerifyToken')?.value.trim() || null,
       whatsapp_access_token: document.getElementById('aiWhatsappAccessToken')?.value.trim() || null,
       whatsapp_phone_number_id: document.getElementById('aiWhatsappPhoneId')?.value.trim() || null,
+      auto_followup_enabled: document.getElementById('aiAutoFollowup') ? document.getElementById('aiAutoFollowup').checked : true,
+      followup_delay_hours: parseInt(document.getElementById('aiFollowupDelayHours')?.value, 10) || 24,
+      round_robin_assignment: document.getElementById('aiRoundRobin') ? document.getElementById('aiRoundRobin').checked : true,
+      notification_sound_enabled: document.getElementById('aiNotificationSound') ? document.getElementById('aiNotificationSound').checked : true,
     };
 
     if (groqKeyVal) {

@@ -150,6 +150,7 @@ async def _product_details(ctx: ToolContext, args: Dict[str, Any]) -> Dict[str, 
     if not p:
         return {"found": False, "message": "No matching product in the catalog."}
     stock = (await InventoryService.get_stock_for_products(ctx.db, ctx.tenant_id, [p.id])).get(p.id)
+    ctx.knowledge_texts.append(f"{p.description or ''} {p.features or ''}")  # text the reply may legitimately quote
     return {
         "found": True,
         "name": p.name,

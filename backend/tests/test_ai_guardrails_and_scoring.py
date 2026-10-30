@@ -194,3 +194,28 @@ async def test_lead_signals_must_be_grounded_in_what_the_customer_said():
     llm.analysis = {"intent": "purchase_request", "budget": 12000, "timeline": "immediate", "quantity": 50}
     a, _ = await analyze_turn(llm.for_task("fast"), history=[], user_message="We need 50 seats asap, budget is 12k", ai_reply="", catalog_summary="")
     assert (a.budget, a.timeline, a.quantity) == (12000, "immediate", 50)  # real signals survive
+
+
+# ----------------------------------------------------------------------------- invented links / contact details
+def link_check(reply, verified_text=""):
+    return guardrails.check_reply(reply, max_discount_percent=10, verified_amounts=set(), max_chars=1500, verified_text=verified_text)
+
+
+def test_invented_links_emails_and_phone_numbers_are_violations():
+    """Live finding: the assistant invented 'https://www.eww.com/checkout' from the company name."""
+    res = link_check("Sure! Pay here: [https://www.eww.com/checkout](https://www.eww.com/checkout)")
+    assert [i.code for i in res.violations] == ["unverified_link"] and "eww.com/checkout" in res.violations[0].detail
+    assert link_check("Just visit eww.com/pay to buy.").violations[0].code == "unverified_link"  # bare domains too
+    assert link_check("Email us at sales@eww.com").violations[0].code == "unverified_contact"
+    assert link_check("Call +1 (555) 019-3847 anytime").violations[0].code == "unverified_contact"
+    assert link_check("Reply here and a rep will send the payment details.").violations == []
+    assert link_check("Plan A costs 1 500 000 and uses Node.js or e.g. Python.").violations == []  # no false positives
+
+
+def test_links_from_company_information_or_the_customer_are_allowed_but_paths_cannot_be_invented():
+    info = "Checkout link: https://www.acme.com/checkout. Support: help@acme.com, +91 98765 43210."
+    assert link_check("Buy here: https://acme.com/checkout", info).violations == []
+    assert link_check("Write to HELP@acme.com or call 919876543210", info).violations == []
+    assert link_check("Our site is www.acme.com", info).violations == []  # host appears in the company text
+    assert link_check("Pay at https://acme.com/secret-pay", info).violations[0].code == "unverified_link"  # invented path
+    assert link_check("Is https://partner.io/x the right page?", "customer: please check https://partner.io/x").violations == []

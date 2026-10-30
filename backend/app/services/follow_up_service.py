@@ -441,7 +441,8 @@ class FollowUpService:
             trace.add_llm(res, "FOLLOWUP_GENERATION")
             trace.reply = res.content
             checked = guardrails.check_reply(
-                res.content, max_discount_percent=config.max_discount_percent, verified_amounts=set(), max_chars=600
+                res.content, max_discount_percent=config.max_discount_percent, verified_amounts=set(), max_chars=600,
+                verified_text=f"{config.custom_instructions or ''}\n{customer.phone or ''}\n{customer.email or ''}",
             )
             await persist_trace(db, trace)
             await db.commit()

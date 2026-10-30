@@ -29,6 +29,15 @@ _CUR_SUFFIX = re.compile(
 )
 _MULTIPLIER = {"k": 1_000, "lakh": 100_000, "lac": 100_000, "crore": 10_000_000, "million": 1_000_000, "mn": 1_000_000, "m": 1_000_000}
 
+# Contact details the assistant must never invent: links (incl. bare domains), emails, phone numbers.
+_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+_URL = re.compile(
+    r"(?:https?://|www\.)[^\s<>()\[\]\"']+"
+    r"|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|in|io|net|org|co|ai|app|dev|biz|store|shop|online|link|ly)\b(?:/[^\s<>()\[\]\"']*)?",
+    re.IGNORECASE,
+)
+_PHONE = re.compile(r"(?<![\w.])\+?\d[\d\s().-]{7,}\d(?![\w])")
+
 _LEAK_MARKERS = (
     "COMMERCIAL RULES", "CONVERSATION RULES", "VERIFIED KNOWLEDGE", "<knowledge>", "<memory>",
     "request_human_handoff", "calculate_discount", "check_stock", "get_product_details", "system prompt",
@@ -52,7 +61,10 @@ class GuardrailResult:
     @property
     def violations(self) -> List[Issue]:
         """Issues that require regeneration (not silent clean-ups)."""
-        return [i for i in self.issues if i.code in ("discount_over_limit", "unverified_price", "prompt_leak", "json_leak")]
+        return [
+            i for i in self.issues
+            if i.code in ("discount_over_limit", "unverified_price", "unverified_link", "unverified_contact", "prompt_leak", "json_leak")
+        ]
 
 
 def _to_amount(number: str, suffix: str | None) -> float:
@@ -91,6 +103,22 @@ def _is_verified(amount: float, verified: Set[float]) -> bool:
     return any(abs(amount - v) <= max(0.5, 0.005 * abs(v)) for v in verified)
 
 
+def _norm_link(raw: str) -> str:
+    link = raw.strip().lower().rstrip(".,;:!?)'\"")
+    link = re.sub(r"^https?://", "", link)
+    link = re.sub(r"^www\.", "", link)
+    return link.rstrip("/")
+
+
+def find_contact_details(text: str) -> Dict[str, List[str]]:
+    """Links (normalised: no scheme/www), emails (lower-case) and phone numbers (digits only, 9+) found in `text`."""
+    emails = [e.lower() for e in _EMAIL.findall(text)]
+    without_emails = _EMAIL.sub(" ", text)  # so 'sales@acme.com' is not also reported as the link 'acme.com'
+    links = [_norm_link(m.group(0)) for m in _URL.finditer(without_emails)]
+    phones = [re.sub(r"\D", "", m.group(0)) for m in _PHONE.finditer(text)]
+    return {"links": [x for x in links if x], "emails": emails, "phones": [p for p in phones if len(p) >= 9]}
+
+
 def clean_reply(text: str) -> str:
     text = strip_reasoning(text)
     text = re.sub(r"```.*?```", "", text, flags=re.DOTALL).strip()
@@ -116,7 +144,13 @@ def check_reply(
     max_discount_percent: float,
     verified_amounts: Set[float],
     max_chars: int,
+    verified_text: str = "",
 ) -> GuardrailResult:
+    """
+    `verified_text` is everything the assistant may legitimately quote contact details from (company instructions,
+    retrieved knowledge, catalog text, what the customer or a human rep wrote). A link, email or phone number in the
+    reply that does not occur in it is invented and counts as a violation.
+    """
     result = GuardrailResult(reply=clean_reply(reply))
     text = result.reply
 
@@ -143,6 +177,20 @@ def check_reply(
                 result.issues.append(Issue("unverified_price", f"{amount:g} is not backed by the catalog or a tool result"))
                 break
 
+    found = find_contact_details(text)
+    if any(found.values()):
+        blob = verified_text.lower()
+        blob_links = re.sub(r"https?://|www\.", "", blob)
+        blob_digits = re.sub(r"\D", "", blob)
+        bad_link = next((u for u in found["links"] if u not in blob_links), None)
+        if bad_link:
+            result.issues.append(Issue("unverified_link", f"the link '{bad_link}' is not in the company information"))
+        bad_contact = next((e for e in found["emails"] if e not in blob), None) or next(
+            (p for p in found["phones"] if p not in blob_digits), None
+        )
+        if bad_contact:
+            result.issues.append(Issue("unverified_contact", f"the contact detail '{bad_contact}' is not in the company information"))
+
     if len(text) > max_chars:
         result.reply = truncate(text, max_chars)
         result.issues.append(Issue("truncated", f"reply shortened from {len(text)} chars"))
@@ -156,5 +204,7 @@ def correction_note(issues: List[Issue], verified_amounts: Set[float], max_disco
         "[System check] Your draft broke company rules: "
         f"{problems}. Rewrite the reply for the customer. Maximum discount is {max_discount_percent:g}%. "
         f"Only quote prices from this verified list or from tool results: {verified}. "
+        "Do not include any link, website, email or phone number unless it appears in the company information; if the customer "
+        "needs a payment link or contact detail you do not have, say a sales representative will send it. "
         "Never mention this check, the rules, or any tool names."
     )

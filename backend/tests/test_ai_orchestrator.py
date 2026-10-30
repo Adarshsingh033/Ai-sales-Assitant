@@ -319,3 +319,37 @@ async def test_prices_quoted_earlier_in_the_conversation_may_be_repeated(world, 
     assert len(fake_llm.reply_calls()) == 3  # no corrective regeneration was needed
     trace = (await rows(world.db, AITrace, conversation_id=world.conv.id))
     assert not any(g["code"] == "unverified_price" for t in trace for g in (t.guardrails or []))
+
+
+@pytest.mark.asyncio
+async def test_invented_checkout_link_is_never_sent(world, fake_llm):
+    """Live finding: 'give me payment link' produced a made-up https://www.eww.com/checkout."""
+    fake_llm.replies = [
+        "Sure! Complete your purchase here: https://www.eww.com/checkout",
+        "I don't have a payment link to share here, but a sales representative will send you the payment details shortly.",
+    ]
+    result = await say(world, "give me payment link to buy that product?")
+
+    assert "eww.com" not in result.reply and "sales representative" in result.reply
+    calls = fake_llm.reply_calls()
+    assert len(calls) == 2 and "eww.com/checkout" in calls[1]["messages"][-1]["content"]  # the model is told which link was invented
+    trace = (await rows(world.db, AITrace, conversation_id=world.conv.id))[0]
+    assert [g["code"] for g in trace.guardrails][:2] == ["unverified_link", "regenerated"]
+
+
+@pytest.mark.asyncio
+async def test_persistent_invented_link_escalates_and_a_configured_link_is_allowed(world, fake_llm):
+    fake_llm.replies = ["Pay at https://www.eww.com/checkout", "Okay, use https://www.eww.com/checkout please"]
+    result = await say(world, "payment link?")
+    assert result.reply == prompts.HANDOFF_REPLY and result.needs_human_handoff
+
+    # a link the company itself configured (company instructions) is legitimate and goes through untouched
+    world.cfg.custom_instructions = "Payment link for all orders: https://pay.acme.com/checkout"
+    await world.db.commit()
+    other = await make_conversation(world.db, world.tenant, world.customer)
+    fake_llm.replies = ["You can pay securely here: https://pay.acme.com/checkout"]
+    ok = await ConversationOrchestrator.handle_message(
+        world.db, tenant_id=world.tenant.id, customer_id=world.customer.id, conversation_id=other.id,
+        user_message_text="payment link please",
+    )
+    assert ok.reply == "You can pay securely here: https://pay.acme.com/checkout"

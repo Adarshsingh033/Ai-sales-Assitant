@@ -43,7 +43,7 @@ from app.services.ai.tools import TOOL_SPECS, ToolContext, run_tool
 from app.services.ai.tracing import TurnTrace, persist_trace
 from app.services.inventory_service import InventoryService
 from app.services.jobs import JobQueue, lane_key
-from app.services.rag_service import RAGService
+from app.services.rag_service import RAGService, product_text
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +88,8 @@ class TurnResult:
 class PromptContext:
     messages: List[Dict[str, Any]]
     verified_amounts: set
+    # Text the assistant may quote links / emails / phone numbers from (never earlier AI messages: those were unchecked).
+    verified_text: str = ""
     knowledge_matches: List[Dict[str, Any]] = field(default_factory=list)
     product_names: List[str] = field(default_factory=list)
 
@@ -321,12 +323,16 @@ class ConversationOrchestrator:
                 await on_token(prompts.FALLBACK_REPLY)
             return prompts.FALLBACK_REPLY, tools_ctx
 
-        checked = guardrails.check_reply(
-            draft,
-            max_discount_percent=config.max_discount_percent,
-            verified_amounts=tools_ctx.verified_amounts | guardrails.amounts_in(tools_ctx.knowledge_texts),
-            max_chars=settings.AI_MAX_REPLY_CHARS,
-        )
+        def verify(candidate: str) -> guardrails.GuardrailResult:
+            return guardrails.check_reply(
+                candidate,
+                max_discount_percent=config.max_discount_percent,
+                verified_amounts=tools_ctx.verified_amounts | guardrails.amounts_in(tools_ctx.knowledge_texts),
+                max_chars=settings.AI_MAX_REPLY_CHARS,
+                verified_text=ctx.verified_text + "\n" + "\n".join(tools_ctx.knowledge_texts),
+            )
+
+        checked = verify(draft)
         trace.guardrails.extend(i.as_dict() for i in checked.issues)
 
         if checked.violations or not checked.reply:
@@ -337,19 +343,14 @@ class ConversationOrchestrator:
             ]
             try:
                 second = await cls._generate(llm, retry_messages, tools_ctx, trace, None, temperature=0.1)
-                checked2 = guardrails.check_reply(
-                    second,
-                    max_discount_percent=config.max_discount_percent,
-                    verified_amounts=tools_ctx.verified_amounts | guardrails.amounts_in(tools_ctx.knowledge_texts),
-                    max_chars=settings.AI_MAX_REPLY_CHARS,
-                )
+                checked2 = verify(second)
                 trace.guardrails.append({"code": "regenerated", "detail": "second draft after violation"})
                 trace.guardrails.extend(i.as_dict() for i in checked2.issues)
             except LLMError:
                 checked2 = guardrails.GuardrailResult(reply="", issues=[guardrails.Issue("prompt_leak", "retry failed")])
             if checked2.violations or not checked2.reply:
                 trace.guardrails.append({"code": "fallback", "detail": "violation persisted; escalated to human"})
-                tools_ctx.handoff_reason = tools_ctx.handoff_reason or "Guardrail: reply could not be verified (price/discount)"
+                tools_ctx.handoff_reason = tools_ctx.handoff_reason or "Guardrail: reply could not be verified (price, discount, link or contact detail)"
                 final = prompts.HANDOFF_REPLY
             else:
                 final = checked2.reply
@@ -494,9 +495,16 @@ class ConversationOrchestrator:
         # must not trigger a regeneration.
         verified |= guardrails.amounts_in([content for _, content in history])
         verified |= guardrails.amounts_in([m["content"] for m in knowledge.matches])
+        verified_text = "\n".join(
+            [config.custom_instructions or "", config.greeting_message or "", customer.phone or "", customer.email or ""]
+            + [m["content"] for m in knowledge.matches]
+            + [product_text(p) for p in products]
+            + [content for who, content in history if who != "AI"]
+        )
         return PromptContext(
             messages=messages,
             verified_amounts=verified,
+            verified_text=verified_text,
             knowledge_matches=knowledge.matches,
             product_names=[p["name"] for p in product_dicts],
         )
@@ -510,7 +518,11 @@ class ConversationOrchestrator:
             products_text=prompts.format_products([], 100), retrieval_confidence=None,
         )
         chat = [{"role": "user" if w == "CUSTOMER" else "assistant", "content": c} for w, c in history]
-        return PromptContext(messages=[{"role": "system", "content": system}] + chat, verified_amounts=set())
+        return PromptContext(
+            messages=[{"role": "system", "content": system}] + chat,
+            verified_amounts=set(),
+            verified_text="\n".join([config.custom_instructions or "", config.greeting_message or ""]),
+        )
 
     @classmethod
     async def _retrieval_query(cls, fast_llm: Any, history: List[Tuple[str, str]], text: str, trace: TurnTrace) -> str:

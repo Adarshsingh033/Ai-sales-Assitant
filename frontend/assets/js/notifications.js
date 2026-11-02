@@ -191,16 +191,13 @@ const NotificationsModule = (() => {
     closeDropdown();
 
     if (linkUrl) {
-      if (linkUrl.startsWith('#/leads')) {
-        const nav = document.querySelector('[data-section="section-leads"]');
-        if (nav) nav.click();
-      } else if (linkUrl.startsWith('#/conversations')) {
-        const nav = document.querySelector('[data-section="section-conversations"]');
-        if (nav) nav.click();
-      } else if (linkUrl.startsWith('#/products')) {
-        const nav = document.querySelector('[data-section="section-products"]');
-        if (nav) nav.click();
-      }
+      // Links look like "#tasks", "#pipeline?lead=<id>" or the older "#/leads?id=<id>"
+      const legacy = { leads: 'pipeline', conversations: 'inbox', products: 'products' };
+      const [rawKey, query] = linkUrl.replace(/^#\/?/, '').split('?');
+      const key = legacy[rawKey] || rawKey;
+      const params = Object.fromEntries(new URLSearchParams(query || ''));
+      if (params.id && !params.lead && key === 'pipeline') { params.lead = params.id; delete params.id; }
+      if (window.Crm && Crm.sectionId(key)) Crm.goto(key, Object.keys(params).length ? params : undefined);
     }
   }
 

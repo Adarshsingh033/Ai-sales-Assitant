@@ -20,6 +20,9 @@ from app.models.ai_job import AIJob
 from app.models.ai_trace import AITrace
 from app.models.customer_memory import CustomerMemory
 from app.models.channel import ChannelBinding, InboundEvent
+from app.models.crm import Task, Activity
+from app.models.knowledge_gap import KnowledgeGap
+from app.models.role import Role
 
 __all__ = [
     "Tenant",

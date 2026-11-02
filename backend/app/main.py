@@ -27,6 +27,11 @@ from app.routers.tenant_admin import ai_usage as tenant_admin_ai_usage
 from app.routers.tenant_admin import notifications as tenant_admin_notifications
 from app.routers.tenant_admin import inventory as tenant_admin_inventory
 from app.routers.tenant_admin import follow_ups as tenant_admin_follow_ups
+from app.routers.tenant_admin import contacts as tenant_admin_contacts
+from app.routers.tenant_admin import tasks as tenant_admin_tasks
+from app.routers.tenant_admin import team as tenant_admin_team
+from app.routers.tenant_admin import roles as tenant_admin_roles
+from app.routers.tenant_admin import knowledge_ask as tenant_admin_knowledge_ask
 from app.routers.webhooks import whatsapp as webhooks_whatsapp
 from fastapi.staticfiles import StaticFiles
 import os
@@ -114,6 +119,11 @@ app.include_router(tenant_admin_ai_usage.router, prefix="/api/v1")
 app.include_router(tenant_admin_notifications.router, prefix="/api/v1")
 app.include_router(tenant_admin_inventory.router, prefix="/api/v1")
 app.include_router(tenant_admin_follow_ups.router, prefix="/api/v1")
+app.include_router(tenant_admin_contacts.router, prefix="/api/v1")
+app.include_router(tenant_admin_tasks.router, prefix="/api/v1")
+app.include_router(tenant_admin_team.router, prefix="/api/v1")
+app.include_router(tenant_admin_roles.router, prefix="/api/v1")
+app.include_router(tenant_admin_knowledge_ask.router, prefix="/api/v1")
 app.include_router(webhooks_whatsapp.router, prefix="/api/v1")
 app.include_router(super_admin_tenants.router, prefix="/api/v1")
 app.include_router(super_admin_subscription_plans.router, prefix="/api/v1")

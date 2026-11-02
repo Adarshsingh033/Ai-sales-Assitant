@@ -139,6 +139,36 @@ def require_tenant_access(
     return tenant
 
 
+class CRMContext:
+    """A Tenant Admin or Sales User working inside their own (active) tenant."""
+
+    def __init__(self, user: User, tenant: Tenant) -> None:
+        self.user = user
+        self.tenant = tenant
+
+    @property
+    def tenant_id(self) -> UUID:
+        return self.tenant.id
+
+    @property
+    def is_admin(self) -> bool:
+        return self.user.role == UserRole.TENANT_ADMIN
+
+    @property
+    def is_rep(self) -> bool:
+        return self.user.role == UserRole.SALES_USER
+
+
+def require_crm_context(
+    current_user: User = Depends(get_current_user),
+    tenant: Tenant = Depends(get_current_tenant),
+) -> CRMContext:
+    """Tenant Admins see the whole tenant; Sales Users are limited to what is assigned to them."""
+    if current_user.role not in (UserRole.TENANT_ADMIN, UserRole.SALES_USER):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sales workspace access required.")
+    return CRMContext(current_user, tenant)
+
+
 class TenantAdminContext:
     """Authenticated Tenant Admin plus their (active) tenant, resolved server-side."""
 

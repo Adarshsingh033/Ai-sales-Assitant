@@ -345,3 +345,57 @@ the `knowledge_vectors` table itself and back-fills it from the stored embedding
 * Free-tier Groq limits (tokens/minute) apply: the gateway waits on `429`s, and the prompt budget is `AI_PROMPT_TOKEN_BUDGET`.
 * Models your key cannot access are probed once, then skipped for 15 minutes.
 * Tests never reach a real LLM: `tests/helpers.py` provides `NullLLM` (default) and a scriptable `FakeLLM` (`fake_llm` fixture).
+
+---
+
+## CRM Workspace
+
+Tenant Admins and Sales Users share one workspace (`/pages/tenantadmin/dashboard.html`): **Home, Inbox, Contacts, Pipeline, Tasks**.
+Tenant Admins also get a **Setup** group (Products, Inventory, Knowledge Base, AI Assistant, Team).
+
+* **Who sees what** — a Sales User only sees deals and chats assigned to them, their own tasks, and the contacts they own or whose
+  deals/chats are theirs. Only Tenant Admins can reassign a deal (it moves the chat with it, logs it on the contact timeline and
+  notifies the new owner) or delete one.
+* **Automatic owners** — every new deal gets an owner by round-robin among active, available **sales reps** — never an admin
+  (a team with no available rep leaves deals unowned until one is) (switch it off with
+  *Round-robin assignment* in the AI Assistant settings): AI-captured leads, and deals an admin adds without choosing an owner
+  ("Assign automatically"). A scheduler sweep (`LeadAssignmentService.assign_unowned`, each `FOLLOWUP_SCAN_SECONDS`) also gives an
+  owner to any open deal still without one — e.g. created before a rep existed or while nobody was available — and sends each rep
+  one summary notification. Deals an admin deliberately unassigned (they carry an `ASSIGNED` timeline entry) are left alone.
+* **Team roles** — an admin creates the roles the *Add team member* dropdown offers (`GET/POST /tenant-admin/roles`,
+  `PUT/DELETE /tenant-admin/roles/{id}`; Team → *Manage roles*). Every team starts with the built-in **Sales Rep** and **Admin**
+  roles. A role has an **access level** (Sales = sees only their own deals/chats/tasks; Admin = full workspace; fixed once
+  created) and, for Sales roles, a *gets new deals automatically* switch. The platform permission check is unchanged: a person's
+  `users.role` (`SALES_USER` / `TENANT_ADMIN`) follows their role's access level, `users.role_id` holds the title. Only Sales
+  roles that receive deals are in the round-robin. `POST/PUT /users` take `role_id`; the Team list (`GET /users`) now includes
+  admins. Moving someone to a role with different access signs them out; nobody can deactivate, delete, reset the password of
+  or change the access of their own account. A role with people in it, and the built-in roles, cannot be deleted.
+* **Contacts** — `GET/POST /tenant-admin/contacts`, `GET/PUT /tenant-admin/contacts/{id}` (profile, deals, chats, tasks, timeline),
+  notes at `/contacts/{id}/notes`. Duplicates (same email, or same phone digits) are refused.
+* **Pipeline** — stages are `NEW, CONTACTED, QUALIFIED, PROPOSAL, WON, LOST`; priorities `LOW, MEDIUM, HIGH, HOT`.
+  `GET /tenant-admin/leads/board` powers the drag-and-drop board; deals can also be created by hand (`POST /tenant-admin/leads`).
+  Older builds wrote `PROPOSAL_SENT / CLOSED_WON / CLOSED_LOST / WARM / COLD`; migration `c4d8e2f6a1b3` rewrites them and the API
+  still accepts them on input.
+* **Tasks** — `/tenant-admin/tasks` (+ `/summary`). The client sends `day_end` (end of its local day) so Today / Upcoming match the
+  user's clock. The worker's scheduler sends one in-app reminder when a task's due time arrives.
+* **Plans** — subscription plans no longer limit anything (one free tier for now); adding users is never blocked by a plan.
+* **Demo logins** (after `python -m app.scripts.seed_demo_tenant`): `tenantadmin@example.com` and `salesrep@example.com`, both `Password123!`.
+
+---
+
+## Knowledge Base: "Ask" chat
+
+The Knowledge screen (all roles; reps get Ask + a read-only document list, admins also get Documents and Unanswered) answers
+questions **only** from the company's uploaded documents and live product catalog (`POST /tenant-admin/knowledge/ask`).
+
+* **Pipeline** (`app/services/ai/knowledge_qa.py`): follow-up → standalone query → retrieve documents + products (live price/stock) →
+  *no relevant passage ⇒ "not found" without calling the model* → model answers from numbered passages with `[n]` citations →
+  deterministic checks (valid citations, every number / link / email / phone appears in the sources, each sentence supported by the
+  source text) → one corrective retry → otherwise "couldn't confirm" with the closest passages.
+* **Outcomes**: `answered`, `not_found`, `not_stated` (related text exists but doesn't say it), `unverified`, `empty`. Everything except
+  `answered`/`empty` is logged in `knowledge_gaps` (deduplicated by wording) for admins: `GET /tenant-admin/knowledge/gaps`.
+* **Safety**: instruction-like sentences planted in a document ("note to the assistant: ignore your rules…") are removed before the
+  model sees the passage; passages far below the best match are dropped; per-person rate limit (20/min); usage counts toward the
+  tenant's monthly AI token budget (`action_type = KNOWLEDGE_QA`).
+* This cannot be mathematically guaranteed: the checks catch invented numbers/contacts and unsupported sentences, and every answer
+  shows its sources so a person can verify. Outdated duplicate documents can still conflict; the model is told to flag disagreements.

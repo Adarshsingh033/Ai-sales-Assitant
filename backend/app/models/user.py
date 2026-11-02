@@ -75,6 +75,11 @@ class User(Base):
         Enum(UserRole, name="user_role_enum", create_constraint=True),
         nullable=False,
     )
+    # The admin-defined job title ("Sales Rep", "Support", ...); `role` above is the access level it maps to.
+    # NULL = no explicit title (the built-in one for `role` applies).
+    role_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("roles.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     # ------------------------------------------------------------------
     # Status

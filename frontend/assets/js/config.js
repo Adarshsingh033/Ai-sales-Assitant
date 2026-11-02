@@ -38,11 +38,12 @@ const CONFIG = Object.freeze({
 
   /**
    * Role → dashboard path mapping.
-   * Add new roles here as portals are built.
+   * Admins and sales reps share one workspace page; the menu and data adapt to the role
+   * (reps only see what is assigned to them, and have no Setup section).
    */
   ROLE_DASHBOARDS: {
     SUPER_ADMIN:  '/pages/superadmin/dashboard.html',
     TENANT_ADMIN: '/pages/tenantadmin/dashboard.html',
-    SALES_USER:   '/pages/salesuser/dashboard.html',
+    SALES_USER:   '/pages/tenantadmin/dashboard.html',
   },
 });

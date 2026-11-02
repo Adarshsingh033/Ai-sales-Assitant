@@ -16,6 +16,7 @@ const SalesUsersModule = (() => {
   let currentSortOrder = 'desc';
   let allUsers = [];
   let pendingAction = null;
+  let roles = []; // roles an admin has created: the Role dropdown lists exactly these
 
   // DOM Elements
   const els = {
@@ -41,6 +42,8 @@ const SalesUsersModule = (() => {
     btnSave: document.getElementById('btnSalesUserSave'),
     userIdInput: document.getElementById('formSalesUserId'),
     passwordRow: document.getElementById('salesUserPasswordRow'),
+    roleSelect: document.getElementById('salesUserRole'),
+    roleHint: document.getElementById('salesUserRoleHint'),
 
     // Details Modal
     detailsModal: document.getElementById('salesUserDetailsModal'),
@@ -109,6 +112,14 @@ const SalesUsersModule = (() => {
 
     els.form.addEventListener('submit', handleFormSubmit);
     els.resetForm.addEventListener('submit', handleResetPasswordSubmit);
+    els.roleSelect.addEventListener('change', showRoleHint);
+
+    // roles were added, renamed or removed in the "Manage roles" dialog
+    Crm.on('roles-changed', async () => {
+      await loadRoles();
+      if (els.modal.classList.contains('active')) fillRoleSelect(els.roleSelect.value);
+      if (els.tableContainer.offsetParent) loadUsers();
+    });
 
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.cell-actions')) {
@@ -155,18 +166,18 @@ const SalesUsersModule = (() => {
   function renderLoading() {
     els.tableContainer.style.display = 'block';
     els.tableBody.innerHTML = `
-      <tr><td colspan="7" style="text-align: center; padding: 48px;">
+      <tr><td colspan="8" style="text-align: center; padding: 48px;">
         <div style="color:var(--color-gray-500);">Loading users...</div>
       </td></tr>
     `;
   }
 
-  function renderEmptyState(message = 'No sales users found', isError = false) {
+  function renderEmptyState(message = 'No team members found', isError = false) {
     els.tableContainer.style.display = 'block';
 
     if (isError) {
       els.tableBody.innerHTML = `
-        <tr><td colspan="7" style="text-align: center; padding: 48px;">
+        <tr><td colspan="8" style="text-align: center; padding: 48px;">
           <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <h3 style="font-size: 15px; font-weight: 600; color: var(--color-gray-700); margin-bottom: 8px;">${escapeHtml(message)}</h3>
             <button class="btn-secondary mt-3" onclick="SalesUsersModule.loadUsers()">Retry</button>
@@ -177,11 +188,11 @@ const SalesUsersModule = (() => {
     }
 
     els.tableBody.innerHTML = `
-      <tr><td colspan="7" style="text-align: center; padding: 64px 24px;">
+      <tr><td colspan="8" style="text-align: center; padding: 64px 24px;">
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
           <h3 style="font-size: 15px; font-weight: 600; color: var(--color-gray-700); margin-bottom: 8px;">${escapeHtml(message)}</h3>
-          <p style="font-size: 13px; color: var(--color-gray-500); margin-bottom: 16px;">There are no sales users matching this criteria.</p>
-          <button class="btn-primary" onclick="SalesUsersModule.openCreateModal()">Add Sales User</button>
+          <p style="font-size: 13px; color: var(--color-gray-500); margin-bottom: 16px;">There are no team members matching this criteria.</p>
+          <button class="btn-primary" onclick="SalesUsersModule.openCreateModal()">Add team member</button>
         </div>
       </td></tr>
     `;
@@ -190,7 +201,7 @@ const SalesUsersModule = (() => {
   function renderTable(users) {
     if (users.length === 0) {
       const filtered = currentSearch || currentStatus || currentAvailability;
-      renderEmptyState(filtered ? 'No users match your filters' : 'No sales users yet');
+      renderEmptyState(filtered ? 'No team members match your filters' : 'No team members yet');
       return;
     }
 
@@ -200,15 +211,27 @@ const SalesUsersModule = (() => {
     for (const u of users) {
       const fullName = `${u.first_name} ${u.last_name}`;
       const lastLogin = u.last_login_at ? new Date(u.last_login_at).toLocaleString() : 'Never';
+      const isAdmin = u.role === 'TENANT_ADMIN';
+      // Admins and roles without automatic deals are not part of the lead rotation, so availability does not apply
+      const availability = (isAdmin || !u.receives_deals)
+        ? `<span class="team-muted" title="Not given deals automatically">—</span>`
+        : (u.is_available ? 'Available' : 'Unavailable');
+      const toggleAttrs = u.is_me
+        ? 'class="status-toggle-wrapper locked" title="You can’t deactivate your own account"'
+        : `class="status-toggle-wrapper" onclick="SalesUsersModule.toggleUserStatus('${u.id}')" title="Click to toggle Active/Inactive status"`;
+      const ownAccountMenu = u.is_me ? '' : `
+              <button class="action-dropdown-item" onclick="SalesUsersModule.handleAction(event, 'reset-password', '${u.id}')">Reset Password</button>
+              <button class="action-dropdown-item danger" onclick="SalesUsersModule.handleAction(event, 'delete', '${u.id}')">Delete</button>`;
 
       html += `
         <tr>
-          <td><strong>${escapeHtml(fullName)}</strong></td>
+          <td><strong>${escapeHtml(fullName)}</strong>${u.is_me ? '<span class="team-you">(you)</span>' : ''}</td>
           <td>${escapeHtml(u.email)}</td>
+          <td>${escapeHtml(u.role_name || '—')}${isAdmin ? '<span class="team-role-pill" title="Full access to the workspace">Admin access</span>' : ''}</td>
           <td>${escapeHtml(u.phone_number || '—')}</td>
-          <td>${u.is_available ? 'Available' : 'Unavailable'}</td>
+          <td>${availability}</td>
           <td>
-            <div class="status-toggle-wrapper" onclick="SalesUsersModule.toggleUserStatus('${u.id}')" title="Click to toggle Active/Inactive status">
+            <div ${toggleAttrs}>
               <span class="status-toggle ${u.is_active ? 'active' : ''}">
                 <span class="status-toggle-handle"></span>
               </span>
@@ -224,9 +247,7 @@ const SalesUsersModule = (() => {
             </button>
             <div class="action-dropdown">
               <button class="action-dropdown-item" onclick="SalesUsersModule.handleAction(event, 'view', '${u.id}')">View</button>
-              <button class="action-dropdown-item" onclick="SalesUsersModule.handleAction(event, 'edit', '${u.id}')">Edit</button>
-              <button class="action-dropdown-item" onclick="SalesUsersModule.handleAction(event, 'reset-password', '${u.id}')">Reset Password</button>
-              <button class="action-dropdown-item danger" onclick="SalesUsersModule.handleAction(event, 'delete', '${u.id}')">Delete</button>
+              <button class="action-dropdown-item" onclick="SalesUsersModule.handleAction(event, 'edit', '${u.id}')">Edit</button>${ownAccountMenu}
             </div>
           </td>
         </tr>
@@ -258,7 +279,7 @@ const SalesUsersModule = (() => {
   // -------------------------------------------------------------------------
   function toggleUserStatus(id) {
     const user = findUser(id);
-    if (!user) return;
+    if (!user || user.is_me) return;
 
     if (user.is_active) {
       openConfirm({
@@ -316,24 +337,63 @@ const SalesUsersModule = (() => {
     });
   }
 
-  function openCreateModal() {
+  // ---- roles: the dropdown lists exactly the roles the admin created (plus the two built-in ones) ----
+  async function loadRoles() {
+    try {
+      roles = await Api.getRoles();
+    } catch (err) {
+      console.error(err);
+      roles = [];
+      showToast('Could not load the roles. Please try again.', 'error');
+    }
+    return roles;
+  }
+
+  function builtInRoleId(access) {
+    const role = roles.find((r) => r.is_system && r.access === access);
+    return role ? role.id : '';
+  }
+
+  function fillRoleSelect(selectedId) {
+    els.roleSelect.innerHTML = roles
+      .map((r) => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}${r.access === 'ADMIN' ? ' (admin access)' : ''}</option>`)
+      .join('');
+    if (selectedId && roles.some((r) => r.id === selectedId)) els.roleSelect.value = selectedId;
+    showRoleHint();
+  }
+
+  function showRoleHint() {
+    const role = roles.find((r) => r.id === els.roleSelect.value);
+    if (!role) { els.roleHint.textContent = ''; return; }
+    els.roleHint.textContent = role.access === 'ADMIN'
+      ? 'Full access to everything in the workspace. Never gets automatic deals.'
+      : `Sees only their own deals, chats and tasks. ${role.receives_deals ? 'Gets new deals automatically.' : 'Does not get automatic deals.'}`;
+  }
+
+  async function openCreateModal() {
+    await loadRoles();
     els.form.reset();
     els.userIdInput.value = '';
-    els.modalTitle.textContent = 'Add Sales User';
+    els.modalTitle.textContent = 'Add team member';
     els.btnSave.textContent = 'Save User';
     document.getElementById('salesUserEmail').disabled = false;
+    fillRoleSelect(builtInRoleId('SALES'));
+    els.roleSelect.disabled = false;
+    els.roleSelect.title = '';
+    els.form.dataset.originalRole = '';
     setPasswordFieldsEnabled(true);
     resetPasswordInputTypes();
     els.modal.classList.add('active');
   }
 
-  function openEditModal(id) {
+  async function openEditModal(id) {
     const user = findUser(id);
     if (!user) return;
 
+    await loadRoles();
     els.form.reset();
     els.userIdInput.value = user.id;
-    els.modalTitle.textContent = 'Edit Sales User';
+    els.modalTitle.textContent = 'Edit team member';
     els.btnSave.textContent = 'Save User';
     setPasswordFieldsEnabled(false);
 
@@ -344,6 +404,14 @@ const SalesUsersModule = (() => {
     emailInput.disabled = true;
     document.getElementById('salesUserPhone').value = user.phone_number || '';
     document.getElementById('salesUserAvailable').value = String(user.is_available);
+
+    const current = user.role_id || builtInRoleId(user.role === 'TENANT_ADMIN' ? 'ADMIN' : 'SALES');
+    fillRoleSelect(current);
+    els.form.dataset.originalRole = current;
+    els.form.dataset.originalLevel = user.role;
+    // nobody can change their own access (an admin could lock themselves out)
+    els.roleSelect.disabled = !!user.is_me;
+    els.roleSelect.title = user.is_me ? 'You can’t change your own role' : '';
 
     els.modal.classList.add('active');
   }
@@ -369,9 +437,30 @@ const SalesUsersModule = (() => {
       return;
     }
 
+    const role_id = els.roleSelect.value;
+    if (!els.roleSelect.disabled && !role_id) {
+      showToast('Choose a role. You can create roles with "Manage roles".', 'error');
+      return;
+    }
+
     let data;
     if (isEdit) {
       data = { first_name, last_name, phone_number: phone_number || null, is_available };
+      if (!els.roleSelect.disabled && role_id !== els.form.dataset.originalRole) {
+        data.role_id = role_id;
+        const picked = roles.find((r) => r.id === role_id);
+        const level = picked && picked.access === 'ADMIN' ? 'TENANT_ADMIN' : 'SALES_USER';
+        if (level !== els.form.dataset.originalLevel) {
+          const who = `${first_name} ${last_name}`.trim();
+          const sure = await Crm.confirm(
+            level === 'TENANT_ADMIN'
+              ? `${who} will get full access to your workspace: all deals, the team and settings. They will be signed out once and need to log in again.`
+              : `${who} will only see their own deals, chats and tasks, and lose admin access. They will be signed out once and need to log in again.`,
+            { title: 'Change access?', confirmText: 'Yes, change access' },
+          );
+          if (!sure) return;
+        }
+      }
     } else {
       const password = document.getElementById('salesUserPassword').value;
       const confirmPassword = document.getElementById('salesUserConfirmPassword').value;
@@ -383,7 +472,7 @@ const SalesUsersModule = (() => {
         showToast('Set password and Confirm password do not match.', 'error');
         return;
       }
-      data = { first_name, last_name, email, phone_number: phone_number || null, is_available, password };
+      data = { first_name, last_name, email, phone_number: phone_number || null, is_available, password, role_id };
     }
 
     els.btnSave.disabled = true;
@@ -392,16 +481,16 @@ const SalesUsersModule = (() => {
     try {
       if (isEdit) {
         await Api.updateSalesUser(id, data);
-        showToast('Sales user updated successfully.', 'success');
+        showToast('Team member updated.', 'success');
       } else {
         await Api.createSalesUser(data);
-        showToast('Sales user created successfully.', 'success');
+        showToast('Team member added.', 'success');
       }
       closeFormModal();
       loadUsers();
     } catch (err) {
       console.error(err);
-      showToast(formatError(err, 'Failed to save sales user.'), 'error');
+      showToast(formatError(err, 'Failed to save team member.'), 'error');
     } finally {
       els.btnSave.disabled = false;
       els.btnSave.textContent = 'Save User';
@@ -427,6 +516,7 @@ const SalesUsersModule = (() => {
             ${detailRow('Name', `${user.first_name} ${user.last_name}`)}
             ${detailRow('Email', user.email)}
             ${detailRow('Phone', user.phone_number || '—')}
+            ${detailRow('Role', user.role_name || '—')}
           </div>
         </div>
         <div class="detail-section">

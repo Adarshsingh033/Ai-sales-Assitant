@@ -294,9 +294,136 @@ const Api = (() => {
       if (statusVal) query.append('status', statusVal);
       if (params.priority) query.append('priority', params.priority);
       if (params.min_score !== undefined && params.min_score !== '') query.append('min_score', params.min_score);
+      if (params.assigned_user_id) query.append('assigned_user_id', params.assigned_user_id);
+      if (params.unassigned) query.append('unassigned', 'true');
+      if (params.customer_id) query.append('customer_id', params.customer_id);
 
       const qs = query.toString() ? `?${query.toString()}` : '';
       return request(`/tenant-admin/leads${qs}`, { method: 'GET' });
+    },
+
+    /** Deals grouped by stage for the Kanban board: { columns: [{stage,label,count,total_value,cards}], unassigned } */
+    async getLeadBoard(params = {}) {
+      const query = new URLSearchParams();
+      if (params.search) query.append('search', params.search);
+      if (params.assigned_user_id) query.append('assigned_user_id', params.assigned_user_id);
+      if (params.unassigned) query.append('unassigned', 'true');
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/tenant-admin/leads/board${qs}`, { method: 'GET' });
+    },
+
+    /** Create a deal by hand: { customer_id, title, budget?, status?, priority?, notes?, assigned_user_id? } */
+    async createLead(data) {
+      return request('/tenant-admin/leads', { method: 'POST', body: JSON.stringify(data) });
+    },
+
+    // -----------------------------------------------------------------------
+    // Contacts (one list of customers + detail with deals, chats, tasks, timeline)
+    // -----------------------------------------------------------------------
+    async getContacts(params = {}) {
+      const query = new URLSearchParams();
+      if (params.page) query.append('page', params.page);
+      if (params.page_size) query.append('page_size', params.page_size);
+      if (params.search) query.append('search', params.search);
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/tenant-admin/contacts${qs}`, { method: 'GET' });
+    },
+
+    async getContact(id) {
+      return request(`/tenant-admin/contacts/${id}`, { method: 'GET' });
+    },
+
+    /** { name, phone?, email?, company_name?, owner_user_id? } */
+    async createContact(data) {
+      return request('/tenant-admin/contacts', { method: 'POST', body: JSON.stringify(data) });
+    },
+
+    async updateContact(id, data) {
+      return request(`/tenant-admin/contacts/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    },
+
+    async addContactNote(id, text, leadId) {
+      const body = { text };
+      if (leadId) body.lead_id = leadId;
+      return request(`/tenant-admin/contacts/${id}/notes`, { method: 'POST', body: JSON.stringify(body) });
+    },
+
+    async deleteContactNote(id, noteId) {
+      return request(`/tenant-admin/contacts/${id}/notes/${noteId}`, { method: 'DELETE' });
+    },
+
+    // -----------------------------------------------------------------------
+    // Tasks & reminders
+    // -----------------------------------------------------------------------
+    /** params: bucket (all|overdue|today|upcoming|no_date|done), day_end (ISO), mine, assigned_user_id, customer_id, lead_id, page, page_size */
+    async getTasks(params = {}) {
+      const query = new URLSearchParams();
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '' && v !== false) query.append(k, v === true ? 'true' : v);
+      });
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/tenant-admin/tasks${qs}`, { method: 'GET' });
+    },
+
+    /** { overdue, today, upcoming, no_date, open } */
+    async getTaskSummary(params = {}) {
+      const query = new URLSearchParams();
+      if (params.day_end) query.append('day_end', params.day_end);
+      if (params.mine) query.append('mine', 'true');
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/tenant-admin/tasks/summary${qs}`, { method: 'GET' });
+    },
+
+    /** { title, notes?, due_at?, customer_id?, lead_id?, assigned_user_id? } */
+    async createTask(data) {
+      return request('/tenant-admin/tasks', { method: 'POST', body: JSON.stringify(data) });
+    },
+
+    async updateTask(id, data) {
+      return request(`/tenant-admin/tasks/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    },
+
+    async completeTask(id) {
+      return request(`/tenant-admin/tasks/${id}/complete`, { method: 'POST' });
+    },
+
+    async reopenTask(id) {
+      return request(`/tenant-admin/tasks/${id}/reopen`, { method: 'POST' });
+    },
+
+    async deleteTask(id) {
+      return request(`/tenant-admin/tasks/${id}`, { method: 'DELETE' });
+    },
+
+    // -----------------------------------------------------------------------
+    // Team & home summary
+    // -----------------------------------------------------------------------
+    /** Active people a deal/contact/task can be given to: [{ id, name, role, is_me }] */
+    async getTeam() {
+      return request('/tenant-admin/team', { method: 'GET' });
+    },
+
+    /** Roles an admin has created for the team (Team screen, admin only). */
+    async getRoles() {
+      return request('/tenant-admin/roles', { method: 'GET' });
+    },
+
+    async createRole(data) {
+      return request('/tenant-admin/roles', { method: 'POST', body: JSON.stringify(data) });
+    },
+
+    async updateRole(id, data) {
+      return request(`/tenant-admin/roles/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    },
+
+    async deleteRole(id) {
+      return request(`/tenant-admin/roles/${id}`, { method: 'DELETE' });
+    },
+
+    /** What needs attention today: tasks counts, focus tasks, unassigned deals, chats needing a human, setup checklist (admins). */
+    async getHomeSummary(dayEnd) {
+      const qs = dayEnd ? `?day_end=${encodeURIComponent(dayEnd)}` : '';
+      return request(`/tenant-admin/dashboard/home${qs}`, { method: 'GET' });
     },
 
     async getLead(id) {
@@ -317,7 +444,7 @@ const Api = (() => {
     },
 
     async getLeadPipelineStats() {
-      return request('/tenant-admin/leads/stats/pipeline', { method: 'GET' });
+      return request('/tenant-admin/leads/pipeline-stats', { method: 'GET' });
     },
 
     // -----------------------------------------------------------------------
@@ -430,6 +557,31 @@ const Api = (() => {
         method: 'POST',
         body: JSON.stringify({ query, top_k: limit }),
       });
+    },
+
+    /**
+     * Ask the knowledge base (any admin or sales user). `history` is the chat so far: [{ role: 'user'|'assistant', text }].
+     * Returns { status: answered|not_found|not_stated|unverified|empty, answer, sources: [{ n, kind, title, location, text }], searched_for }.
+     */
+    async askKnowledge(question, history = []) {
+      return request('/tenant-admin/knowledge/ask', {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      });
+    },
+
+    /** Read-only view of what the assistant can answer from: { documents, product_count, product_names }. */
+    async getKnowledgeLibrary() {
+      return request('/tenant-admin/knowledge/library', { method: 'GET' });
+    },
+
+    /** Admins: questions nobody could answer: { items: [{ id, question, times_asked, last_asked_by, last_asked_at }], open_count }. */
+    async getKnowledgeGaps() {
+      return request('/tenant-admin/knowledge/gaps', { method: 'GET' });
+    },
+
+    async dismissKnowledgeGap(id) {
+      return request(`/tenant-admin/knowledge/gaps/${id}/dismiss`, { method: 'POST' });
     },
 
     // -----------------------------------------------------------------------

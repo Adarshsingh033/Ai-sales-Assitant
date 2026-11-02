@@ -36,7 +36,8 @@ _URL = re.compile(
     r"|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|in|io|net|org|co|ai|app|dev|biz|store|shop|online|link|ly)\b(?:/[^\s<>()\[\]\"']*)?",
     re.IGNORECASE,
 )
-_PHONE = re.compile(r"(?<![\w.])\+?\d[\d\s().-]{7,}\d(?![\w])")
+_PHONE = re.compile(r"(?<![\w.])\+?\d[\d \t().-]{7,}\d(?![\w])")  # a number never wraps onto the next line
+PHONE_RE = _PHONE
 
 _LEAK_MARKERS = (
     "COMMERCIAL RULES", "CONVERSATION RULES", "VERIFIED KNOWLEDGE", "<knowledge>", "<memory>",

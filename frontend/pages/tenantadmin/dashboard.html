@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Admin Dashboard — AI Sales Assistant platform management." />
-  <title>Admin Dashboard — AI Sales Assistant</title>
+  <meta name="description" content="Sales workspace — contacts, pipeline, tasks and AI-assisted chats." />
+  <title>Workspace — AI Sales Assistant</title>
 
   <!-- Styles -->
   <link rel="stylesheet" href="../../assets/css/global.css" />
@@ -13,6 +13,13 @@
   <link rel="stylesheet" href="../../assets/css/tenants.css" />
   <link rel="stylesheet" href="../../assets/css/dashboard.css" />
   <link rel="stylesheet" href="../../assets/css/tenant_sales.css" />
+  <link rel="stylesheet" href="../../assets/css/crm.css" />
+  <link rel="stylesheet" href="../../assets/css/home.css" />
+  <link rel="stylesheet" href="../../assets/css/contacts.css" />
+  <link rel="stylesheet" href="../../assets/css/pipeline.css" />
+  <link rel="stylesheet" href="../../assets/css/tasks.css" />
+  <link rel="stylesheet" href="../../assets/css/knowledge.css" />
+  <link rel="stylesheet" href="../../assets/css/roles.css" />
 </head>
 
 <body>
@@ -35,90 +42,105 @@
         </div>
         <div>
           <div class="sidebar-logo-text">AI Sales Assistant</div>
-          <div class="sidebar-logo-sub">Admin Portal</div>
+          <div class="sidebar-logo-sub" id="portalLabel">Workspace</div>
         </div>
       </div>
 
       <!-- Navigation -->
       <nav class="sidebar-nav">
 
-        <span class="sidebar-section-label">Sales & Pipeline</span>
-
-        <a href="#" class="nav-item active" data-page="Dashboard" data-section="section-dashboard" aria-current="page"
-          aria-label="Dashboard">
+        <a href="#home" class="nav-item active" data-key="home" data-page="Home" data-section="section-dashboard" aria-current="page"
+          aria-label="Home">
           <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
-              d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+              d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
           </svg>
-          <span class="nav-item-label">Dashboard</span>
+          <span class="nav-item-label">Home</span>
         </a>
 
-        <a href="#" class="nav-item" data-page="Leads & Pipeline" data-section="section-leads" aria-label="Leads & Pipeline">
-          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            stroke-width="1.6" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-          </svg>
-          <span class="nav-item-label">Leads & Pipeline</span>
-        </a>
-
-        <a href="#" class="nav-item" data-page="Live Conversations" data-section="section-conversations" aria-label="Live Conversations">
+        <a href="#inbox" class="nav-item" data-key="inbox" data-page="Inbox" data-section="section-conversations" aria-label="Inbox">
           <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a.75.75 0 0 1-.974-.974 5.95 5.95 0 0 1 1.057-4.035C4.03 14.556 3 13.336 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
           </svg>
-          <span class="nav-item-label">Live Conversations</span>
+          <span class="nav-item-label">Inbox</span>
+          <span id="badgeInbox" class="crm-nav-badge amber" hidden>0</span>
         </a>
 
-        <span class="sidebar-section-label">AI & Knowledge</span>
-
-        <a href="#" class="nav-item" data-page="Product Catalog" data-section="section-products" aria-label="Product Catalog">
+        <a href="#contacts" class="nav-item" data-key="contacts" data-page="Contacts" data-section="section-contacts" aria-label="Contacts">
           <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
-              d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+              d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
           </svg>
-          <span class="nav-item-label">Product Catalog</span>
+          <span class="nav-item-label">Contacts</span>
         </a>
 
-        <a href="#" class="nav-item" data-page="Warehouse Inventory" data-section="section-inventory" aria-label="Warehouse Inventory">
+        <a href="#pipeline" class="nav-item" data-key="pipeline" data-page="Pipeline" data-section="section-leads" aria-label="Pipeline">
           <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
-              d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+              d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z" />
           </svg>
-          <span class="nav-item-label">Warehouse Inventory</span>
+          <span class="nav-item-label">Pipeline</span>
         </a>
 
-        <a href="#" class="nav-item" data-page="Knowledge Base" data-section="section-knowledge" aria-label="Knowledge Base">
+        <a href="#tasks" class="nav-item" data-key="tasks" data-page="Tasks" data-section="section-tasks" aria-label="Tasks">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          <span class="nav-item-label">Tasks</span>
+          <span id="badgeTasks" class="crm-nav-badge" hidden>0</span>
+        </a>
+
+        <a href="#knowledge" class="nav-item" data-key="knowledge" data-page="Knowledge" data-section="section-knowledge" aria-label="Knowledge">
           <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
           </svg>
-          <span class="nav-item-label">Knowledge Base</span>
+          <span class="nav-item-label">Knowledge</span>
         </a>
 
-        <a href="#" class="nav-item" data-page="AI Configuration" data-section="section-ai-config" aria-label="AI Configuration">
+        <span class="sidebar-section-label" data-admin-only>Setup</span>
+
+        <a href="#products" class="nav-item" data-admin-only data-key="products" data-page="Products" data-section="section-products" aria-label="Products">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+          </svg>
+          <span class="nav-item-label">Products</span>
+        </a>
+
+        <a href="#inventory" class="nav-item" data-admin-only data-key="inventory" data-page="Inventory" data-section="section-inventory" aria-label="Inventory">
+          <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+          </svg>
+          <span class="nav-item-label">Inventory</span>
+        </a>
+
+        <a href="#ai" class="nav-item" data-admin-only data-key="ai" data-page="AI Assistant" data-section="section-ai-config" aria-label="AI Assistant">
           <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.091Z" />
           </svg>
-          <span class="nav-item-label">AI Configuration</span>
+          <span class="nav-item-label">AI Assistant</span>
         </a>
 
-        <span class="sidebar-section-label">Organization</span>
-
-        <a href="#" class="nav-item" data-page="User Management" data-section="section-user-management" aria-label="User Management">
+        <a href="#team" class="nav-item" data-admin-only data-key="team" data-page="Team" data-section="section-user-management" aria-label="Team">
           <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
           </svg>
-          <span class="nav-item-label">User Management</span>
+          <span class="nav-item-label">Team</span>
         </a>
 
       </nav>
@@ -142,7 +164,10 @@
        ================================================================ -->
     <header class="topbar" role="banner">
       <div class="topbar-left">
-        <span class="topbar-title" id="pageTitle">Dashboard</span>
+        <button type="button" class="topbar-menu-btn" id="btnMenu" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+        <span class="topbar-title" id="pageTitle">Home</span>
       </div>
       <div class="topbar-right" style="display:flex; align-items:center; gap:16px;">
         <div class="topbar-notifications">
@@ -177,147 +202,119 @@
       <section id="section-dashboard" class="page-section">
         <div class="db-welcome-banner">
           <div class="db-welcome-text">
-            <h2>Sales Command Center 👋</h2>
-            <p>Live AI qualification intelligence, pipeline overview, and incoming conversations.</p>
+            <h2 id="homeGreeting">Welcome 👋</h2>
+            <p id="homeSubtitle">Here is what needs your attention today.</p>
           </div>
         </div>
 
-        <!-- KPI Grid -->
+        <!-- First-run checklist (admins; hides itself once everything is done) -->
+        <div id="setupCard" class="crm-card home-setup" data-admin-only hidden></div>
+
+        <!-- What needs attention right now -->
+        <div id="homeAttention" class="home-attention"></div>
+
+        <!-- Numbers -->
         <div class="db-kpi-grid">
           <div class="db-kpi-card accent-amber">
             <div class="db-kpi-header">
-              <span class="db-kpi-label">Total Leads</span>
-              <div class="db-kpi-icon amber">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              </div>
+              <span class="db-kpi-label">Open deals</span>
             </div>
-            <div class="db-kpi-value" id="statTotalLeads">0</div>
-            <div class="db-kpi-footer">Captured across channels</div>
+            <div class="db-kpi-value" id="statOpenDeals">—</div>
+            <div class="db-kpi-footer">Still in progress</div>
           </div>
 
           <div class="db-kpi-card accent-green">
             <div class="db-kpi-header">
-              <span class="db-kpi-label">Pipeline Value</span>
-              <div class="db-kpi-icon green">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              </div>
+              <span class="db-kpi-label">Pipeline value</span>
             </div>
-            <div class="db-kpi-value" id="statPipelineValue">$0</div>
-            <div class="db-kpi-footer">Estimated deal value</div>
+            <div class="db-kpi-value" id="statPipelineValue">—</div>
+            <div class="db-kpi-footer">Open deals only</div>
           </div>
 
           <div class="db-kpi-card accent-rose">
             <div class="db-kpi-header">
-              <span class="db-kpi-label">Hot Leads</span>
-              <div class="db-kpi-icon rose">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-              </div>
+              <span class="db-kpi-label">Hot leads</span>
             </div>
-            <div class="db-kpi-value" id="statHotLeads">0</div>
-            <div class="db-kpi-footer">High intent & budget</div>
+            <div class="db-kpi-value" id="statHotLeads">—</div>
+            <div class="db-kpi-footer">Open deals marked Hot</div>
           </div>
 
           <div class="db-kpi-card accent-blue">
             <div class="db-kpi-header">
-              <span class="db-kpi-label">Avg Lead Score</span>
-              <div class="db-kpi-icon blue">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
-              </div>
+              <span class="db-kpi-label">Deals won</span>
             </div>
-            <div class="db-kpi-value" id="statAvgScore">0</div>
-            <div class="db-kpi-footer">Out of 100 max score</div>
+            <div class="db-kpi-value" id="statWonDeals">—</div>
+            <div class="db-kpi-footer">Closed successfully</div>
           </div>
         </div>
 
-        <!-- Secondary Grid -->
-        <div class="db-secondary-grid">
-          <div class="db-stat-pill">
-            <div class="db-stat-pill-icon purple">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.587-1.112l-3.826.956.956-3.826A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2z"/></svg>
-            </div>
-            <div class="db-stat-pill-text">
-              <div class="db-stat-pill-value" id="statAiConversations">0</div>
-              <div class="db-stat-pill-label">Autonomous AI Conversations</div>
-            </div>
-          </div>
-
-          <div class="db-stat-pill">
-            <div class="db-stat-pill-icon orange">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-            </div>
-            <div class="db-stat-pill-text">
-              <div class="db-stat-pill-value" id="statHumanTakeover">0</div>
-              <div class="db-stat-pill-label">Human Agent Takeovers</div>
-            </div>
-          </div>
-
-          <div class="db-stat-pill">
-            <div class="db-stat-pill-icon cyan">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <div class="db-stat-pill-text">
-              <div class="db-stat-pill-value">WhatsApp & Web</div>
-              <div class="db-stat-pill-label">Active Sales Channels</div>
-            </div>
-          </div>
-
-          <div class="db-stat-pill">
-            <div class="db-stat-pill-icon purple">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            </div>
-            <div class="db-stat-pill-text">
-              <div class="db-stat-pill-value" id="statTotalTokens">0</div>
-              <div class="db-stat-pill-label">AI Tokens (30d)</div>
-            </div>
-          </div>
-
-          <div class="db-stat-pill">
-            <div class="db-stat-pill-icon green">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            </div>
-            <div class="db-stat-pill-text">
-              <div class="db-stat-pill-value" id="statEstSavings">$0</div>
-              <div class="db-stat-pill-label">Est. LLM Cost Savings</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2-Column Bottom Layout -->
+        <!-- Tasks + chats -->
         <div class="db-bottom-grid">
-          <!-- Recent Leads Panel -->
           <div class="db-panel">
             <div class="db-panel-header">
-              <span class="db-panel-title">Recent Qualified Leads</span>
-              <button class="btn-secondary" style="font-size:12px; padding:4px 10px;" onclick="document.querySelector('.nav-item[data-section=\'section-leads\']')?.click()">View All</button>
+              <span class="db-panel-title">Your tasks for today</span>
+              <button class="btn-secondary" style="font-size:12px; padding:4px 10px;" onclick="Crm.goto('tasks')">All tasks</button>
             </div>
-            <div class="db-panel-body" style="padding:0;">
-              <table class="data-table" style="border:none;">
-                <thead>
-                  <tr>
-                    <th>Lead</th>
-                    <th>Score</th>
-                    <th>Stage</th>
-                    <th>Value</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody id="dashboardRecentLeadsBody">
-                  <tr><td colspan="5" class="db-empty">Loading recent leads...</td></tr>
-                </tbody>
-              </table>
+            <div class="db-panel-body" id="homeTasksBody">
+              <div class="db-empty">Loading…</div>
             </div>
           </div>
 
-          <!-- Recent Conversations Panel -->
           <div class="db-panel">
             <div class="db-panel-header">
-              <span class="db-panel-title">Active Conversations</span>
-              <button class="btn-secondary" style="font-size:12px; padding:4px 10px;" onclick="document.querySelector('.nav-item[data-section=\'section-conversations\']')?.click()">Open Inbox</button>
+              <span class="db-panel-title">Recent chats</span>
+              <button class="btn-secondary" style="font-size:12px; padding:4px 10px;" onclick="Crm.goto('inbox')">Open inbox</button>
             </div>
             <div class="db-panel-body">
               <ul class="db-activity-list" id="dashboardRecentConversationsList">
-                <li class="db-empty">Loading active conversations...</li>
+                <li class="db-empty">Loading chats…</li>
               </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Newest deals -->
+        <div class="db-panel" style="margin-top:20px;">
+          <div class="db-panel-header">
+            <span class="db-panel-title">Newest deals</span>
+            <button class="btn-secondary" style="font-size:12px; padding:4px 10px;" onclick="Crm.goto('pipeline')">Open pipeline</button>
+          </div>
+          <div class="db-panel-body" style="padding:0;">
+            <table class="data-table" style="border:none;">
+              <thead>
+                <tr>
+                  <th>Deal</th>
+                  <th>Score</th>
+                  <th>Stage</th>
+                  <th>Value</th>
+                  <th>Added</th>
+                </tr>
+              </thead>
+              <tbody id="dashboardRecentLeadsBody">
+                <tr><td colspan="5" class="db-empty">Loading deals…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- AI usage (admins) -->
+        <div class="db-secondary-grid" data-admin-only style="margin-top:20px;">
+          <div class="db-stat-pill">
+            <div class="db-stat-pill-text">
+              <div class="db-stat-pill-value" id="statAiConversations">—</div>
+              <div class="db-stat-pill-label">Chats the AI is handling now</div>
+            </div>
+          </div>
+          <div class="db-stat-pill">
+            <div class="db-stat-pill-text">
+              <div class="db-stat-pill-value" id="statHumanTakeover">—</div>
+              <div class="db-stat-pill-label">Chats resolved</div>
+            </div>
+          </div>
+          <div class="db-stat-pill">
+            <div class="db-stat-pill-text">
+              <div class="db-stat-pill-value" id="statTotalTokens">—</div>
+              <div class="db-stat-pill-label">AI usage, last 30 days (tokens)</div>
             </div>
           </div>
         </div>
@@ -329,8 +326,8 @@
       <section id="section-user-management" class="page-section" hidden>
         <div class="tenant-page-header">
           <div class="tenant-page-title">
-            <h2>User Management</h2>
-            <p>Create and manage sales users within your organization.</p>
+            <h2>Team</h2>
+            <p>Add your people and give each one a role. New deals are shared between available sales reps automatically.</p>
           </div>
 
           <div class="tenant-toolbar">
@@ -360,8 +357,11 @@
               <option value="email:asc">Email (A-Z)</option>
               <option value="last_login_at:desc">Last login</option>
             </select>
+            <button class="btn-secondary" onclick="RolesModule.open()">
+              Manage roles
+            </button>
             <button class="btn-primary" onclick="SalesUsersModule.openCreateModal()">
-              Create Sales User
+              Add team member
             </button>
           </div>
         </div>
@@ -372,6 +372,7 @@
               <tr>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Role</th>
                 <th>Phone</th>
                 <th>Availability</th>
                 <th>Status</th>
@@ -430,75 +431,12 @@
       <!-- =================================================================
          Leads & Pipeline Section
          ================================================================= -->
-      <section id="section-leads" class="page-section" hidden>
-        <div class="tenant-page-header">
-          <div class="tenant-page-title">
-            <h2>Leads & Pipeline</h2>
-            <p>Track, qualify, and advance customer leads captured autonomously by your AI Assistant.</p>
-          </div>
-          <div class="tenant-toolbar">
-            <div class="tenant-search-box">
-              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
-              <input type="text" id="leadSearchInput" placeholder="Search by name, company, or phone..." aria-label="Search leads" />
-            </div>
-            <select id="leadStageFilter" class="tenant-filter" aria-label="Filter by stage">
-              <option value="">All Pipeline Stages</option>
-              <option value="NEW">New</option>
-              <option value="CONTACTED">Contacted</option>
-              <option value="QUALIFIED">Qualified</option>
-              <option value="PROPOSAL_SENT">Proposal Sent</option>
-              <option value="CLOSED_WON">Closed Won</option>
-              <option value="CLOSED_LOST">Closed Lost</option>
-            </select>
-            <select id="leadPriorityFilter" class="tenant-filter" aria-label="Filter by priority">
-              <option value="">All Priorities</option>
-              <option value="HOT">Hot Leads (70+)</option>
-              <option value="WARM">Warm Leads (40-69)</option>
-              <option value="COLD">Cold Leads (0-39)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Lead / Company</th>
-                <th>Contact</th>
-                <th>Score</th>
-                <th>Priority</th>
-                <th>Stage</th>
-                <th>Est. Value</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="leadsTableBody">
-              <tr><td colspan="7" class="db-empty">Loading leads...</td></tr>
-            </tbody>
-          </table>
-
-          <div class="pagination">
-            <div class="pagination-info">
-              <span id="leadsPageIndicator">Page 1 of 1</span>
-              <span class="rows-label">Rows:</span>
-              <select id="leadsPageSize" class="rows-select">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-              </select>
-            </div>
-            <div class="pagination-controls">
-              <button class="page-icon-btn" id="btnLeadsFirst" disabled>«</button>
-              <button class="page-icon-btn" id="btnLeadsPrev" disabled>‹</button>
-              <button class="page-icon-btn active" id="btnLeadsCurrent">1</button>
-              <button class="page-icon-btn" id="btnLeadsNext" disabled>›</button>
-              <button class="page-icon-btn" id="btnLeadsLast" disabled>»</button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <!-- =================================================================
+         CRM sections — their markup is rendered by contacts.js, pipeline.js and tasks.js
+         ================================================================= -->
+      <section id="section-contacts" class="page-section" hidden></section>
+      <section id="section-leads" class="page-section" hidden></section>
+      <section id="section-tasks" class="page-section" hidden></section>
 
       <!-- =================================================================
          Live Conversations & Inbox Section
@@ -682,67 +620,7 @@
       <!-- =================================================================
          Knowledge Base Section
          ================================================================= -->
-      <section id="section-knowledge" class="page-section" hidden>
-        <div class="tenant-page-header">
-          <div class="tenant-page-title">
-            <h2>Knowledge Base & RAG Indexing</h2>
-            <p>Upload sales collateral, FAQs, and price lists. The AI indexes files locally into vector embeddings.</p>
-          </div>
-        </div>
-
-        <div class="kb-grid">
-          <!-- Upload Box -->
-          <div class="kb-card">
-            <h3 style="font-size:16px; margin:0 0 12px 0; color:#1e293b;">Upload Document</h3>
-            <div class="kb-dropzone" id="kbDropzone">
-              <svg class="kb-dropzone-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
-              </svg>
-              <div style="font-weight:600; font-size:14px; color:#1e293b;">Click to browse or drag & drop</div>
-              <div style="font-size:12px; color:#64748b; margin-top:4px;">Supports PDF, DOCX, and TXT files (Up to 15MB)</div>
-              <input type="file" id="kbFileInput" accept=".pdf,.docx,.txt" style="display:none;" />
-              <div id="kbSelectedFileName" class="kb-file-selected"></div>
-            </div>
-
-            <div style="margin-top:16px; display:flex; gap:10px;">
-              <input type="text" id="kbDocTitle" class="form-input" placeholder="Document Title (optional)" style="flex:1;" />
-              <button id="btnUploadKbDoc" class="btn-primary" style="white-space:nowrap;">Upload & Index</button>
-            </div>
-          </div>
-
-          <!-- Semantic Search Tester -->
-          <div class="kb-card">
-            <h3 style="font-size:16px; margin:0 0 4px 0; color:#1e293b;">Test Knowledge Retrieval</h3>
-            <p style="font-size:12.5px; color:#64748b; margin:0 0 12px 0;">Verify how the AI retrieves relevant knowledge chunks for buyer queries.</p>
-            <div style="display:flex; gap:10px;">
-              <input type="text" id="kbTestSearchInput" class="form-input" placeholder="e.g. What is your cancellation or warranty policy?" style="flex:1;" />
-              <button id="btnKbTestSearch" class="btn-secondary" style="white-space:nowrap;">Search</button>
-            </div>
-            <div id="kbSearchResults" class="kb-search-results">
-              <div class="db-empty" style="padding:20px 0;">Type a question above and click Search to test vector similarity.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Document List Table -->
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Document Title & Filename</th>
-                <th>Type</th>
-                <th>File Size</th>
-                <th>Indexed Chunks</th>
-                <th>Uploaded</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="knowledgeTableBody">
-              <tr><td colspan="6" class="db-empty">Loading documents...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <section id="section-knowledge" class="page-section" hidden></section>
 
       <!-- =================================================================
          AI Assistant Configuration Section
@@ -945,7 +823,7 @@
   <div id="salesUserModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="salesUserModalTitle">
     <div class="modal">
       <div class="modal-header">
-        <h3 id="salesUserModalTitle" class="modal-title">Add Sales User</h3>
+        <h3 id="salesUserModalTitle" class="modal-title">Add team member</h3>
         <button class="modal-close" onclick="SalesUsersModule.closeFormModal()" aria-label="Close">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
             stroke="currentColor" width="20" height="20">
@@ -977,6 +855,13 @@
               <label class="form-label" for="salesUserPhone">Phone</label>
               <input type="tel" id="salesUserPhone" class="form-input" maxlength="20" placeholder="+1 (555) 123-4567" />
             </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="salesUserRole">Role *</label>
+            <select id="salesUserRole" class="form-input" required></select>
+            <p class="team-role-hint"><span id="salesUserRoleHint"></span>
+              <button type="button" class="crm-link-btn" onclick="RolesModule.open()">Manage roles</button></p>
           </div>
 
           <div class="form-group">
@@ -1150,97 +1035,6 @@
     </div>
   </div>
 
-  <!-- Lead Detail & Qualification Modal -->
-  <div id="leadDetailModal" class="modal-overlay" role="dialog" aria-modal="true">
-    <div class="modal" style="max-width: 650px;">
-      <div class="modal-header">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <h3 class="modal-title" id="leadModalName">Lead Details</h3>
-          <span id="leadModalScore"></span>
-          <span id="leadModalPriority"></span>
-        </div>
-        <button class="modal-close" onclick="LeadsModule.closeLeadDetail()" aria-label="Close">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
-        <!-- Contact summary row -->
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px;">
-          <div>
-            <div style="color:#64748b; font-size:11px; text-transform:uppercase; font-weight:700;">Company</div>
-            <div id="leadModalCompany" style="font-weight:600; color:#1e293b; margin-top:2px;">—</div>
-          </div>
-          <div>
-            <div style="color:#64748b; font-size:11px; text-transform:uppercase; font-weight:700;">Phone / WhatsApp</div>
-            <div id="leadModalPhone" style="font-weight:600; color:#1e293b; margin-top:2px;">—</div>
-          </div>
-          <div style="grid-column: span 2;">
-            <div style="color:#64748b; font-size:11px; text-transform:uppercase; font-weight:700;">Email</div>
-            <div id="leadModalEmail" style="color:#1e293b; margin-top:2px;">—</div>
-          </div>
-        </div>
-
-        <!-- AI Qualification Summary Box -->
-        <div style="background:#fdfcf9; border:1px solid #e8dec8; border-radius:10px; padding:14px 18px;">
-          <div style="font-weight:700; font-size:12px; color:#8B7355; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-            <span>🤖 AI Qualification Summary</span>
-          </div>
-          <div id="leadModalAiSummary" style="font-size:13px; color:#334155; line-height:1.5;"></div>
-        </div>
-
-        <!-- Pain points / Needs -->
-        <div>
-          <div style="font-weight:700; font-size:12px; color:#475569; margin-bottom:6px;">Identified Requirements & Pain Points</div>
-          <div id="leadModalPainPoints" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-        </div>
-
-        <!-- Stage & Value change row -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="form-group">
-            <label class="form-label" for="leadModalStage">Pipeline Stage</label>
-            <select id="leadModalStage" class="form-input">
-              <option value="NEW">New</option>
-              <option value="CONTACTED">Contacted</option>
-              <option value="QUALIFIED">Qualified</option>
-              <option value="PROPOSAL_SENT">Proposal Sent</option>
-              <option value="CLOSED_WON">Closed Won</option>
-              <option value="CLOSED_LOST">Closed Lost</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="leadModalPrioritySelect">Priority</label>
-            <select id="leadModalPrioritySelect" class="form-input">
-              <option value="HOT">Hot</option>
-              <option value="WARM">Warm</option>
-              <option value="COLD">Cold</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="leadModalValue">Estimated Value ($)</label>
-          <input type="number" id="leadModalValue" class="form-input" placeholder="e.g. 5000" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="leadModalNotes">Internal Rep Notes</label>
-          <textarea id="leadModalNotes" class="form-input" rows="2" placeholder="Add custom notes or instructions for the sales team..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer" style="display:flex; justify-content:space-between;">
-        <button type="button" class="btn-secondary" onclick="LeadsModule.openLeadConversation()">
-          💬 Open Conversation
-        </button>
-        <div style="display:flex; gap:10px;">
-          <button type="button" class="btn-secondary" onclick="LeadsModule.closeLeadDetail()">Cancel</button>
-          <button type="button" class="btn-primary" onclick="LeadsModule.saveLeadChanges()">Save Changes</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Add / Edit Product Modal -->
   <div id="productModal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal" style="max-width: 580px; max-height: 90vh; display: flex; flex-direction: column;">
@@ -1361,14 +1155,14 @@
   </div>
 
   <!-- Floating Web Chat Simulator Widget -->
-  <button id="chatSimulatorToggle" class="chat-sim-toggle-btn" aria-label="Open AI Chat Simulator">
+  <button id="chatSimulatorToggle" class="chat-sim-toggle-btn" data-admin-only aria-label="Open AI Chat Simulator">
     <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a.75.75 0 0 1-.974-.974 5.95 5.95 0 0 1 1.057-4.035C4.03 14.556 3 13.336 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
     </svg>
     <span>Test AI Assistant</span>
   </button>
 
-  <div id="chatSimulatorDrawer" class="chat-sim-drawer">
+  <div id="chatSimulatorDrawer" class="chat-sim-drawer" data-admin-only>
     <div class="chat-sim-header">
       <div class="chat-sim-header-title">
         <span>🤖 Sales Assistant Simulator</span>
@@ -1414,10 +1208,15 @@
   <script src="../../assets/js/config.js"></script>
   <script src="../../assets/js/api.js"></script>
   <script src="../../assets/js/auth.js"></script>
+  <script src="../../assets/js/crm.js"></script>
   <script src="../../assets/js/tenantadmin.js"></script>
+  <script src="../../assets/js/roles.js"></script>
   <script src="../../assets/js/sales_users.js"></script>
   <script src="../../assets/js/tenant_dashboard.js"></script>
   <script src="../../assets/js/leads.js"></script>
+  <script src="../../assets/js/pipeline.js"></script>
+  <script src="../../assets/js/contacts.js"></script>
+  <script src="../../assets/js/tasks.js"></script>
   <script src="../../assets/js/conversations.js"></script>
   <script src="../../assets/js/inventory.js"></script>
   <script src="../../assets/js/products.js"></script>

@@ -19,6 +19,7 @@ class SalesUserCreate(BaseModel):
     phone_number: Optional[str] = Field(None, max_length=20)
     password: str = Field(..., min_length=8, max_length=128)
     is_available: bool = True
+    role_id: Optional[UUID] = None  # one of the tenant's roles; omitted = the built-in "Sales Rep"
 
     @field_validator("first_name", "last_name")
     @classmethod
@@ -36,6 +37,7 @@ class SalesUserUpdate(BaseModel):
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
     phone_number: Optional[str] = Field(None, max_length=20)
     is_available: Optional[bool] = None
+    role_id: Optional[UUID] = None
 
     @field_validator("first_name", "last_name")
     @classmethod
@@ -61,7 +63,11 @@ class SalesUserResponse(BaseModel):
     email: str
     phone_number: Optional[str] = None
     profile_image_url: Optional[str] = None
-    role: str
+    role: str  # access level: SALES_USER or TENANT_ADMIN
+    role_id: Optional[UUID] = None
+    role_name: str = ""  # the admin-defined title shown to people
+    receives_deals: bool = False
+    is_me: bool = False
     is_active: bool
     is_available: bool
     last_login_at: Optional[datetime] = None

@@ -1,0 +1,59 @@
+/* =========================================================================
+   Home — setup checklist, "needs attention" cards, today's tasks
+   ========================================================================= */
+
+/* --- first-run checklist -------------------------------------------------- */
+.home-setup { padding: 20px 22px; margin-bottom: 18px; border-color: #e8dec8; background: #fffdf8; }
+.home-setup[hidden] { display: none; }
+.home-setup-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.home-setup-head h3 { margin: 0 0 4px; font-size: 16px; color: var(--color-gray-900); }
+.home-setup-head p { margin: 0; font-size: 13px; color: var(--color-gray-500); }
+.home-setup-bar { height: 6px; background: var(--color-gray-100); border-radius: 999px; margin: 14px 0 6px; overflow: hidden; }
+.home-setup-bar span { display: block; height: 100%; background: var(--color-primary); border-radius: 999px; transition: width .4s ease; }
+.home-setup-list { list-style: none; margin: 0; padding: 0; }
+.home-setup-step { display: flex; align-items: center; gap: 14px; padding: 11px 0; border-top: 1px solid #f0e9d8; }
+.home-setup-step:first-child { border-top: none; }
+.home-setup-check {
+  width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--color-gray-300); flex: none;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff;
+}
+.home-setup-step.done .home-setup-check { background: var(--color-success); border-color: var(--color-success); }
+.home-setup-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.home-setup-text strong { font-size: 14px; color: var(--color-gray-800); }
+.home-setup-text span { font-size: 12.5px; color: var(--color-gray-500); }
+.home-setup-step.done .home-setup-text strong { color: var(--color-gray-400); text-decoration: line-through; }
+.home-setup-step .btn-primary, .home-setup-step .btn-secondary { flex: none; padding: 7px 18px; }
+
+/* --- needs attention ------------------------------------------------------ */
+.home-attention { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.home-attn-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px 18px; text-align: left; cursor: pointer; font: inherit;
+  background: #fff; border: 1px solid var(--color-border); border-left-width: 4px; border-radius: 12px; transition: box-shadow .15s, transform .15s;
+}
+.home-attn-card:hover { box-shadow: 0 6px 16px rgba(15, 23, 42, .08); transform: translateY(-1px); }
+.home-attn-count { font-size: 28px; font-weight: 700; line-height: 1; min-width: 34px; text-align: center; }
+.home-attn-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.home-attn-text strong { font-size: 14px; color: var(--color-gray-800); }
+.home-attn-text span { font-size: 12.5px; color: var(--color-gray-500); }
+.home-attn-card.tone-red    { border-left-color: #dc2626; } .tone-red .home-attn-count    { color: #dc2626; }
+.home-attn-card.tone-amber  { border-left-color: #d97706; } .tone-amber .home-attn-count  { color: #d97706; }
+.home-attn-card.tone-blue   { border-left-color: #2563eb; } .tone-blue .home-attn-count   { color: #2563eb; }
+.home-attn-card.tone-purple { border-left-color: #7c3aed; } .tone-purple .home-attn-count { color: #7c3aed; }
+.home-attn-card.clear { border-left-color: var(--color-gray-200); background: var(--color-gray-50); }
+.home-attn-card.clear .home-attn-count { color: var(--color-success); font-size: 22px; }
+
+/* --- today's tasks -------------------------------------------------------- */
+.home-task-list { list-style: none; margin: 0; padding: 0; }
+.home-task-row { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--color-gray-100); }
+.home-task-row:last-child { border-bottom: none; }
+.home-task-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.home-task-main strong { font-size: 14px; color: var(--color-gray-800); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home-task-check {
+  width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--color-gray-300); background: #fff; cursor: pointer; flex: none; transition: all .15s;
+}
+.home-task-check:hover { border-color: var(--color-success); background: #ecfdf5; }
+.home-task-check.done { background: var(--color-success); border-color: var(--color-success); }
+.home-empty { padding: 26px 16px; }
+
+/* --- load failures: say so instead of showing zeros ---------------------------------------------- */
+.home-load-error { grid-column: 1 / -1; padding: 16px 18px; border: 1px solid #fecaca; background: #fef2f2; color: #991b1b; border-radius: 12px; font-size: 13.5px; }

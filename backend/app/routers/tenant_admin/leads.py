@@ -1,28 +1,37 @@
 """
-Lead & Pipeline Management endpoints for Tenant Admin and Sales Users.
+Deals ("leads") & pipeline for Tenant Admins and Sales Users.
+
+A Sales User only sees deals assigned to them; a Tenant Admin sees every deal and is the only one who can hand a deal
+to someone else. Stages and priorities are validated against the canonical lists in `app.services.crm`.
 """
 import math
 import uuid
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import aliased, selectinload
 
 from app.core.database import get_db
-from app.core.dependencies import require_sales_user, require_tenant_admin
+from app.core.dependencies import CRMContext, require_crm_context
+from app.models.crm import Task
 from app.models.customer import Customer
 from app.models.lead import Lead
 from app.models.user import User
+from app.schemas.crm import BoardCard, BoardColumn, BoardResponse, DealCreate
 from app.schemas.lead import (
     LeadListResponse,
     LeadResponse,
     LeadUpdate,
     PipelineStatsResponse,
 )
+from app.services import crm
 
 router = APIRouter(prefix="/tenant-admin/leads", tags=["Tenant Admin Leads"])
+
+BOARD_COLUMN_LIMIT = 30  # cards shown per stage on the board; the list view holds the rest
 
 
 def _to_lead_response(lead: Lead) -> LeadResponse:
@@ -60,41 +69,47 @@ def _to_lead_response(lead: Lead) -> LeadResponse:
     )
 
 
-@router.get(
-    "/pipeline-stats",
-    response_model=PipelineStatsResponse,
-    summary="Get Sales Pipeline Statistics",
-)
+def _lead_query():
+    return select(Lead).options(selectinload(Lead.customer), selectinload(Lead.assigned_user))
+
+
+async def _get_lead(db: AsyncSession, ctx: CRMContext, lead_id: uuid.UUID) -> Lead:
+    lead = (
+        await db.execute(
+            _lead_query().where(*crm.lead_scope(ctx), Lead.id == lead_id).execution_options(populate_existing=True)
+        )
+    ).scalar_one_or_none()  # populate_existing: after an update the owner/customer must be re-read, not served from the session
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found.")
+    return lead
+
+
+@router.get("/pipeline-stats", response_model=PipelineStatsResponse, summary="Get Sales Pipeline Statistics")
 async def get_pipeline_stats(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> PipelineStatsResponse:
-    tenant_id = current_user.tenant_id
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="Tenant ID is required.")
+    scope = crm.lead_scope(ctx)
+    rows = (
+        await db.execute(
+            select(Lead.status, func.count(Lead.id), func.sum(Lead.budget)).where(*scope).group_by(Lead.status)
+        )
+    ).all()
 
-    # Get counts per status
-    stmt = (
-        select(Lead.status, func.count(Lead.id), func.sum(Lead.budget))
-        .where(Lead.tenant_id == tenant_id)
-        .group_by(Lead.status)
-    )
-    rows = (await db.execute(stmt)).all()
-
-    stages = {"NEW": 0, "QUALIFIED": 0, "CONTACTED": 0, "PROPOSAL": 0, "WON": 0, "LOST": 0}
-    total_val = 0.0
+    stages = {stage: 0 for stage in crm.STAGES}
+    total_val = 0.0  # value of deals still open
     total_leads = 0
-
     for st, count, bgt in rows:
-        stages[st] = count
+        stages[st] = stages.get(st, 0) + count
         total_leads += count
-        if bgt:
+        if bgt and st not in crm.CLOSED_STAGES:
             total_val += float(bgt)
 
-    # Hot leads count (score >= 80)
-    hot_stmt = select(func.count(Lead.id)).where(Lead.tenant_id == tenant_id, Lead.score >= 80)
-    hot_count = (await db.execute(hot_stmt)).scalar_one()
-
+    hot_count = (
+        await db.execute(
+            select(func.count(Lead.id)).where(*scope, Lead.status.notin_(crm.CLOSED_STAGES), Lead.priority == "HOT")
+        )
+    ).scalar_one()
     return PipelineStatsResponse(
         total_leads=total_leads,
         stage_counts=stages,
@@ -103,11 +118,101 @@ async def get_pipeline_stats(
     )
 
 
-@router.get(
-    "",
-    response_model=LeadListResponse,
-    summary="List Leads",
-)
+@router.get("/board", response_model=BoardResponse, summary="Deals grouped by stage for the Kanban board")
+async def get_board(
+    search: Optional[str] = None,
+    assigned_user_id: Optional[uuid.UUID] = None,
+    unassigned: bool = False,
+    day_end: Optional[datetime] = None,
+    db: AsyncSession = Depends(get_db),
+    ctx: CRMContext = Depends(require_crm_context),
+) -> BoardResponse:
+    filters = crm.lead_scope(ctx)
+    if assigned_user_id and ctx.is_admin:
+        filters.append(Lead.assigned_user_id == assigned_user_id)
+    if unassigned and ctx.is_admin:
+        filters.append(Lead.assigned_user_id.is_(None))
+    base = select(Lead.id).outerjoin(Customer, Lead.customer_id == Customer.id).where(*filters)
+    if search and search.strip():
+        like = f"%{search.strip().lower()}%"
+        base = base.where(
+            func.lower(Lead.title).like(like)
+            | func.lower(func.coalesce(Customer.name, "")).like(like)
+            | func.lower(func.coalesce(Customer.company_name, "")).like(like)
+            | func.lower(func.coalesce(Customer.phone, "")).like(like)
+        )
+    visible = base.subquery()
+
+    totals = {
+        st: (count, float(value or 0))
+        for st, count, value in (
+            await db.execute(
+                select(Lead.status, func.count(Lead.id), func.sum(Lead.budget))
+                .where(Lead.id.in_(select(visible.c.id)))
+                .group_by(Lead.status)
+            )
+        ).all()
+    }
+
+    rank = func.row_number().over(
+        partition_by=Lead.status, order_by=(Lead.score.desc(), Lead.updated_at.desc())
+    ).label("rank")
+    ranked = (
+        select(Lead.id, rank).where(Lead.id.in_(select(visible.c.id))).subquery()
+    )
+    now = datetime.now(timezone.utc)
+    open_tasks = (
+        select(func.count(Task.id)).where(Task.lead_id == Lead.id, Task.status == "OPEN").correlate(Lead).scalar_subquery()
+    )
+    overdue_tasks = (
+        select(func.count(Task.id))
+        .where(Task.lead_id == Lead.id, Task.status == "OPEN", Task.due_at < now)
+        .correlate(Lead).scalar_subquery()
+    )
+    owner = aliased(User)
+    card_rows = (
+        await db.execute(
+            select(Lead, Customer.name, owner.first_name, owner.last_name, open_tasks, overdue_tasks)
+            .join(ranked, ranked.c.id == Lead.id)
+            .outerjoin(Customer, Lead.customer_id == Customer.id)
+            .outerjoin(owner, Lead.assigned_user_id == owner.id)
+            .where(ranked.c.rank <= BOARD_COLUMN_LIMIT)
+            .order_by(Lead.score.desc(), Lead.updated_at.desc())
+        )
+    ).all()
+
+    cards_by_stage = {stage: [] for stage in crm.STAGES}
+    for lead, customer_name, first, last, n_open, n_overdue in card_rows:
+        cards_by_stage.setdefault(lead.status, []).append(
+            BoardCard(
+                id=lead.id, title=lead.title, status=lead.status, priority=lead.priority, score=lead.score,
+                budget=float(lead.budget) if lead.budget is not None else None, customer_id=lead.customer_id,
+                customer_name=customer_name, assigned_user_id=lead.assigned_user_id,
+                assigned_user_name=f"{first or ''} {last or ''}".strip() or None,
+                open_tasks=n_open or 0, overdue_tasks=n_overdue or 0, updated_at=lead.updated_at,
+            )
+        )
+
+    columns = [
+        BoardColumn(
+            stage=stage, label=crm.STAGE_LABELS[stage], count=totals.get(stage, (0, 0.0))[0],
+            total_value=round(totals.get(stage, (0, 0.0))[1], 2), cards=cards_by_stage.get(stage, []),
+        )
+        for stage in crm.STAGES
+    ]
+    unassigned_count = 0
+    if ctx.is_admin:
+        unassigned_count = (
+            await db.execute(
+                select(func.count(Lead.id)).where(
+                    Lead.tenant_id == ctx.tenant_id, Lead.assigned_user_id.is_(None), Lead.status.notin_(crm.CLOSED_STAGES)
+                )
+            )
+        ).scalar_one()
+    return BoardResponse(columns=columns, unassigned=unassigned_count)
+
+
+@router.get("", response_model=LeadListResponse, summary="List Leads")
 async def list_leads(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -116,124 +221,145 @@ async def list_leads(
     priority: Optional[str] = None,
     min_score: Optional[int] = Query(None, ge=0, le=100),
     assigned_user_id: Optional[uuid.UUID] = None,
+    unassigned: bool = False,
+    customer_id: Optional[uuid.UUID] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> LeadListResponse:
-    tenant_id = current_user.tenant_id
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="Tenant ID is required.")
-
-    stmt = (
-        select(Lead)
-        .options(selectinload(Lead.customer), selectinload(Lead.assigned_user))
-        .where(Lead.tenant_id == tenant_id)
-    )
+    stmt = _lead_query().where(*crm.lead_scope(ctx))
 
     if lead_status:
-        stmt = stmt.where(Lead.status == lead_status.upper())
-
+        stmt = stmt.where(Lead.status == crm.normalize_stage(lead_status))
     if priority:
-        stmt = stmt.where(Lead.priority == priority.upper())
-
+        stmt = stmt.where(Lead.priority == crm.normalize_priority(priority))
     if min_score is not None:
         stmt = stmt.where(Lead.score >= min_score)
-
-    if assigned_user_id:
+    if assigned_user_id and ctx.is_admin:
         stmt = stmt.where(Lead.assigned_user_id == assigned_user_id)
+    if unassigned and ctx.is_admin:
+        stmt = stmt.where(Lead.assigned_user_id.is_(None))
+    if customer_id:
+        stmt = stmt.where(Lead.customer_id == customer_id)
 
-    if search:
+    if search and search.strip():
         pat = f"%{search.strip().lower()}%"
         stmt = stmt.outerjoin(Customer, Lead.customer_id == Customer.id).where(
             func.lower(Lead.title).like(pat)
-            | func.lower(Customer.name).like(pat)
-            | func.lower(Customer.phone).like(pat)
-            | func.lower(Customer.email).like(pat)
+            | func.lower(func.coalesce(Customer.name, "")).like(pat)
+            | func.lower(func.coalesce(Customer.phone, "")).like(pat)
+            | func.lower(func.coalesce(Customer.email, "")).like(pat)
+            | func.lower(func.coalesce(Customer.company_name, "")).like(pat)
         )
 
-    count_stmt = select(func.count()).select_from(stmt.subquery())
-    total = (await db.execute(count_stmt)).scalar_one()
-
+    total = (await db.execute(select(func.count()).select_from(stmt.order_by(None).subquery()))).scalar_one()
     stmt = stmt.order_by(Lead.score.desc(), Lead.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
     rows = (await db.execute(stmt)).scalars().all()
-
-    pages = math.ceil(total / page_size) if page_size > 0 else 1
 
     return LeadListResponse(
         items=[_to_lead_response(l) for l in rows],
         total=total,
         page=page,
         page_size=page_size,
-        pages=pages,
+        pages=math.ceil(total / page_size) if page_size > 0 else 1,
     )
 
 
-@router.get(
-    "/{lead_id}",
-    response_model=LeadResponse,
-    summary="Get Lead Details",
-)
+@router.post("", response_model=LeadResponse, status_code=status.HTTP_201_CREATED, summary="Create a deal by hand")
+async def create_lead(
+    data: DealCreate,
+    db: AsyncSession = Depends(get_db),
+    ctx: CRMContext = Depends(require_crm_context),
+) -> LeadResponse:
+    customer = (
+        await db.execute(select(Customer).where(*crm.customer_scope(ctx), Customer.id == data.customer_id))
+    ).scalar_one_or_none()
+    if customer is None:
+        raise HTTPException(status_code=404, detail="Contact not found.")
+
+    owner_id = ctx.user.id if ctx.is_rep else None
+    if ctx.is_admin and data.assigned_user_id:
+        owner_id = (await crm.get_assignable_user(db, ctx.tenant_id, data.assigned_user_id)).id
+
+    lead = Lead(
+        tenant_id=ctx.tenant_id, customer_id=customer.id, title=data.title, budget=data.budget,
+        status=crm.normalize_stage(data.status), priority=crm.normalize_priority(data.priority),
+        notes=data.notes, source="MANUAL", score=0, assigned_user_id=owner_id,
+    )
+    db.add(lead)
+    await db.flush()
+    crm.log_activity(db, tenant_id=ctx.tenant_id, kind="DEAL", text=f"{crm.full_name(ctx.user)} created the deal “{lead.title}”",
+                     customer_id=customer.id, lead_id=lead.id, actor_user_id=ctx.user.id)
+    if owner_id and owner_id != ctx.user.id:
+        crm.notify(db, tenant_id=ctx.tenant_id, user_id=owner_id, title=f"Deal assigned to you: {lead.title}",
+                   message=f"{crm.full_name(ctx.user)} assigned you this deal.", link_url=f"#pipeline?lead={lead.id}")
+    await db.commit()
+    if owner_id is None:
+        # an admin who did not pick an owner gets the same automatic round-robin as an AI-captured deal
+        from app.services.lead_assignment_service import LeadAssignmentService
+
+        await LeadAssignmentService.assign_lead_round_robin(db, ctx.tenant_id, lead.id, actor_id=ctx.user.id)
+    return _to_lead_response(await _get_lead(db, ctx, lead.id))
+
+
+@router.get("/{lead_id}", response_model=LeadResponse, summary="Get Lead Details")
 async def get_lead(
     lead_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> LeadResponse:
-    stmt = (
-        select(Lead)
-        .options(selectinload(Lead.customer), selectinload(Lead.assigned_user))
-        .where(Lead.id == lead_id, Lead.tenant_id == current_user.tenant_id)
-    )
-    lead = (await db.execute(stmt)).scalar_one_or_none()
-    if not lead:
-        raise HTTPException(status_code=404, detail="Lead not found.")
-
-    return _to_lead_response(lead)
+    return _to_lead_response(await _get_lead(db, ctx, lead_id))
 
 
-@router.put(
-    "/{lead_id}",
-    response_model=LeadResponse,
-    summary="Update Lead Stage, Priority, or Assignment",
-)
+@router.put("/{lead_id}", response_model=LeadResponse, summary="Update Lead Stage, Priority, or Assignment")
 async def update_lead(
     lead_id: uuid.UUID,
     data: LeadUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> LeadResponse:
-    stmt = (
-        select(Lead)
-        .options(selectinload(Lead.customer), selectinload(Lead.assigned_user))
-        .where(Lead.id == lead_id, Lead.tenant_id == current_user.tenant_id)
-    )
-    lead = (await db.execute(stmt)).scalar_one_or_none()
-    if not lead:
-        raise HTTPException(status_code=404, detail="Lead not found.")
+    lead = await _get_lead(db, ctx, lead_id)
+    changes = data.model_dump(exclude_unset=True)
 
-    up_dict = data.model_dump(exclude_unset=True)
-    for field, val in up_dict.items():
-        if field == "status" and val:
-            val = val.upper()
-        if field == "priority" and val:
-            val = val.upper()
-        setattr(lead, field, val)
+    if "assigned_user_id" in changes and changes["assigned_user_id"] != lead.assigned_user_id and not ctx.is_admin:
+        raise HTTPException(status_code=403, detail="Only an admin can reassign a deal.")
+
+    if "title" in changes:
+        if not changes["title"] or not changes["title"].strip():
+            raise HTTPException(status_code=422, detail="A deal needs a title.")
+        lead.title = changes["title"].strip()
+    if "status" in changes and changes["status"]:
+        new_stage = crm.normalize_stage(changes["status"])
+        if new_stage != lead.status:
+            old = crm.STAGE_LABELS.get(lead.status, lead.status.title())
+            crm.log_activity(
+                db, tenant_id=ctx.tenant_id, kind="STAGE",
+                text=f"{crm.full_name(ctx.user)} moved “{lead.title}” from {old} to {crm.STAGE_LABELS[new_stage]}",
+                customer_id=lead.customer_id, lead_id=lead.id, actor_user_id=ctx.user.id,
+            )
+            lead.status = new_stage
+    if "priority" in changes and changes["priority"]:
+        lead.priority = crm.normalize_priority(changes["priority"])
+    for field in ("budget", "timeline", "requirements", "notes"):
+        if field in changes:
+            setattr(lead, field, changes[field])
+    if "assigned_user_id" in changes:
+        await crm.assign_lead(db, actor=ctx.user, lead=lead, new_user_id=changes["assigned_user_id"])
 
     await db.commit()
-    await db.refresh(lead)
-    return _to_lead_response(lead)
+    return _to_lead_response(await _get_lead(db, ctx, lead_id))
 
 
-@router.delete(
-    "/{lead_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete Lead",
-)
+@router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Lead")
 async def delete_lead(
     lead_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_tenant_admin),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> None:
-    stmt = select(Lead).where(Lead.id == lead_id, Lead.tenant_id == current_user.tenant_id)
-    lead = (await db.execute(stmt)).scalar_one_or_none()
+    if not ctx.is_admin:
+        raise HTTPException(status_code=403, detail="Only an admin can delete a deal.")
+    lead = (
+        await db.execute(select(Lead).where(Lead.tenant_id == ctx.tenant_id, Lead.id == lead_id))
+    ).scalar_one_or_none()
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found.")
 

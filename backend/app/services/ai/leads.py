@@ -14,6 +14,7 @@ from app.models.conversation import Conversation
 from app.models.customer import Customer
 from app.models.lead import Lead
 from app.services.ai.analysis import TurnAnalysis, capture_threshold, priority_for, timeline_label
+from app.services.crm import log_activity
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ async def sync_lead(
 ) -> Lead:
     threshold = config.qualification_threshold
     priority = priority_for(score, threshold)
+    created = lead is None
 
     if lead is None:
         name = customer.name or customer.phone or "New Lead"
@@ -79,6 +81,9 @@ async def sync_lead(
         if score >= threshold and lead.status == "NEW":
             lead.status = "QUALIFIED"
     await db.flush()
+    if created:
+        log_activity(db, tenant_id=tenant_id, kind="AI", text=f"AI captured this lead (score {score}/100)",
+                     customer_id=customer.id, lead_id=lead.id)
 
     if not lead.assigned_user_id:
         from app.services.lead_assignment_service import LeadAssignmentService

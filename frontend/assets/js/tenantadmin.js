@@ -1,5 +1,9 @@
 /**
- * Tenant Admin Dashboard controller.
+ * Workspace controller — shared by Tenant Admins and Sales Users.
+ *
+ * - Auth guard (admin or sales rep) and role switch: reps never see the Setup section or admin-only widgets.
+ * - Sidebar navigation with deep-linkable URLs (#home, #contacts, #pipeline?lead=…, #tasks, …).
+ * - Starts each section's module when it is opened, and keeps the sidebar badges fresh.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,20 +12,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const user = Auth.getCurrentUser();
 
-  // Enforce TENANT_ADMIN role
-  if (!user || user.role !== 'TENANT_ADMIN') {
+  // Admins and sales reps use this workspace; everyone else goes back to login
+  if (!user || (user.role !== 'TENANT_ADMIN' && user.role !== 'SALES_USER')) {
     Auth.logout();
     return;
   }
+  const isRep = user.role === 'SALES_USER';
+  document.body.dataset.role = isRep ? 'rep' : 'admin';
+
+  const portalLabel = document.getElementById('portalLabel');
+  if (portalLabel) portalLabel.textContent = isRep ? 'Sales Portal' : 'Admin Portal';
+  document.querySelectorAll('[data-user-role]').forEach((el) => { el.textContent = isRep ? 'Sales' : 'Admin'; });
 
   // Populate user info
   function updateGlobalAvatars(user) {
     const fullName = `${user.first_name} ${user.last_name}`.trim();
     const initials = (user.first_name?.[0] ?? '') + (user.last_name?.[0] ?? '');
-    
+
     document.querySelectorAll('[data-user-name]').forEach(el => { el.textContent = fullName; });
     document.querySelectorAll('[data-user-initials]').forEach(el => { el.textContent = initials.toUpperCase(); });
-    
+
     let profileImgSrc = null;
     if (user.profile_image_url) {
       if (user.profile_image_url.startsWith('data:') || user.profile_image_url.startsWith('http')) {
@@ -30,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         profileImgSrc = `${CONFIG.API_BASE_URL}${user.profile_image_url}`;
       }
     }
-    
+
     document.querySelectorAll('.topbar-avatar, .sidebar-avatar, [data-user-avatar]').forEach(el => {
       if (profileImgSrc) {
         el.style.backgroundImage = `url("${profileImgSrc}")`;
@@ -47,57 +57,102 @@ document.addEventListener('DOMContentLoaded', () => {
   updateGlobalAvatars(user);
   window.updateGlobalAvatars = updateGlobalAvatars;
 
-  // Sidebar navigation
-  const navItems = document.querySelectorAll('.nav-item[data-page]');
+  // ---------------------------------------------------------------- sections
+  const navItems = Array.from(document.querySelectorAll('.nav-item[data-section]'));
+  const allowedNav = (item) => !(isRep && item.hasAttribute('data-admin-only'));
 
-  navItems.forEach(item => {
+  /** What to start when a section is opened. Every init() is safe to call repeatedly. */
+  // (`typeof` rather than `window.X`: some modules are top-level `const`s, which are not window properties)
+  const SECTION_INIT = {
+    'section-dashboard': () => { if (typeof TenantDashboardModule !== 'undefined') TenantDashboardModule.init(); },
+    'section-leads': () => { if (typeof PipelineModule !== 'undefined') PipelineModule.init(); },
+    'section-contacts': () => { if (typeof ContactsModule !== 'undefined') ContactsModule.init(); },
+    'section-tasks': () => { if (typeof TasksModule !== 'undefined') TasksModule.init(); },
+    'section-conversations': () => { if (typeof ConversationsModule !== 'undefined') ConversationsModule.init(); },
+    'section-products': () => { if (typeof ProductsModule !== 'undefined') ProductsModule.init(); },
+    'section-inventory': () => { if (typeof InventoryModule !== 'undefined') InventoryModule.loadData(); },
+    'section-knowledge': () => { if (typeof KnowledgeModule !== 'undefined') KnowledgeModule.init(); },
+    'section-ai-config': () => { if (typeof AIConfigModule !== 'undefined') AIConfigModule.init(); },
+    'section-user-management': () => { if (typeof SalesUsersModule !== 'undefined') SalesUsersModule.loadUsers(); },
+  };
+
+  function parseHash() {
+    const raw = window.location.hash.replace(/^#\/?/, '');
+    const [key, query] = raw.split('?');
+    return { key: key || 'home', params: Object.fromEntries(new URLSearchParams(query || '')) };
+  }
+
+  let activeKey = null;
+
+  function activate(item, params = {}) {
+    Crm.closeDialogs(); // a dialog from the previous screen must not linger over the next one
+    document.querySelectorAll('.nav-item').forEach((n) => { n.classList.remove('active'); n.removeAttribute('aria-current'); });
+    item.classList.add('active');
+    item.setAttribute('aria-current', 'page');
+
+    const titleEl = document.getElementById('pageTitle');
+    if (titleEl) titleEl.textContent = item.dataset.page;
+    document.title = `${item.dataset.page} — AI Sales Assistant`;
+
+    document.querySelectorAll('.page-section').forEach((s) => { s.hidden = true; });
+    const section = document.getElementById(item.dataset.section);
+    if (section) section.hidden = false;
+    document.getElementById('mainContent')?.scrollTo?.(0, 0);
+
+    activeKey = item.dataset.key;
+    try { SECTION_INIT[item.dataset.section]?.(); } catch (err) { console.error('Section failed to start:', err); }
+    Crm.emit('route:' + item.dataset.key, params);
+    Crm.emit('route', { key: item.dataset.key, params });
+  }
+
+  function route() {
+    const { key, params } = parseHash();
+    const item = navItems.find((n) => n.dataset.key === key && allowedNav(n)) || navItems[0];
+    activate(item, item.dataset.key === key ? params : {});
+  }
+
+  navItems.forEach((item) => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
-
-      // Remove active from all nav items
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      item.classList.add('active');
-
-      // Update page title
-      const pageTitle = item.dataset.page;
-      const titleEl = document.getElementById('pageTitle');
-      if (titleEl) titleEl.textContent = pageTitle;
-
-      // Show correct content section
-      document.querySelectorAll('.page-section').forEach(s => s.hidden = true);
-      const sectionId = item.dataset.section;
-      if (sectionId) {
-        const section = document.getElementById(sectionId);
-        if (section) section.hidden = false;
-
-        if (sectionId === 'section-dashboard' && typeof TenantDashboardModule !== 'undefined') {
-          TenantDashboardModule.init();
-        } else if (sectionId === 'section-leads' && typeof LeadsModule !== 'undefined') {
-          LeadsModule.init();
-        } else if (sectionId === 'section-conversations' && typeof ConversationsModule !== 'undefined') {
-          ConversationsModule.init();
-        } else if (sectionId === 'section-products' && typeof ProductsModule !== 'undefined') {
-          ProductsModule.init();
-        } else if (sectionId === 'section-inventory' && typeof InventoryModule !== 'undefined') {
-          InventoryModule.loadData();
-        } else if (sectionId === 'section-knowledge' && typeof KnowledgeModule !== 'undefined') {
-          KnowledgeModule.init();
-        } else if (sectionId === 'section-ai-config' && typeof AIConfigModule !== 'undefined') {
-          AIConfigModule.init();
-        } else if (sectionId === 'section-user-management' && typeof SalesUsersModule !== 'undefined') {
-          SalesUsersModule.loadUsers();
-        }
+      if (!allowedNav(item)) return;
+      const target = `#${item.dataset.key}`;
+      if (window.location.hash === target || (!window.location.hash && item.dataset.key === 'home')) {
+        route(); // re-clicking the current page refreshes it
+      } else {
+        window.location.hash = target; // hashchange does the rest, so Back works
       }
     });
   });
+  window.addEventListener('hashchange', route);
 
-  // Initialize initial section & chat simulator
-  if (typeof TenantDashboardModule !== 'undefined') {
-    TenantDashboardModule.init();
+  // ---------------------------------------------------------------- mobile menu (the sidebar slides in on small screens)
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('btnMenu');
+  const scrim = document.createElement('div');
+  scrim.className = 'sidebar-scrim';
+  document.body.appendChild(scrim);
+  function setMenu(open) {
+    sidebar?.classList.toggle('open', open);
+    document.body.classList.toggle('nav-open', open);
+    menuBtn?.setAttribute('aria-expanded', String(open));
   }
-  if (typeof ChatSimulatorModule !== 'undefined') {
+  menuBtn?.addEventListener('click', () => setMenu(!sidebar.classList.contains('open')));
+  scrim.addEventListener('click', () => setMenu(false));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+  navItems.forEach((item) => item.addEventListener('click', () => setMenu(false)));
+  window.addEventListener('hashchange', () => setMenu(false));
+
+  // ---------------------------------------------------------------- start
+  if (!isRep && typeof ChatSimulatorModule !== 'undefined') {
     ChatSimulatorModule.init();
   }
+  route();
+
+  // Sidebar badges (overdue tasks, chats waiting for a person): now, after changes, and every minute
+  Crm.refreshBadges();
+  ['tasks-changed', 'deals-changed'].forEach((ev) => Crm.on(ev, () => Crm.refreshBadges()));
+  setInterval(() => { if (!document.hidden) Crm.refreshBadges(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) Crm.refreshBadges(); });
 });
 
 /**

@@ -46,9 +46,10 @@ async def _login(client: AsyncClient, email: str, password: str = PASSWORD):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_crud_happy_path(client: AsyncClient, make_tenant_admin):
-    token, tenant, _ = await make_tenant_admin(max_users=5)
+    token, tenant, admin = await make_tenant_admin(max_users=5)
 
     created = await _create(client, token, email="Crud.User@Test.com")
+    assert created["role_name"] == "Sales Rep" and created["receives_deals"] is True and created["is_me"] is False
     assert created["role"] == "SALES_USER"
     assert created["tenant_id"] == str(tenant.id)
     assert created["email"] == "crud.user@test.com"
@@ -74,8 +75,8 @@ async def test_crud_happy_path(client: AsyncClient, make_tenant_admin):
     resp = await client.get(BASE, headers=_auth(token))
     assert resp.status_code == 200
     body = resp.json()
-    assert body["total"] == 1
-    assert body["items"][0]["id"] == user_id
+    assert body["total"] == 2  # the team: this admin and the new sales person
+    assert {i["id"] for i in body["items"]} == {user_id, str(admin.id)}
 
     resp = await client.delete(f"{BASE}/{user_id}", headers=_auth(token))
     assert resp.status_code == 204
@@ -142,37 +143,23 @@ async def test_duplicate_email_other_tenant(client: AsyncClient, make_tenant_adm
 
 
 # ---------------------------------------------------------------------------
-# Subscription limits
+# Plans never restrict adding users (single free tier for now)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_user_limit_reached(client: AsyncClient, make_tenant_admin):
-    # Tenant Admin counts toward the limit: max_users=3 leaves room for 2 sales users
-    token, _, _ = await make_tenant_admin(max_users=3)
-    await _create(client, token)
-    second = await _create(client, token)
-
-    # Inactive users still count
-    await client.patch(f"{BASE}/{second['id']}/status", json={"is_active": False}, headers=_auth(token))
-
-    resp = await client.post(BASE, json=_payload(), headers=_auth(token))
-    assert resp.status_code == 403
-    assert "maximum of 3 users" in resp.json()["detail"]
-    assert "limit reached" in resp.json()["detail"].lower()
-
-
-@pytest.mark.asyncio
-async def test_no_plan_blocks_creation(client: AsyncClient, make_tenant_admin):
+async def test_no_plan_does_not_block_creation(client: AsyncClient, make_tenant_admin):
+    """Regression: an organization with no plan assigned could not add users at all."""
     token, _, _ = await make_tenant_admin(max_users=None)
     resp = await client.post(BASE, json=_payload(), headers=_auth(token))
-    assert resp.status_code == 403
-    assert "subscription plan" in resp.json()["detail"].lower()
+    assert resp.status_code == 201
 
 
 @pytest.mark.asyncio
-async def test_inactive_plan_blocks_creation(client: AsyncClient, make_tenant_admin):
-    token, _, _ = await make_tenant_admin(max_users=10, plan_active=False)
-    resp = await client.post(BASE, json=_payload(), headers=_auth(token))
-    assert resp.status_code == 403
+async def test_plan_user_limit_and_inactive_plan_are_not_enforced(client: AsyncClient, make_tenant_admin):
+    capped, _, _ = await make_tenant_admin(max_users=1)  # a plan that would only fit the admin
+    for _ in range(3):
+        await _create(client, capped)
+    inactive, _, _ = await make_tenant_admin(max_users=10, plan_active=False)
+    assert (await client.post(BASE, json=_payload(), headers=_auth(inactive))).status_code == 201
 
 
 # ---------------------------------------------------------------------------
@@ -202,9 +189,12 @@ async def test_cross_tenant_access_returns_404(client: AsyncClient, make_tenant_
 
 @pytest.mark.asyncio
 async def test_tenant_admin_cannot_manage_other_tenant_admins(client: AsyncClient, make_tenant_admin):
-    token, _, admin = await make_tenant_admin()
-    resp = await client.get(f"{BASE}/{admin.id}", headers=_auth(token))
-    assert resp.status_code == 404
+    token_a, _, admin_a = await make_tenant_admin()
+    token_b, _, _ = await make_tenant_admin()
+    assert (await client.get(f"{BASE}/{admin_a.id}", headers=_auth(token_b))).status_code == 404
+    assert (await client.patch(f"{BASE}/{admin_a.id}/status", json={"is_active": False}, headers=_auth(token_b))).status_code == 404
+    mine = await client.get(f"{BASE}/{admin_a.id}", headers=_auth(token_a))  # an admin can see their own record
+    assert mine.status_code == 200 and mine.json()["is_me"] is True and mine.json()["role_name"] == "Admin"
 
 
 # ---------------------------------------------------------------------------
@@ -309,7 +299,8 @@ async def test_password_reset_validation(client: AsyncClient, make_tenant_admin)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_list_search_filter_sort_paginate(client: AsyncClient, make_tenant_admin):
-    token, _, _ = await make_tenant_admin(max_users=10)
+    token, _, admin = await make_tenant_admin(max_users=10)
+    admin_id = str(admin.id)  # the admin is part of the team list too; the assertions below look at the sales people
     tag = uuid.uuid4().hex[:6]
     alice = await _create(client, token, first_name="Alice", last_name="Anders", email=f"alice_{tag}@test.com")
     bob = await _create(client, token, first_name="Bob", last_name="Brown", email=f"bob_{tag}@test.com", is_available=False)
@@ -328,23 +319,23 @@ async def test_list_search_filter_sort_paginate(client: AsyncClient, make_tenant
     r = (await client.get(BASE, params={"is_active": "false"}, headers=_auth(token))).json()
     assert [i["id"] for i in r["items"]] == [carol["id"]]
     r = (await client.get(BASE, params={"is_available": "true"}, headers=_auth(token))).json()
-    assert [i["id"] for i in r["items"]] == [alice["id"]]
+    assert {i["id"] for i in r["items"]} == {alice["id"], admin_id}
 
-    # Sort
+    # Sort (the admin, "Tenant", sorts between Carol and the rest)
     r = (await client.get(BASE, params={"sort_by": "first_name", "sort_order": "asc"}, headers=_auth(token))).json()
-    assert [i["first_name"] for i in r["items"]] == ["Alice", "Bob", "Carol"]
+    assert [i["first_name"] for i in r["items"]] == ["Alice", "Bob", "Carol", "Tenant"]
     r = (await client.get(BASE, params={"sort_by": "first_name", "sort_order": "desc"}, headers=_auth(token))).json()
-    assert [i["first_name"] for i in r["items"]] == ["Carol", "Bob", "Alice"]
+    assert [i["first_name"] for i in r["items"]] == ["Tenant", "Carol", "Bob", "Alice"]
 
     # Pagination
     r = (await client.get(BASE, params={"page": 1, "page_size": 2, "sort_by": "first_name", "sort_order": "asc"}, headers=_auth(token))).json()
-    assert r["total"] == 3 and r["total_pages"] == 2 and len(r["items"]) == 2
+    assert r["total"] == 4 and r["total_pages"] == 2 and len(r["items"]) == 2
     r = (await client.get(BASE, params={"page": 2, "page_size": 2, "sort_by": "first_name", "sort_order": "asc"}, headers=_auth(token))).json()
-    assert [i["first_name"] for i in r["items"]] == ["Carol"]
+    assert [i["first_name"] for i in r["items"]] == ["Carol", "Tenant"]
 
-    # Tenant Admin never appears in sales user listing
+    # The team is this tenant's sales people and admins; never the platform's super admin
     r = (await client.get(BASE, headers=_auth(token))).json()
-    assert all(i["role"] == "SALES_USER" for i in r["items"])
+    assert {i["role"] for i in r["items"]} == {"SALES_USER", "TENANT_ADMIN"}
 
 
 @pytest.mark.asyncio

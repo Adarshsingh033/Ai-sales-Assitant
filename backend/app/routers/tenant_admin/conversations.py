@@ -1,28 +1,29 @@
 """
 Conversation Management & Human Handoff endpoints for Tenant Admin and Sales Users.
 Provides real-time conversation viewing, human takeover, and agent replies.
+
+A Sales User only sees (and can act on) conversations assigned to them; a Tenant Admin sees every conversation.
 """
 import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
-from app.core.dependencies import require_sales_user
+from app.core.dependencies import CRMContext, require_crm_context
 from app.models.ai_assistant_config import AIAssistantConfig
 from app.models.conversation import Conversation, Message
-from app.models.customer import Customer
-from app.models.user import User
 from app.schemas.conversation import (
     ConversationListResponse,
     ConversationResponse,
     HumanReplyRequest,
     MessageResponse,
 )
+from app.services import crm
 from app.services.channels import ChannelSender
 
 router = APIRouter(prefix="/tenant-admin/conversations", tags=["Tenant Admin Conversations"])
@@ -62,6 +63,20 @@ async def _reload(db: AsyncSession, conversation_id: uuid.UUID, tenant_id: uuid.
     return (await db.execute(stmt)).scalar_one()
 
 
+async def _get_conversation(db: AsyncSession, ctx: CRMContext, conversation_id: uuid.UUID, *, messages: bool = True) -> Conversation:
+    options = [selectinload(Conversation.customer)]
+    if messages:
+        options.append(selectinload(Conversation.messages))
+    conv = (
+        await db.execute(
+            select(Conversation).options(*options).where(*crm.conversation_scope(ctx), Conversation.id == conversation_id)
+        )
+    ).scalar_one_or_none()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    return conv
+
+
 @router.get(
     "",
     response_model=ConversationListResponse,
@@ -71,16 +86,12 @@ async def list_conversations(
     conv_status: Optional[str] = Query(None, alias="status"),
     channel: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> ConversationListResponse:
-    tenant_id = current_user.tenant_id
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="Tenant ID is required.")
-
     stmt = (
         select(Conversation)
         .options(selectinload(Conversation.customer), selectinload(Conversation.messages))
-        .where(Conversation.tenant_id == tenant_id)
+        .where(*crm.conversation_scope(ctx))
     )
 
     if conv_status:
@@ -106,20 +117,9 @@ async def list_conversations(
 async def get_conversation(
     conversation_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> ConversationResponse:
-    stmt = (
-        select(Conversation)
-        .options(selectinload(Conversation.customer), selectinload(Conversation.messages))
-        .where(
-            Conversation.id == conversation_id,
-            Conversation.tenant_id == current_user.tenant_id,
-        )
-    )
-    conv = (await db.execute(stmt)).scalar_one_or_none()
-    if not conv:
-        raise HTTPException(status_code=404, detail="Conversation not found.")
-    return _to_conv_response(conv)
+    return _to_conv_response(await _get_conversation(db, ctx, conversation_id))
 
 
 @router.get(
@@ -130,18 +130,14 @@ async def get_conversation(
 async def get_messages(
     conversation_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> List[MessageResponse]:
-    stmt = (
-        select(Message)
-        .join(Conversation, Message.conversation_id == Conversation.id)
-        .where(
-            Conversation.id == conversation_id,
-            Conversation.tenant_id == current_user.tenant_id,
+    await _get_conversation(db, ctx, conversation_id, messages=False)
+    rows = (
+        await db.execute(
+            select(Message).where(Message.conversation_id == conversation_id).order_by(Message.created_at.asc())
         )
-        .order_by(Message.created_at.asc())
-    )
-    rows = (await db.execute(stmt)).scalars().all()
+    ).scalars().all()
 
     return [MessageResponse.model_validate(m) for m in rows]
 
@@ -154,25 +150,17 @@ async def get_messages(
 async def takeover_conversation(
     conversation_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> ConversationResponse:
-    stmt = (
-        select(Conversation)
-        .options(selectinload(Conversation.customer), selectinload(Conversation.messages))
-        .where(
-            Conversation.id == conversation_id,
-            Conversation.tenant_id == current_user.tenant_id,
-        )
-    )
-    conv = (await db.execute(stmt)).scalar_one_or_none()
-    if not conv:
-        raise HTTPException(status_code=404, detail="Conversation not found.")
-
+    conv = await _get_conversation(db, ctx, conversation_id)
+    if conv.status != "ESCALATED_HUMAN" or conv.assigned_user_id != ctx.user.id:
+        crm.log_activity(db, tenant_id=ctx.tenant_id, kind="CHAT", text=f"{crm.full_name(ctx.user)} took over the chat",
+                         customer_id=conv.customer_id, actor_user_id=ctx.user.id)
     conv.status = "ESCALATED_HUMAN"
-    conv.assigned_user_id = current_user.id
+    conv.assigned_user_id = ctx.user.id
     await db.commit()
 
-    return _to_conv_response(await _reload(db, conv.id, current_user.tenant_id))
+    return _to_conv_response(await _reload(db, conv.id, ctx.tenant_id))
 
 
 @router.post(
@@ -184,23 +172,13 @@ async def human_reply(
     conversation_id: uuid.UUID,
     data: HumanReplyRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> MessageResponse:
-    stmt = (
-        select(Conversation)
-        .options(selectinload(Conversation.customer))
-        .where(
-            Conversation.id == conversation_id,
-            Conversation.tenant_id == current_user.tenant_id,
-        )
-    )
-    conv = (await db.execute(stmt)).scalar_one_or_none()
-    if not conv:
-        raise HTTPException(status_code=404, detail="Conversation not found.")
+    conv = await _get_conversation(db, ctx, conversation_id, messages=False)
 
     # Mark as human escalated and assign to user
     conv.status = "ESCALATED_HUMAN"
-    conv.assigned_user_id = current_user.id
+    conv.assigned_user_id = ctx.user.id
     conv.last_activity_at = datetime.now(timezone.utc)
 
     msg = Message(
@@ -215,7 +193,7 @@ async def human_reply(
     # Deliver on the customer's channel (WhatsApp / Telegram); the web simulator needs no delivery
     if conv.customer:
         config = (
-            await db.execute(select(AIAssistantConfig).where(AIAssistantConfig.tenant_id == current_user.tenant_id))
+            await db.execute(select(AIAssistantConfig).where(AIAssistantConfig.tenant_id == ctx.tenant_id))
         ).scalar_one_or_none()
         await ChannelSender.send(db, conv, conv.customer, config, data.content.strip())
 
@@ -230,24 +208,13 @@ async def human_reply(
 async def handback_conversation(
     conversation_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> ConversationResponse:
-    stmt = (
-        select(Conversation)
-        .options(selectinload(Conversation.customer), selectinload(Conversation.messages))
-        .where(
-            Conversation.id == conversation_id,
-            Conversation.tenant_id == current_user.tenant_id,
-        )
-    )
-    conv = (await db.execute(stmt)).scalar_one_or_none()
-    if not conv:
-        raise HTTPException(status_code=404, detail="Conversation not found.")
-
+    conv = await _get_conversation(db, ctx, conversation_id)
     conv.status = "ACTIVE_AI"
     await db.commit()
 
-    return _to_conv_response(await _reload(db, conv.id, current_user.tenant_id))
+    return _to_conv_response(await _reload(db, conv.id, ctx.tenant_id))
 
 
 @router.post(
@@ -258,21 +225,10 @@ async def handback_conversation(
 async def resolve_conversation(
     conversation_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_sales_user),
+    ctx: CRMContext = Depends(require_crm_context),
 ) -> ConversationResponse:
-    stmt = (
-        select(Conversation)
-        .options(selectinload(Conversation.customer), selectinload(Conversation.messages))
-        .where(
-            Conversation.id == conversation_id,
-            Conversation.tenant_id == current_user.tenant_id,
-        )
-    )
-    conv = (await db.execute(stmt)).scalar_one_or_none()
-    if not conv:
-        raise HTTPException(status_code=404, detail="Conversation not found.")
-
+    conv = await _get_conversation(db, ctx, conversation_id)
     conv.status = "RESOLVED"
     await db.commit()
 
-    return _to_conv_response(await _reload(db, conv.id, current_user.tenant_id))
+    return _to_conv_response(await _reload(db, conv.id, ctx.tenant_id))

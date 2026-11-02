@@ -129,7 +129,7 @@ async def test_round_robin_lead_assignment(client: AsyncClient, test_db: AsyncSe
     test_db.add_all([lead1, lead2])
     await test_db.commit()
 
-    # Assign lead 1 -> Should pick either rep1 or rep2
+    # Assign lead 1 -> Should pick either rep1 or rep2, never the admin
     first_assigned = await LeadAssignmentService.assign_lead_round_robin(
         db=test_db,
         tenant_id=tenant.id,
@@ -137,7 +137,8 @@ async def test_round_robin_lead_assignment(client: AsyncClient, test_db: AsyncSe
         trigger_notification=True,
     )
     assert first_assigned is not None
-    assert first_assigned.id in [rep1.id, rep2.id, admin.id]
+    assert first_assigned.id in [rep1.id, rep2.id]
+    assert first_assigned.id != admin.id
 
     # Assign lead 2 -> Must pick a DIFFERENT rep
     second_assigned = await LeadAssignmentService.assign_lead_round_robin(

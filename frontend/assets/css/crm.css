@@ -1,0 +1,168 @@
+/* =========================================================================
+   CRM workspace — shared components
+   Used by Home, Contacts, Pipeline, Tasks and the deal dialog.
+   Palette follows global.css (warm olive/brown primary).
+   ========================================================================= */
+
+/* --- layout: let wide content (the pipeline board) scroll inside the page instead of stretching it ---- */
+.admin-shell > .main-content { min-width: 0; }
+
+/* --- role switch: admin-only things disappear for sales reps ------------- */
+body[data-role="rep"] [data-admin-only] { display: none !important; }
+
+/* --- stage / priority pills (canonical names) ----------------------------- */
+.stage-pill.stage-proposal { background: #fae8ff; color: #86198f; }
+.stage-pill.stage-won      { background: #15803d; color: #ffffff; }
+.stage-pill.stage-lost     { background: #fee2e2; color: #b91c1c; }
+.priority-pill.high   { background: #ffedd5; color: #c2410c; }
+.priority-pill.medium { background: #fef3c7; color: #b45309; }
+.priority-pill.low    { background: #f1f5f9; color: #64748b; }
+
+/* --- small building blocks ------------------------------------------------ */
+.crm-avatar {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  border-radius: 50%; font-weight: 700; letter-spacing: .2px; user-select: none;
+}
+.crm-muted { color: var(--color-gray-500); }
+.crm-small { font-size: 12px; }
+.crm-link-btn {
+  background: none; border: none; padding: 0; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 600;
+  color: var(--color-primary-dark); text-decoration: underline; text-underline-offset: 2px;
+}
+.crm-link-btn:hover { color: var(--color-primary); }
+.crm-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px;
+  border: none; background: transparent; color: var(--color-gray-400); cursor: pointer; transition: background .15s, color .15s;
+}
+.crm-icon-btn:hover { background: var(--color-gray-100); color: var(--color-gray-800); }
+.crm-icon-btn.danger:hover { background: #fee2e2; color: #b91c1c; }
+.crm-card { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; }
+.crm-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.crm-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.crm-form { display: flex; flex-direction: column; gap: 14px; }
+.crm-form .form-group { gap: 6px; }
+.crm-hint { font-size: 12px; color: var(--color-gray-500); }
+.crm-error { color: #b91c1c; font-size: 13px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 12px; }
+.crm-confirm-text { margin: 0; font-size: 14px; line-height: 1.5; color: var(--color-gray-700); }
+.btn-primary:disabled, .btn-secondary:disabled { opacity: .6; cursor: not-allowed; }
+
+/* --- sidebar badges ------------------------------------------------------- */
+.crm-nav-badge {
+  margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center; background: #dc2626; color: #fff;
+}
+.crm-nav-badge[hidden] { display: none; }
+.crm-nav-badge.amber { background: #d97706; }
+
+/* --- empty states --------------------------------------------------------- */
+.crm-empty { text-align: center; padding: 44px 20px; color: var(--color-gray-500); }
+.crm-empty-icon { font-size: 34px; line-height: 1; margin-bottom: 10px; }
+.crm-empty h4 { margin: 0 0 6px; font-size: 16px; color: var(--color-gray-800); font-weight: 600; }
+.crm-empty p { margin: 0 auto 16px; max-width: 420px; font-size: 13.5px; line-height: 1.5; }
+.crm-empty .btn-primary { margin: 0 auto; }
+
+/* --- tabs, segmented control, chips -------------------------------------- */
+.crm-tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--color-border); margin-bottom: 14px; }
+.crm-tab {
+  background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 14px; margin-bottom: -1px; cursor: pointer;
+  font: inherit; font-size: 13.5px; font-weight: 500; color: var(--color-gray-500); white-space: nowrap; display: inline-flex; gap: 7px; align-items: center;
+}
+.crm-tab:hover { color: var(--color-gray-800); }
+.crm-tab.active { color: var(--color-primary-dark); border-bottom-color: var(--color-primary); font-weight: 600; }
+.crm-count {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11.5px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center; background: var(--color-gray-100); color: var(--color-gray-600);
+}
+.crm-count.danger { background: #fee2e2; color: #b91c1c; }
+.crm-segmented { display: inline-flex; padding: 3px; gap: 2px; background: var(--color-gray-100); border-radius: 10px; }
+.crm-segmented button {
+  border: none; background: transparent; padding: 6px 14px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 500;
+  color: var(--color-gray-600); cursor: pointer;
+}
+.crm-segmented button.active { background: #fff; color: var(--color-gray-900); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.crm-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.crm-chip {
+  border: 1px solid var(--color-border); background: #fff; border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 12.5px;
+  color: var(--color-gray-700); cursor: pointer; transition: all .15s;
+}
+.crm-chip:hover { border-color: var(--color-primary); color: var(--color-primary-dark); }
+.crm-chip.active { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary-dark); font-weight: 600; }
+
+/* --- due-date text -------------------------------------------------------- */
+.crm-due { font-size: 12.5px; color: var(--color-gray-500); white-space: nowrap; }
+.crm-due.overdue { color: #dc2626; font-weight: 600; }
+.crm-due.today { color: #b45309; font-weight: 600; }
+.crm-due.done { color: var(--color-gray-400); }
+
+/* --- dialogs --------------------------------------------------------------- */
+.crm-modal-overlay { z-index: 1300; }
+.crm-modal { max-height: 92vh; }
+.crm-modal-body { overflow-y: auto; padding: 20px 24px; }
+.crm-modal-footer {
+  padding: 14px 24px; border-top: 1px solid var(--color-border); background: #f9fafb; display: flex; justify-content: flex-end; gap: 10px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.crm-modal-footer[hidden] { display: none; }
+
+.crm-drawer-overlay {
+  position: fixed; inset: 0; z-index: 1200; background: rgba(15, 23, 42, .35); backdrop-filter: blur(2px);
+  display: flex; justify-content: flex-end; opacity: 0; pointer-events: none; transition: opacity .2s ease;
+}
+.crm-drawer-overlay.active { opacity: 1; pointer-events: auto; }
+.crm-drawer {
+  position: relative; height: 100%; background: #fff; display: flex; flex-direction: column;
+  box-shadow: -12px 0 32px rgba(15, 23, 42, .12); transform: translateX(32px); transition: transform .25s cubic-bezier(.16, 1, .3, 1);
+}
+.crm-drawer-overlay.active .crm-drawer { transform: translateX(0); }
+.crm-drawer-close { position: absolute; top: 14px; right: 14px; z-index: 2; background: none; border: none; cursor: pointer; color: var(--color-gray-400); padding: 4px; border-radius: 8px; }
+.crm-drawer-close:hover { background: var(--color-gray-100); color: var(--color-gray-800); }
+.crm-drawer-header { padding: 22px 52px 16px 24px; border-bottom: 1px solid var(--color-border); }
+.crm-drawer-body { flex: 1; overflow-y: auto; padding: 18px 24px 40px; display: flex; flex-direction: column; gap: 22px; }
+
+/* --- contact picker --------------------------------------------------------- */
+.crm-picker { position: relative; }
+.crm-picker-chosen {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-gray-50);
+}
+.crm-picker-chosen[hidden], .crm-picker-search[hidden] { display: none; }
+.crm-picker-name { font-weight: 600; font-size: 14px; flex: 1; }
+.crm-picker-search { position: relative; }
+.crm-picker-list {
+  position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 20; margin: 0; padding: 4px; list-style: none; background: #fff;
+  border: 1px solid var(--color-border); border-radius: 10px; box-shadow: 0 12px 28px rgba(15, 23, 42, .14); max-height: 260px; overflow-y: auto;
+}
+.crm-picker-list[hidden] { display: none; }
+.crm-picker-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 13.5px; }
+.crm-picker-item:hover { background: var(--color-primary-light); }
+.crm-picker-item small { display: block; color: var(--color-gray-500); font-size: 12px; }
+.crm-picker-plus {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary-dark);
+  display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  .crm-field-row { grid-template-columns: 1fr; }
+  .crm-modal-body { padding: 16px; }
+  .crm-drawer-body { padding: 16px 16px 32px; }
+}
+
+/* --- phones: the sidebar becomes a slide-in menu opened from the top bar ------------------------- */
+.topbar-menu-btn { display: none; }
+.sidebar-scrim { display: none; }
+@media (max-width: 768px) {
+  .topbar { padding: 0 12px; gap: 8px; }
+  .topbar-left { display: flex; align-items: center; min-width: 0; }
+  .topbar-menu-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-right: 6px; flex: none;
+    border: none; background: none; border-radius: 10px; color: var(--color-gray-700); cursor: pointer;
+  }
+  .topbar-menu-btn:hover { background: var(--color-gray-100); }
+  .sidebar { z-index: 120; }
+  .sidebar.open { box-shadow: 0 0 48px rgba(15, 23, 42, .3); }
+  body.nav-open .sidebar-scrim { display: block; position: fixed; inset: 0; z-index: 110; background: rgba(15, 23, 42, .4); }
+  .home-attention { grid-template-columns: 1fr 1fr; }
+  .crm-drawer { width: 100vw !important; }
+}
+
+/* the display rules above would otherwise override the [hidden] attribute on count badges */
+.crm-count[hidden], .crm-nav-badge[hidden] { display: none !important; }

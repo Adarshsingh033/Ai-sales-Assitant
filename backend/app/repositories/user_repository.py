@@ -3,7 +3,7 @@ User repository — all database operations for the User model.
 Keeps SQL/ORM concerns out of services and routers.
 """
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 from uuid import UUID
 
 from sqlalchemy import func, or_, select, update
@@ -12,6 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User, UserRole
 
 logger = logging.getLogger(__name__)
+
+# Everyone an admin manages on the Team screen (the platform's own SUPER_ADMIN is never part of a tenant's team)
+TEAM_ROLES = (UserRole.SALES_USER, UserRole.TENANT_ADMIN)
 
 SALES_USER_SORT_FIELDS = {
     "first_name": User.first_name,
@@ -63,13 +66,13 @@ class UserRepository:
         self,
         user_id: UUID,
         tenant_id: UUID,
-        role: UserRole = UserRole.SALES_USER,
+        roles: Sequence[UserRole] = (UserRole.SALES_USER,),
     ) -> Optional[User]:
         result = await self._db.execute(
             select(User).where(
                 User.id == user_id,
                 User.tenant_id == tenant_id,
-                User.role == role,
+                User.role.in_(list(roles)),
             )
         )
         return result.scalar_one_or_none()
@@ -85,7 +88,7 @@ class UserRepository:
         sort_by: str = "created_at",
         sort_order: str = "desc",
     ) -> Tuple[List[User], int]:
-        filters = [User.tenant_id == tenant_id, User.role == UserRole.SALES_USER]
+        filters = [User.tenant_id == tenant_id, User.role.in_(TEAM_ROLES)]
 
         if search:
             term = f"%{search.strip()}%"

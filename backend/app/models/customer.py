@@ -38,6 +38,10 @@ class Customer(Base):
     email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
     company_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     preferred_language: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    # The sales user who owns this contact (set when a rep adds it by hand); reps also see contacts whose deals or chats are assigned to them.
+    owner_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     # Set when the customer asks to stop; blocks every automated outbound message.
     do_not_contact: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 

@@ -200,6 +200,8 @@ class Worker:
 
     async def _scheduler_loop(self) -> None:
         from app.services.follow_up_service import FollowUpService
+        from app.services.lead_assignment_service import LeadAssignmentService
+        from app.services.task_reminders import send_due_reminders
 
         await asyncio.sleep(5)
         await self._maintenance_once()
@@ -209,6 +211,8 @@ class Worker:
                     count = await FollowUpService.process_due_followups(db)
                     if count:
                         logger.info("Follow-up scheduler dispatched %d message(s)", count)
+                    await send_due_reminders(db)
+                    await LeadAssignmentService.assign_unowned(db)
                     await db.execute(
                         delete(AIJob).where(
                             AIJob.status.in_(["DONE", "FAILED"]), AIJob.finished_at < _utcnow() - timedelta(days=7)

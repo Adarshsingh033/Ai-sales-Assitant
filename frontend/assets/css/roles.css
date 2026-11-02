@@ -1,0 +1,40 @@
+/* =========================================================================
+   Team roles dialog, and the Role column / field on the Team screen
+   ========================================================================= */
+
+.crm-field { margin-bottom: 14px; }
+.roles-loading { padding: 32px; text-align: center; color: var(--color-gray-500); font-size: 14px; }
+.role-intro { margin: 0 0 14px; font-size: 13.5px; line-height: 1.55; color: var(--color-gray-600); }
+
+.role-list { border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden; background: #fff; }
+.role-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--color-gray-100); }
+.role-row:last-child { border-bottom: none; }
+.role-main { flex: 1; min-width: 0; }
+.role-name { font-weight: 600; font-size: 14.5px; color: var(--color-gray-900); }
+.role-meta { margin-top: 2px; font-size: 12.5px; color: var(--color-gray-500); line-height: 1.45; }
+.role-tag { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--color-gray-100); color: var(--color-gray-600); font-size: 11px; font-weight: 600; vertical-align: 1px; }
+.role-count { flex: none; font-size: 12.5px; color: var(--color-gray-500); white-space: nowrap; }
+.role-actions { flex: none; display: flex; gap: 12px; min-width: 76px; justify-content: flex-end; }
+.role-delete { color: #b91c1c; }
+
+.role-choice { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; margin-top: 8px; border: 1px solid var(--color-border); border-radius: 10px; cursor: pointer; background: #fff; }
+.role-choice:has(input:checked) { border-color: var(--color-primary); background: var(--color-primary-light); }
+.role-choice.locked { cursor: default; opacity: .85; }
+.role-choice input { margin-top: 3px; flex: none; }
+.role-choice strong { display: block; font-size: 14px; color: var(--color-gray-900); }
+.role-choice small { display: block; margin-top: 2px; font-size: 12.5px; line-height: 1.45; color: var(--color-gray-600); }
+.role-check { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13.5px; color: var(--color-gray-800); cursor: pointer; }
+.role-check[hidden] { display: none; }
+
+/* Team screen */
+.team-role-pill { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #ede9fe; color: #6d28d9; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.team-you { margin-left: 6px; font-size: 12px; font-weight: 500; color: var(--color-gray-500); }
+.team-muted { color: var(--color-gray-400); }
+.status-toggle-wrapper.locked { cursor: not-allowed; opacity: .6; }
+.team-role-hint { margin: 6px 2px 0; font-size: 12.5px; line-height: 1.5; color: var(--color-gray-500); }
+.team-role-hint .crm-link-btn { font-size: 12.5px; }
+
+@media (max-width: 640px) {
+  .role-row { flex-wrap: wrap; gap: 6px 12px; }
+  .role-main { flex-basis: 100%; }
+}

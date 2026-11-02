@@ -64,6 +64,23 @@ async def seed_demo():
         else:
             logger.info("Tenant Admin user already exists: %s", admin_user.email)
 
+        # A demo sales rep, so the rep workspace can be tried right away
+        rep = (await db.execute(select(User).where(User.email == "salesrep@example.com"))).scalar_one_or_none()
+        if not rep:
+            db.add(User(
+                id=uuid.uuid4(),
+                tenant_id=tenant.id,
+                first_name="Priya",
+                last_name="Sharma",
+                email="salesrep@example.com",
+                password_hash=hash_password("Password123!"),
+                role=UserRole.SALES_USER,
+                is_active=True,
+                is_verified=True,
+                is_available=True,
+            ))
+            logger.info("Created Sales User: salesrep@example.com / Password123!")
+
         # Ensure AIAssistantConfig exists
         stmt_cfg = select(AIAssistantConfig).where(AIAssistantConfig.tenant_id == tenant.id)
         cfg = (await db.execute(stmt_cfg)).scalar_one_or_none()

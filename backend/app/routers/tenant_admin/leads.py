@@ -7,20 +7,28 @@ to someone else. Stages and priorities are validated against the canonical lists
 import math
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased, selectinload
 
 from app.core.database import get_db
 from app.core.dependencies import CRMContext, require_crm_context
-from app.models.crm import Task
+from app.models.crm import Activity, Task
 from app.models.customer import Customer
 from app.models.lead import Lead
 from app.models.user import User
-from app.schemas.crm import BoardCard, BoardColumn, BoardResponse, DealCreate
+from app.schemas.crm import (
+    BoardCard,
+    BoardColumn,
+    BoardResponse,
+    DealClose,
+    DealCreate,
+    DealHandOver,
+    DealHistoryItem,
+)
 from app.schemas.lead import (
     LeadListResponse,
     LeadResponse,
@@ -64,6 +72,8 @@ def _to_lead_response(lead: Lead) -> LeadResponse:
         assigned_user_name=assigned_name,
         source=lead.source,
         notes=lead.notes,
+        closed_at=lead.closed_at,
+        close_reason=lead.close_reason,
         created_at=lead.created_at,
         updated_at=lead.updated_at,
     )
@@ -86,10 +96,16 @@ async def _get_lead(db: AsyncSession, ctx: CRMContext, lead_id: uuid.UUID) -> Le
 
 @router.get("/pipeline-stats", response_model=PipelineStatsResponse, summary="Get Sales Pipeline Statistics")
 async def get_pipeline_stats(
+    assigned_user_id: Optional[uuid.UUID] = None,
+    unassigned: bool = False,
     db: AsyncSession = Depends(get_db),
     ctx: CRMContext = Depends(require_crm_context),
 ) -> PipelineStatsResponse:
     scope = crm.lead_scope(ctx)
+    if assigned_user_id and ctx.is_admin:
+        scope.append(Lead.assigned_user_id == assigned_user_id)
+    if unassigned and ctx.is_admin:
+        scope.append(Lead.assigned_user_id.is_(None))
     rows = (
         await db.execute(
             select(Lead.status, func.count(Lead.id), func.sum(Lead.budget)).where(*scope).group_by(Lead.status)
@@ -113,6 +129,7 @@ async def get_pipeline_stats(
     return PipelineStatsResponse(
         total_leads=total_leads,
         stage_counts=stages,
+        group_counts=crm.group_counts(stages),
         total_estimated_value=round(total_val, 2),
         hot_leads_count=hot_count,
     )
@@ -218,6 +235,7 @@ async def list_leads(
     page_size: int = Query(20, ge=1, le=100),
     search: Optional[str] = None,
     lead_status: Optional[str] = Query(None, alias="status"),
+    stage_group: Optional[str] = None,
     priority: Optional[str] = None,
     min_score: Optional[int] = Query(None, ge=0, le=100),
     assigned_user_id: Optional[uuid.UUID] = None,
@@ -230,6 +248,8 @@ async def list_leads(
 
     if lead_status:
         stmt = stmt.where(Lead.status == crm.normalize_stage(lead_status))
+    if stage_group:
+        stmt = stmt.where(Lead.status.in_(crm.STAGE_GROUPS[crm.normalize_group(stage_group)]))
     if priority:
         stmt = stmt.where(Lead.priority == crm.normalize_priority(priority))
     if min_score is not None:
@@ -328,15 +348,7 @@ async def update_lead(
             raise HTTPException(status_code=422, detail="A deal needs a title.")
         lead.title = changes["title"].strip()
     if "status" in changes and changes["status"]:
-        new_stage = crm.normalize_stage(changes["status"])
-        if new_stage != lead.status:
-            old = crm.STAGE_LABELS.get(lead.status, lead.status.title())
-            crm.log_activity(
-                db, tenant_id=ctx.tenant_id, kind="STAGE",
-                text=f"{crm.full_name(ctx.user)} moved “{lead.title}” from {old} to {crm.STAGE_LABELS[new_stage]}",
-                customer_id=lead.customer_id, lead_id=lead.id, actor_user_id=ctx.user.id,
-            )
-            lead.status = new_stage
+        await crm.set_stage(db, actor=ctx.user, lead=lead, new_stage=crm.normalize_stage(changes["status"]))
     if "priority" in changes and changes["priority"]:
         lead.priority = crm.normalize_priority(changes["priority"])
     for field in ("budget", "timeline", "requirements", "notes"):
@@ -347,6 +359,64 @@ async def update_lead(
 
     await db.commit()
     return _to_lead_response(await _get_lead(db, ctx, lead_id))
+
+
+@router.post("/{lead_id}/close", response_model=LeadResponse, summary="Close a deal as Won or Lost, with feedback")
+async def close_deal(
+    lead_id: uuid.UUID,
+    data: DealClose,
+    db: AsyncSession = Depends(get_db),
+    ctx: CRMContext = Depends(require_crm_context),
+) -> LeadResponse:
+    lead = await _get_lead(db, ctx, lead_id)
+    await crm.close_lead(db, actor=ctx.user, lead=lead, outcome=data.outcome, reason=data.reason, feedback=data.feedback)
+    await db.commit()
+    return _to_lead_response(await _get_lead(db, ctx, lead_id))
+
+
+@router.post("/{lead_id}/hand-over", response_model=LeadResponse, summary="Hand a deal to another team member, with a note")
+async def hand_over_deal(
+    lead_id: uuid.UUID,
+    data: DealHandOver,
+    db: AsyncSession = Depends(get_db),
+    ctx: CRMContext = Depends(require_crm_context),
+) -> LeadResponse:
+    lead = await _get_lead(db, ctx, lead_id)
+    await crm.hand_over_lead(db, actor=ctx.user, lead=lead, to_user_id=data.to_user_id, note=data.note)
+    await db.commit()
+    # read it back by tenant, not by the caller's own view: a rep no longer sees the deal they just handed over
+    handed = (
+        await db.execute(
+            _lead_query().where(Lead.tenant_id == ctx.tenant_id, Lead.id == lead_id).execution_options(populate_existing=True)
+        )
+    ).scalar_one()
+    return _to_lead_response(handed)
+
+
+@router.get("/{lead_id}/history", response_model=List[DealHistoryItem], summary="Everything that happened on a deal")
+async def get_lead_history(
+    lead_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    ctx: CRMContext = Depends(require_crm_context),
+) -> List[DealHistoryItem]:
+    lead = await _get_lead(db, ctx, lead_id)
+    rows = (
+        await db.execute(
+            select(Activity, User.first_name, User.last_name)
+            .outerjoin(User, Activity.actor_user_id == User.id)
+            .where(Activity.tenant_id == ctx.tenant_id, Activity.lead_id == lead.id)
+            # newest first; the person's own words sort above the system line they were written with (same instant)
+            .order_by(Activity.created_at.desc(), case((Activity.kind == "FEEDBACK", 0), else_=1))
+            .limit(50)
+        )
+    ).all()
+    return [
+        DealHistoryItem(
+            id=a.id, kind=a.kind, text=a.text, created_at=a.created_at,
+            actor_name=f"{first or ''} {last or ''}".strip() or ("AI Assistant" if a.kind == "AI" else None),
+        )
+        for a, first, last in rows
+    ]
 
 
 @router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Lead")

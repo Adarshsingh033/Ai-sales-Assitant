@@ -2,6 +2,8 @@
  * Deals — the deal dialog and the list view of the Pipeline screen.
  *
  *   LeadsModule.openLeadDetail(id)      open the deal dialog (edit stage, owner, value, notes…)
+ *   LeadsModule.openCloseDialog(deal, { outcome?, onDone?, onCancel? })   "Close this deal" (Won / Lost + feedback)
+ *   LeadsModule.openHandOverDialog(deal, { onDone? })                     "Hand over" to another person, with a note
  *   LeadsModule.createList(host, opts)  mount the table view into `host` (used by PipelineModule)
  *   LeadsModule.loadLeads()             refresh whatever Pipeline view is showing (kept for chat_simulator.js)
  *   LeadsModule.closeLeadDetail()       close the dialog
@@ -29,6 +31,163 @@ const LeadsModule = (() => {
   const options = (items, selected) =>
     items.map((i) => `<option value="${esc(i.key)}"${i.key === selected ? ' selected' : ''}>${esc(i.label)}</option>`).join('');
 
+  const isClosed = (stage) => stage === 'WON' || stage === 'LOST';
+  const HISTORY_ICON = { STAGE: '➡️', ASSIGNED: '👤', FEEDBACK: '🗒️', NOTE: '📝', DEAL: '💼', AI: '🤖', TASK: '✅', CHAT: '💬', CONTACT: '🆕' };
+
+  // ======================================================================= close & hand over
+  /**
+   * "Close this deal": how it ended, why (when lost) and the person's own feedback, which the whole team then reads on
+   * the deal's history. `deal` is { id, title }.
+   */
+  function openCloseDialog(deal, { outcome = 'WON', onDone, onCancel } = {}) {
+    let finished = false;
+    const reasons = Crm.LOST_REASONS.map((r) => `<option value="${esc(r)}">${esc(r)}</option>`).join('');
+    const m = Crm.modal({
+      title: 'Close this deal',
+      width: 520,
+      body: `
+        <p class="deal-close-title">${esc(deal.title)}</p>
+        <form class="crm-form" id="dealCloseForm" novalidate>
+          <div class="form-group">
+            <span class="form-label">How did it end?</span>
+            <div class="deal-outcome" role="radiogroup" aria-label="How did it end?">
+              <label class="deal-outcome-opt won"><input type="radio" name="dealOutcome" value="WON"${outcome === 'WON' ? ' checked' : ''} /> <span>🎉 Won</span></label>
+              <label class="deal-outcome-opt lost"><input type="radio" name="dealOutcome" value="LOST"${outcome === 'LOST' ? ' checked' : ''} /> <span>Lost</span></label>
+            </div>
+          </div>
+          <div class="form-group" id="dealCloseReasonRow">
+            <label class="form-label" for="dealCloseReason">Main reason *</label>
+            <select id="dealCloseReason" class="form-input"><option value="">Choose a reason…</option>${reasons}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="dealCloseFeedback">Your feedback *</label>
+            <textarea id="dealCloseFeedback" class="form-input" rows="4" maxlength="1500"
+              placeholder="How did it go? What did the customer say, what was agreed, what would you do differently?"></textarea>
+          </div>
+          <p class="crm-hint">Everyone on the team can read this on the deal. Closing also marks the chat as resolved and stops the AI’s automatic follow-ups.</p>
+          <div class="crm-error" id="dealCloseError" role="alert" hidden></div>
+        </form>`,
+      footer: `<button type="button" class="btn-secondary" data-close>Cancel</button>
+               <button type="submit" form="dealCloseForm" class="btn-primary" id="dealCloseSave">Close deal</button>`,
+      onClose: () => { if (!finished && onCancel) onCancel(); },
+    });
+
+    const q = (sel) => m.el.querySelector(sel);
+    const errorBox = q('#dealCloseError');
+    const showError = (msg) => { errorBox.textContent = msg; errorBox.hidden = !msg; };
+    const picked = () => (q('input[name="dealOutcome"]:checked') || {}).value;
+    const syncReason = () => { q('#dealCloseReasonRow').style.display = picked() === 'LOST' ? '' : 'none'; };
+    m.el.querySelectorAll('input[name="dealOutcome"]').forEach((r) => r.addEventListener('change', syncReason));
+    syncReason();
+    setTimeout(() => q(outcome === 'LOST' ? '#dealCloseReason' : '#dealCloseFeedback')?.focus(), 80);
+
+    q('#dealCloseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showError('');
+      const chosen = picked();
+      const reason = chosen === 'LOST' ? q('#dealCloseReason').value : '';
+      const feedback = q('#dealCloseFeedback').value.trim();
+      if (!chosen) { showError('Choose how the deal ended.'); return; }
+      if (chosen === 'LOST' && !reason) { showError('Pick the main reason it was lost.'); q('#dealCloseReason').focus(); return; }
+      if (!feedback) { showError('Write a short feedback note for the team.'); q('#dealCloseFeedback').focus(); return; }
+
+      const save = q('#dealCloseSave');
+      Crm.busy(save, true, 'Closing…');
+      try {
+        const updated = await Api.closeLead(deal.id, { outcome: chosen, reason: reason || null, feedback });
+        finished = true;
+        Crm.toast(chosen === 'WON' ? 'Deal closed as won 🎉' : 'Deal closed as lost');
+        m.close();
+        Crm.emit('deals-changed');
+        if (onDone) onDone(updated);
+      } catch (err) {
+        showError(errText(err));
+        Crm.busy(save, false);
+      }
+    });
+    return m;
+  }
+
+  /** "Hand over": give an open deal (with its chat and to-dos) to someone else, with a note on what they need to know. */
+  async function openHandOverDialog(deal, { onDone } = {}) {
+    let members = [];
+    try { members = await Crm.team(); } catch (e) { /* the empty state below explains it */ }
+    // a rep hands over to other sales reps; an admin can pick anyone but the current owner
+    const targets = members.filter((t) => !t.is_me && t.id !== deal.assigned_user_id && (Crm.isAdmin || t.role === 'SALES_USER'));
+
+    const m = Crm.modal({
+      title: 'Hand over this deal',
+      width: 500,
+      body: targets.length ? `
+        <p class="deal-close-title">${esc(deal.title)}</p>
+        <form class="crm-form" id="dealHandForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="dealHandTo">Hand over to *</label>
+            <select id="dealHandTo" class="form-input"><option value="">Choose a person…</option>
+              ${targets.map((t) => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('')}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="dealHandNote">Note for them *</label>
+            <textarea id="dealHandNote" class="form-input" rows="4" maxlength="1500"
+              placeholder="What do they need to know? What the customer wants, what you already promised, the best time to call…"></textarea>
+          </div>
+          <p class="crm-hint">The chat and any open to-dos for this deal move to them. They get a notification with your note.</p>
+          <div class="crm-error" id="dealHandError" role="alert" hidden></div>
+        </form>`
+        : `<div class="crm-empty"><div class="crm-empty-icon">👥</div><h4>No one to hand this to yet</h4>
+           <p>${Crm.isAdmin ? 'Add another team member first.' : 'There is no other sales person on the team right now. Ask your admin to add one.'}</p></div>`,
+      footer: targets.length
+        ? `<button type="button" class="btn-secondary" data-close>Cancel</button>
+           <button type="submit" form="dealHandForm" class="btn-primary" id="dealHandSave">Hand over</button>`
+        : '<button type="button" class="btn-secondary" data-close>Close</button>',
+    });
+    if (!targets.length) return m;
+
+    const q = (sel) => m.el.querySelector(sel);
+    const errorBox = q('#dealHandError');
+    const showError = (msg) => { errorBox.textContent = msg; errorBox.hidden = !msg; };
+    q('#dealHandForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showError('');
+      const toId = q('#dealHandTo').value;
+      const note = q('#dealHandNote').value.trim();
+      if (!toId) { showError('Choose who to hand this deal to.'); q('#dealHandTo').focus(); return; }
+      if (!note) { showError('Write a short note so they know where things stand.'); q('#dealHandNote').focus(); return; }
+      const save = q('#dealHandSave');
+      Crm.busy(save, true, 'Handing over…');
+      try {
+        const updated = await Api.handOverLead(deal.id, { to_user_id: toId, note });
+        Crm.toast(`Handed over to ${updated.assigned_user_name || 'your teammate'}`);
+        m.close();
+        Crm.emit('deals-changed');
+        if (onDone) onDone(updated);
+      } catch (err) {
+        showError(errText(err));
+        Crm.busy(save, false);
+      }
+    });
+    return m;
+  }
+
+  /** The deal's story: stage moves, hand-overs and everyone's feedback, newest first. */
+  async function loadHistory(host, leadId) {
+    try {
+      const items = await Api.getLeadHistory(leadId);
+      host.innerHTML = items.length
+        ? `<ul class="deal-history-list">${items.map((a) => `
+            <li class="deal-history-item kind-${esc(String(a.kind).toLowerCase())}">
+              <span class="deal-history-icon" aria-hidden="true">${HISTORY_ICON[a.kind] || '•'}</span>
+              <div>
+                <div class="deal-history-text">${esc(a.text)}</div>
+                <div class="deal-history-meta">${a.actor_name ? `${esc(a.actor_name)} · ` : ''}<span title="${esc(new Date(a.created_at).toLocaleString())}">${esc(Crm.relTime(a.created_at))}</span></div>
+              </div>
+            </li>`).join('')}</ul>`
+        : '<p class="crm-muted crm-small">Nothing has happened on this deal yet.</p>';
+    } catch (err) {
+      host.innerHTML = '<p class="crm-muted crm-small">Could not load the history.</p>';
+    }
+  }
+
   // ======================================================================= deal dialog
   let dialog = null;
 
@@ -52,6 +211,11 @@ const LeadsModule = (() => {
     const contactName = lead.customer_name || Crm.phoneLabel(lead.customer_phone) || 'Unknown contact';
     const canTask = !!(window.TasksModule && typeof TasksModule.openForm === 'function');
     const hasAiNotes = !!(lead.score_reason || lead.requirements || lead.timeline);
+    const closed = isClosed(stage);
+    // a finished deal can be reopened (moved to an open stage) but not switched between Won and Lost
+    const stageChoices = closed ? Crm.STAGES.filter((s) => !isClosed(s.key) || s.key === stage) : Crm.STAGES;
+    const closedOn = lead.closed_at
+      ? new Date(lead.closed_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
 
     const body = `
       <div class="deal-sub">
@@ -62,6 +226,17 @@ const LeadsModule = (() => {
         ${lead.customer_id ? '<button type="button" class="crm-link-btn" id="dealViewContact">View contact</button>' : ''}
         <span class="deal-pills">${Crm.scorePill(lead.score)} ${Crm.priorityPill(priority)}</span>
       </div>
+
+      ${closed ? `
+        <div class="deal-closed deal-closed--${stage === 'WON' ? 'won' : 'lost'}">
+          <strong>${stage === 'WON' ? '🎉 Closed as won' : 'Closed as lost'}</strong>${closedOn ? ` on ${esc(closedOn)}` : ''}${lead.close_reason ? ` · ${esc(lead.close_reason)}` : ''}
+          <span>Move it back to an open stage below to work on it again.</span>
+        </div>` : `
+        <div class="deal-actions" role="group" aria-label="What next?">
+          <button type="button" class="btn-primary" id="dealCloseBtn">✓ Close deal</button>
+          ${Crm.isRep ? '<button type="button" class="btn-secondary" id="dealHandOverBtn">↪ Hand over</button>' : ''}
+          <span class="crm-hint">Done talking? Close it with your feedback${Crm.isRep ? ', or hand it to a teammate' : ''}.</span>
+        </div>`}
 
       ${hasAiNotes ? `
         <div class="deal-ai">
@@ -75,14 +250,13 @@ const LeadsModule = (() => {
         <div class="crm-field-row">
           <div class="form-group">
             <label class="form-label" for="dealStage">Stage</label>
-            <select id="dealStage" class="form-input">${options(Crm.STAGES, stage)}</select>
+            <select id="dealStage" class="form-input">${options(stageChoices, stage)}</select>
           </div>
           <div class="form-group">
             <label class="form-label" for="dealPriority">Priority</label>
             <select id="dealPriority" class="form-input">${options(Crm.PRIORITIES, priority)}</select>
           </div>
         </div>
-        <p class="crm-hint deal-close-hint" id="dealCloseHint" hidden>Closing a deal stops the AI’s automatic follow-ups.</p>
         <div class="crm-field-row">
           <div class="form-group">
             <label class="form-label" for="dealValue">Estimated value ($)</label>
@@ -100,7 +274,12 @@ const LeadsModule = (() => {
             placeholder="Anything your team should know about this deal…">${esc(lead.notes || '')}</textarea>
         </div>
         <div class="crm-error" id="dealError" role="alert" hidden></div>
-      </form>`;
+      </form>
+
+      <section class="deal-history" aria-label="History of this deal">
+        <h4 class="deal-history-title">History</h4>
+        <div id="dealHistory"><p class="crm-muted crm-small">Loading…</p></div>
+      </section>`;
 
     const footer = `
       <div class="deal-foot-left">
@@ -128,10 +307,16 @@ const LeadsModule = (() => {
     const showError = (msg) => { errorBox.textContent = msg; errorBox.hidden = !msg; };
 
     const stageSelect = q('#dealStage');
-    const hint = q('#dealCloseHint');
-    const syncHint = () => { hint.hidden = !(stageSelect.value === 'WON' || stageSelect.value === 'LOST'); };
-    stageSelect.addEventListener('change', syncHint);
-    syncHint();
+    // Won / Lost always go through "Close this deal", so the team gets the feedback; cancelling leaves the stage as it was
+    stageSelect.addEventListener('change', () => {
+      const picked = stageSelect.value;
+      if (!isClosed(picked)) return;
+      stageSelect.value = stage;
+      openCloseDialog(lead, { outcome: picked, onDone: () => closeLeadDetail() });
+    });
+    q('#dealCloseBtn')?.addEventListener('click', () => openCloseDialog(lead, { outcome: 'WON', onDone: () => closeLeadDetail() }));
+    q('#dealHandOverBtn')?.addEventListener('click', () => openHandOverDialog(lead, { onDone: () => closeLeadDetail() }));
+    loadHistory(q('#dealHistory'), lead.id);
 
     let ownerInitial = '';
     const ownerSelect = q('#dealOwner');
@@ -240,7 +425,9 @@ const LeadsModule = (() => {
     host.innerHTML = `
       <div class="pipeline-list-filters">
         <select class="tenant-filter" data-f="stage" aria-label="Filter by stage">
-          <option value="">All stages</option>${options(Crm.STAGES, '')}
+          <option value="">All stages</option>
+          <optgroup label="The three steps">${Crm.GROUPS.map((g) => `<option value="group:${esc(g.key)}">${esc(g.label)}</option>`).join('')}</optgroup>
+          <optgroup label="Stages">${options(Crm.STAGES, '')}</optgroup>
         </select>
         <select class="tenant-filter" data-f="priority" aria-label="Filter by priority">
           <option value="">All priorities</option>${options(Crm.PRIORITIES, '')}
@@ -314,8 +501,10 @@ const LeadsModule = (() => {
       const query = (opts.getQuery && opts.getQuery()) || {};
       const body = f('body');
       try {
+        const byGroup = stage.startsWith('group:'); // "New / Being served / Completed" instead of one stage
         const res = await Api.getLeads({
-          page, page_size: pageSize, search: query.search || '', status: stage, priority,
+          page, page_size: pageSize, search: query.search || '', status: byGroup ? '' : stage,
+          stage_group: byGroup ? stage.slice(6) : '', priority,
           assigned_user_id: query.assigned_user_id, unassigned: query.unassigned,
         });
         if (mine !== seq) return;
@@ -379,7 +568,7 @@ const LeadsModule = (() => {
     if (window.PipelineModule && typeof PipelineModule.refresh === 'function') PipelineModule.refresh();
   }
 
-  return { openLeadDetail, closeLeadDetail, createList, loadLeads, errText };
+  return { openLeadDetail, closeLeadDetail, openCloseDialog, openHandOverDialog, createList, loadLeads, errText };
 })();
 
 window.LeadsModule = LeadsModule;

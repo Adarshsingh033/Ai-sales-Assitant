@@ -40,7 +40,7 @@ const ContactsModule = (() => {
     ESCALATED_HUMAN: 'With a person',
     RESOLVED: 'Resolved',
   };
-  const KIND_ICON = { NOTE: '📝', STAGE: '➡️', ASSIGNED: '👤', TASK: '✅', DEAL: '💼', CONTACT: '🆕', AI: '🤖', CHAT: '💬' };
+  const KIND_ICON = { NOTE: '📝', STAGE: '➡️', ASSIGNED: '👤', TASK: '✅', DEAL: '💼', CONTACT: '🆕', AI: '🤖', CHAT: '💬', FEEDBACK: '🗒️' };
 
   // ------------------------------------------------------------------ helpers
   function errText(err) {

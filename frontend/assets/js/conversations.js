@@ -6,6 +6,8 @@
 const ConversationsModule = (() => {
   let conversations = [];
   let selectedConvId = null;
+  let selectedLeadId = null; // the deal behind the open chat, for the "Open deal" button
+  let dealListenerAdded = false;
   let activeFilter = ''; // '', 'ACTIVE_AI', 'HUMAN_TAKEOVER', 'RESOLVED'
   let searchTimeout = null;
 
@@ -169,6 +171,10 @@ const ConversationsModule = (() => {
     if (btnTakeover) btnTakeover.style.display = conv.status === 'ACTIVE_AI' ? 'inline-block' : 'none';
     if (btnHandback) btnHandback.style.display = isHumanTakeover ? 'inline-block' : 'none';
     if (btnResolve) btnResolve.style.display = conv.status !== 'RESOLVED' ? 'inline-block' : 'none';
+    // talk, then close or hand over: the deal behind this chat is one click away
+    selectedLeadId = conv.lead_id || null;
+    const btnOpenDeal = document.getElementById('btnOpenDeal');
+    if (btnOpenDeal) btnOpenDeal.style.display = selectedLeadId ? 'inline-block' : 'none';
 
     // Composer input & notice banner
     const noticeBar = document.getElementById('inboxTakeoverNotice');
@@ -290,6 +296,28 @@ const ConversationsModule = (() => {
     }
   }
 
+  /** Open the deal behind this chat: that is where it is closed with feedback, or handed to a teammate. */
+  function openDeal() {
+    if (selectedLeadId && typeof LeadsModule !== 'undefined') LeadsModule.openLeadDetail(selectedLeadId);
+  }
+
+  /** A deal was closed or handed over (here or on the Pipeline): the chat may be resolved, or no longer ours to show. */
+  async function refreshAfterDealChange() {
+    if (selectedConvId) {
+      try {
+        await Api.getConversation(selectedConvId);
+      } catch (err) {
+        selectedConvId = null;
+        selectedLeadId = null;
+        const emptyPane = document.getElementById('inboxEmptyPane');
+        const activePane = document.getElementById('inboxActivePane');
+        if (emptyPane) emptyPane.style.display = 'flex';
+        if (activePane) activePane.style.display = 'none';
+      }
+    }
+    loadConversations();
+  }
+
   async function sendReply() {
     if (!selectedConvId) return;
     const input = document.getElementById('inboxReplyInput');
@@ -371,12 +399,17 @@ const ConversationsModule = (() => {
       setupEvents();
       startPolling();
       loadConversations();
+      if (!dealListenerAdded && typeof Crm !== 'undefined') { // init() runs on every visit to the Inbox
+        dealListenerAdded = true;
+        Crm.on('deals-changed', refreshAfterDealChange);
+      }
     },
     loadConversations,
     selectConversation,
     takeover,
     handback,
     resolve,
+    openDeal,
     sendReply,
     filterByCustomer
   };

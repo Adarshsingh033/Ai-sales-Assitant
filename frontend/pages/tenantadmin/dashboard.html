@@ -375,6 +375,7 @@
                 <th>Role</th>
                 <th>Phone</th>
                 <th>Availability</th>
+                <th title="New leads, leads being served, and completed deals">Deals</th>
                 <th>Status</th>
                 <th>Last Login</th>
                 <th>Actions</th>
@@ -488,6 +489,7 @@
                   <span id="inboxChatStatusBadge"></span>
                   <button id="btnTakeover" class="btn-primary" style="font-size:12px; padding:6px 12px;" onclick="ConversationsModule.takeover()">Take Over</button>
                   <button id="btnHandback" class="btn-secondary" style="font-size:12px; padding:6px 12px; display:none;" onclick="ConversationsModule.handback()">Hand Back to AI</button>
+                  <button id="btnOpenDeal" class="btn-secondary" style="font-size:12px; padding:6px 12px; display:none;" onclick="ConversationsModule.openDeal()" title="Close this deal with your feedback, or hand it to a teammate">Open deal</button>
                   <button id="btnResolve" class="btn-secondary" style="font-size:12px; padding:6px 12px;" onclick="ConversationsModule.resolve()">Mark Resolved</button>
                 </div>
               </div>

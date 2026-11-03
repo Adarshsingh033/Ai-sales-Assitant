@@ -52,7 +52,7 @@ const PipelineModule = (() => {
       <div class="tenant-page-header">
         <div class="tenant-page-title">
           <h2>Pipeline</h2>
-          <p>Drag deals from one stage to the next as they progress.</p>
+          <p>Leads come in, get served, then are completed. Drag a deal along as it progresses.</p>
         </div>
         <div class="tenant-toolbar">
           <div class="tenant-search-box">
@@ -70,6 +70,7 @@ const PipelineModule = (() => {
         </div>
       </div>
 
+      <div id="pipelineSteps" class="pipeline-steps" aria-label="Leads by step" hidden></div>
       <div id="pipelineNotice" class="pipeline-notice" data-admin-only hidden></div>
       <div id="pipelineBoard" class="pipeline-board" aria-label="Deals by stage"></div>
       <div id="pipelineList" hidden></div>`;
@@ -86,6 +87,10 @@ const PipelineModule = (() => {
     $('pipelineAdd').addEventListener('click', () => openDealForm());
     el.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
     $('pipelineNotice').addEventListener('click', (e) => { if (e.target.closest('[data-show-unassigned]')) setOwner(UNASSIGNED); });
+    $('pipelineSteps').addEventListener('click', (e) => {
+      const tile = e.target.closest('[data-group]');
+      if (tile) setView('list', { stage: `group:${tile.dataset.group}` });
+    });
 
     if (window.LeadsModule && LeadsModule.createList) {
       list = LeadsModule.createList($('pipelineList'), { getQuery: query, onAdd: () => openDealForm() });
@@ -128,6 +133,35 @@ const PipelineModule = (() => {
       box.innerHTML = `<span>${n} deal${n === 1 ? ' has' : 's have'} no owner yet.</span>
         <button type="button" class="crm-link-btn" data-show-unassigned>Show them</button>`;
     }
+  }
+
+  // ======================================================================= the three steps
+  let stepsSeq = 0;
+
+  function renderSteps(stats) {
+    const box = $('pipelineSteps');
+    if (!box) return;
+    const groups = stats.group_counts || {};
+    const stages = stats.stage_counts || {};
+    box.hidden = false;
+    box.innerHTML = Crm.GROUPS.map((g, i) => {
+      const hint = g.key === 'COMPLETED' ? `${stages.WON || 0} won · ${stages.LOST || 0} lost` : g.hint;
+      return `${i ? '<span class="pipeline-step-arrow" aria-hidden="true">→</span>' : ''}
+        <button type="button" class="pipeline-step step-${g.key.toLowerCase()}" data-group="${esc(g.key)}" title="Show these deals as a list">
+          <span class="pipeline-step-n">${groups[g.key] || 0}</span>
+          <span class="pipeline-step-t"><strong>${esc(g.label)}</strong><small>${esc(hint)}</small></span>
+        </button>`;
+    }).join('');
+  }
+
+  /** The New → Being served → Completed counts follow the owner filter (admins) and always cover the whole team's view. */
+  async function loadSteps() {
+    const mine = ++stepsSeq;
+    const q = query();
+    try {
+      const stats = await Api.getLeadPipelineStats({ assigned_user_id: q.assigned_user_id, unassigned: q.unassigned });
+      if (mine === stepsSeq) renderSteps(stats);
+    } catch (err) { /* the strip is a bonus: the board and list still work without it */ }
   }
 
   // ======================================================================= board
@@ -233,6 +267,17 @@ const PipelineModule = (() => {
     const toCol = board.columns.find((c) => c.stage === toStage);
     if (!card || !toCol || fromCol === toCol) return;
 
+    // Finishing a deal always asks for feedback first; the card only moves once that is saved
+    const finished = (s) => s === 'WON' || s === 'LOST';
+    if (finished(toStage)) {
+      if (finished(fromCol.stage)) {
+        Crm.toast('This deal is already closed. Move it back to an open stage first.', 'error');
+      } else {
+        LeadsModule.openCloseDialog({ id: card.id, title: card.title }, { outcome: toStage });
+      }
+      return;
+    }
+
     const snapshot = JSON.parse(JSON.stringify(board));
     fromCol.cards = fromCol.cards.filter((x) => x.id !== id);
     fromCol.count -= 1;
@@ -327,6 +372,7 @@ const PipelineModule = (() => {
   // ======================================================================= loading
   function refresh() {
     if (!rendered) return Promise.resolve();
+    loadSteps();
     return view === 'list' && list ? list.load() : loadBoard();
   }
 
@@ -464,6 +510,7 @@ const PipelineModule = (() => {
   Crm.on('route:pipeline', async (params = {}) => {
     if (!rendered) await init();
     if (params.unassigned) setOwner(UNASSIGNED);
+    if (params.owner) setOwner(params.owner); // e.g. from the Team screen: show this person's deals
     if (params.lead) LeadsModule.openLeadDetail(params.lead);
   });
 

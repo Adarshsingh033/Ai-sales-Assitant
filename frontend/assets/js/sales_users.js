@@ -15,6 +15,7 @@ const SalesUsersModule = (() => {
   let currentSortBy = 'created_at';
   let currentSortOrder = 'desc';
   let allUsers = [];
+  let workload = {}; // user id -> { new, serving, completed, won, lost, overdue_tasks, ... } for the Deals column
   let pendingAction = null;
   let roles = []; // roles an admin has created: the Role dropdown lists exactly these
 
@@ -141,15 +142,20 @@ const SalesUsersModule = (() => {
     renderLoading();
 
     try {
-      const response = await Api.getSalesUsers({
-        page: currentPage,
-        page_size: pageSize,
-        search: currentSearch,
-        is_active: currentStatus,
-        is_available: currentAvailability,
-        sort_by: currentSortBy,
-        sort_order: currentSortOrder,
-      });
+      const [response, load] = await Promise.all([
+        Api.getSalesUsers({
+          page: currentPage,
+          page_size: pageSize,
+          search: currentSearch,
+          is_active: currentStatus,
+          is_available: currentAvailability,
+          sort_by: currentSortBy,
+          sort_order: currentSortOrder,
+        }),
+        Api.getTeamWorkload().catch(() => null), // the Deals column is a bonus: the list still works without it
+      ]);
+      workload = {};
+      ((load && load.members) || []).forEach((m) => { workload[m.user_id] = m; });
       allUsers = response.items || [];
       totalPages = response.total_pages || 1;
       currentPage = response.page || 1;
@@ -166,7 +172,7 @@ const SalesUsersModule = (() => {
   function renderLoading() {
     els.tableContainer.style.display = 'block';
     els.tableBody.innerHTML = `
-      <tr><td colspan="8" style="text-align: center; padding: 48px;">
+      <tr><td colspan="9" style="text-align: center; padding: 48px;">
         <div style="color:var(--color-gray-500);">Loading users...</div>
       </td></tr>
     `;
@@ -177,7 +183,7 @@ const SalesUsersModule = (() => {
 
     if (isError) {
       els.tableBody.innerHTML = `
-        <tr><td colspan="8" style="text-align: center; padding: 48px;">
+        <tr><td colspan="9" style="text-align: center; padding: 48px;">
           <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <h3 style="font-size: 15px; font-weight: 600; color: var(--color-gray-700); margin-bottom: 8px;">${escapeHtml(message)}</h3>
             <button class="btn-secondary mt-3" onclick="SalesUsersModule.loadUsers()">Retry</button>
@@ -188,7 +194,7 @@ const SalesUsersModule = (() => {
     }
 
     els.tableBody.innerHTML = `
-      <tr><td colspan="8" style="text-align: center; padding: 64px 24px;">
+      <tr><td colspan="9" style="text-align: center; padding: 64px 24px;">
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
           <h3 style="font-size: 15px; font-weight: 600; color: var(--color-gray-700); margin-bottom: 8px;">${escapeHtml(message)}</h3>
           <p style="font-size: 13px; color: var(--color-gray-500); margin-bottom: 16px;">There are no team members matching this criteria.</p>
@@ -196,6 +202,24 @@ const SalesUsersModule = (() => {
         </div>
       </td></tr>
     `;
+  }
+
+  /** "3 new · 5 serving · 12 done" for one person; clicking it opens their deals in the Pipeline. */
+  function dealsCell(u) {
+    const w = workload[u.id];
+    if (!w || !(w.new || w.serving || w.completed || w.overdue_tasks)) return '<span class="team-muted">—</span>';
+    const overdue = w.overdue_tasks
+      ? `<span class="team-load-chip overdue" title="Overdue to-dos"><b>${w.overdue_tasks}</b> overdue</span>` : '';
+    return `<button type="button" class="team-load" onclick="SalesUsersModule.showDeals('${u.id}')"
+        title="${escapeHtml(displayName(u))}: ${w.won} won, ${w.lost} lost. Click to see their deals.">
+      <span class="team-load-chip new"><b>${w.new}</b> new</span>
+      <span class="team-load-chip serving"><b>${w.serving}</b> serving</span>
+      <span class="team-load-chip done"><b>${w.completed}</b> done</span>${overdue}
+    </button>`;
+  }
+
+  function showDeals(id) {
+    Crm.goto('pipeline', { owner: id });
   }
 
   function renderTable(users) {
@@ -230,6 +254,7 @@ const SalesUsersModule = (() => {
           <td>${escapeHtml(u.role_name || '—')}${isAdmin ? '<span class="team-role-pill" title="Full access to the workspace">Admin access</span>' : ''}</td>
           <td>${escapeHtml(u.phone_number || '—')}</td>
           <td>${availability}</td>
+          <td>${dealsCell(u)}</td>
           <td>
             <div ${toggleAttrs}>
               <span class="status-toggle ${u.is_active ? 'active' : ''}">
@@ -717,6 +742,7 @@ const SalesUsersModule = (() => {
     closeDetailsModal,
     closeResetPasswordModal,
     toggleUserStatus,
+    showDeals,
     closeConfirmModal,
     executeConfirmedAction,
     togglePasswordVisibility,

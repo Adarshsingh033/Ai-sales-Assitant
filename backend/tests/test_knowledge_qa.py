@@ -64,16 +64,17 @@ async def test_a_misspelled_question_is_corrected_before_searching_and_prompting
 
 
 @pytest.mark.asyncio
-async def test_a_general_question_gets_a_short_answer_and_is_still_logged_for_admins(client: AsyncClient, test_db, fake_llm):
+async def test_a_question_the_documents_miss_is_logged_for_admins_and_never_answered_from_general_knowledge(
+    client: AsyncClient, test_db, fake_llm
+):
     tenant, admin, rep = await _world(test_db)
-    fake_llm.replies = ["The capital of France is Paris. I'm here for questions about your company's products and policies."] * 2
-    res = await _ask(client, rep, "What is the capital of France?")
-    assert res.json()["status"] == "general" and "Paris" in res.json()["answer"] and res.json()["sources"] == []
-    prompt = fake_llm.reply_calls()[0]["messages"]  # no sources are sent; the model is told the company and the NOT_FOUND rule
-    assert "reply with exactly NOT_FOUND" in prompt[0]["content"] and "Ask Co" in prompt[0]["content"]
-    assert prompt[1]["content"] == "What is the capital of France?"
+    fake_llm.replies = ["COMPANY"] * 4
+    res = await _ask(client, rep, "Who is the CEO of our company?")
+    assert res.json()["status"] == "not_found" and res.json()["sources"] == [] and "couldn't find" in res.json()["answer"]
+    prompt = fake_llm.reply_calls()[0]["messages"]  # the scope check sees no sources, only the company name and the question
+    assert "Ask Co" in prompt[0]["content"] and prompt[1]["content"] == "Who is the CEO of our company?"
 
-    await _ask(client, admin, "what is the capital of France")  # same question, different wording/case
+    await _ask(client, admin, "who is the ceo of our company")  # same question, different wording/case
     gaps = (await client.get(f"{API}/gaps", headers=admin)).json()
     assert gaps["open_count"] == 1 and gaps["items"][0]["times_asked"] == 2
     assert gaps["items"][0]["last_asked_by"]
@@ -86,32 +87,30 @@ async def test_a_general_question_gets_a_short_answer_and_is_still_logged_for_ad
 
 
 @pytest.mark.asyncio
-async def test_a_company_question_the_documents_miss_is_never_answered_from_general_knowledge(client: AsyncClient, test_db, fake_llm):
+async def test_an_outside_question_is_not_answered_just_pointed_back_politely_and_not_logged(client: AsyncClient, test_db, fake_llm):
     _, admin, _ = await _world(test_db)
-    fake_llm.replies = ["NOT_FOUND", "NOT_FOUND"]
-    body = (await _ask(client, admin, "Who is the CEO of our company?")).json()
-    assert body["status"] == "not_found" and body["sources"] == [] and "couldn't find" in body["answer"]
-    assert (await client.get(f"{API}/gaps", headers=admin)).json()["open_count"] == 1
+    for question in ("What is the capital of France?", "give python to write hello world"):
+        fake_llm.replies = ["OUTSIDE"]
+        body = (await _ask(client, admin, question)).json()
+        assert body["status"] == "off_topic" and body["sources"] == []
+        assert "inventory and knowledge base" in body["answer"] and "doesn't belong there" in body["answer"]
+        assert "Paris" not in body["answer"] and "print" not in body["answer"]  # nothing from general knowledge
+    assert len(fake_llm.reply_calls()) == 2  # one tiny scope check per question, no answer generated
+    assert (await client.get(f"{API}/gaps", headers=admin)).json()["open_count"] == 0  # nothing an admin could add documents for
+
+
+@pytest.mark.asyncio
+async def test_anything_but_a_clear_outside_verdict_counts_as_a_company_question(client: AsyncClient, test_db, fake_llm):
+    _, admin, _ = await _world(test_db)
+    fake_llm.replies = ["Sure, the CEO is Jane Doe."]  # an unexpected reply must not hide a real gap behind the polite note
+    assert (await _ask(client, admin, "Who is the CEO of our company?")).json()["status"] == "not_found"
 
 
 @pytest.mark.asyncio
 async def test_when_the_ai_is_unavailable_an_unrelated_question_is_simply_not_found(client: AsyncClient, test_db):
     _, admin, _ = await _world(test_db)
-    res = await _ask(client, admin, "What is the capital of France?")  # default NullLLM: the fallback must not turn this into a 503
+    res = await _ask(client, admin, "What is the capital of France?")  # default NullLLM: the scope check must not become a 503
     assert res.status_code == 200 and res.json()["status"] == "not_found"
-
-
-@pytest.mark.asyncio
-async def test_general_answers_keep_code_blocks_and_always_close_them(client: AsyncClient, test_db, fake_llm):
-    _, admin, _ = await _world(test_db)
-    fake_llm.replies = ["Here you go:\n```python\nprint(sum([1, 2, 3]))\n```\nI'm here for your company's products and pricing."]
-    body = (await _ask(client, admin, "Give me python code to reverse a string")).json()
-    assert body["status"] == "general" and "```python" in body["answer"] and "sum([1, 2, 3])" in body["answer"]
-
-    fake_llm.replies = ["```python\n" + "x = 1\n" * 400]  # far too long and never closed
-    long = (await _ask(client, admin, "Write a very long script")).json()
-    assert long["status"] == "general" and long["answer"].count("```") % 2 == 0
-    assert len(long["answer"]) <= knowledge_qa.MAX_GENERAL_CHARS + 4
 
 
 @pytest.mark.asyncio
@@ -340,8 +339,9 @@ async def test_library_lists_real_product_names_and_home_counts_unanswered_quest
     lib = (await client.get(f"{API}/library", headers=rep)).json()
     assert lib["product_count"] == 2 and lib["product_names"] == ["Alpha Gadget", "Zeta Widget"]
 
-    await _ask(client, admin, "What is the capital of France?")  # nothing relevant -> logged
-    home = (await client.get("/api/v1/tenant-admin/dashboard/home", headers=admin)).json()
+    fake_llm.replies = ["COMPANY"]
+    await _ask(client, admin, "Who is the CEO of our company?")  # nothing relevant -> logged
+    home =(await client.get("/api/v1/tenant-admin/dashboard/home", headers=admin)).json()
     assert home["unanswered_questions"] == 1
     assert (await client.get("/api/v1/tenant-admin/dashboard/home", headers=rep)).json()["unanswered_questions"] == 0
 

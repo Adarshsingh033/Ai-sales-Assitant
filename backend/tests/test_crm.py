@@ -490,3 +490,166 @@ async def test_resolved_chats_are_counted_from_real_status(client: AsyncClient, 
     assert stats["resolved_conversations"] == 1 and stats["active_ai_conversations"] == 2
     rep = (await client.get(f"{API}/dashboard", headers=_headers(world["rep_a"]))).json()
     assert rep["resolved_conversations"] == 1 and rep["active_ai_conversations"] == 0  # a rep only counts their own chats
+
+
+# ----------------------------------------------------------------------------- hand-over, closing, the three steps
+@pytest.mark.asyncio
+async def test_a_rep_hands_a_deal_to_another_rep_with_a_note_and_the_chat_and_todos_go_with_it(client: AsyncClient, test_db, world):
+    lead, rep_a, rep_b = world["lead_a"], world["rep_a"], world["rep_b"]
+    test_db.add(Task(tenant_id=world["tenant"].id, title="Send the quote", assigned_user_id=rep_a.id, lead_id=lead.id,
+                     customer_id=world["cust_a"].id))
+    test_db.add(Task(tenant_id=world["tenant"].id, title="Own errand", assigned_user_id=rep_a.id))
+    await test_db.commit()
+    url, ra = f"{API}/leads/{lead.id}/hand-over", _headers(rep_a)
+
+    assert (await client.post(url, json={"to_user_id": str(rep_b.id)}, headers=ra)).status_code == 422  # a note is required
+    assert (await client.post(url, json={"to_user_id": str(rep_b.id), "note": "   "}, headers=ra)).status_code == 422
+
+    res = await client.post(url, json={"to_user_id": str(rep_b.id), "note": "Wants the annual plan, call after 3pm"}, headers=ra)
+    assert res.status_code == 200 and res.json()["assigned_user_id"] == str(rep_b.id)
+    await test_db.refresh(world["conv_a"])
+    assert world["conv_a"].assigned_user_id == rep_b.id
+
+    tasks = {t.title: t.assigned_user_id for t in (await test_db.execute(select(Task))).scalars().all()}
+    assert tasks["Send the quote"] == rep_b.id and tasks["Own errand"] == rep_a.id  # only this deal's to-dos move
+
+    # the new owner is told why, and the note stays on the deal's history
+    notes = (await test_db.execute(select(Notification).where(Notification.recipient_user_id == rep_b.id))).scalars().all()
+    assert any("Wants the annual plan" in n.message for n in notes)
+    history = (await client.get(f"{API}/leads/{lead.id}/history", headers=_headers(rep_b))).json()
+    assert any(h["kind"] == "FEEDBACK" and h["text"] == "Hand-over note: Wants the annual plan, call after 3pm" for h in history)
+    assert any(h["kind"] == "ASSIGNED" and "reassigned this deal from Rae Rep to Ben" in h["text"] for h in history)
+    assert history[0]["kind"] == "FEEDBACK"
+
+    # the previous owner no longer sees it
+    assert (await client.get(f"{API}/leads/{lead.id}", headers=ra)).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_hand_over_rules(client: AsyncClient, test_db, world):
+    lead, rep_a, rep_b, admin = world["lead_a"], world["rep_a"], world["rep_b"], world["admin"]
+    body = {"to_user_id": str(rep_b.id), "note": "yours now"}
+    url, ra = f"{API}/leads/{lead.id}/hand-over", _headers(rep_a)
+
+    # a rep cannot hand over someone else's deal, "give" it to its current owner, or give it to an admin
+    other_deal = f"{API}/leads/{world['lead_b'].id}/hand-over"
+    assert (await client.post(other_deal, json={**body, "to_user_id": str(rep_a.id)}, headers=ra)).status_code == 404
+    assert (await client.post(url, json={**body, "to_user_id": str(rep_a.id)}, headers=ra)).status_code == 422
+    assert (await client.post(url, json={**body, "to_user_id": str(admin.id)}, headers=ra)).status_code == 404
+    # nor to someone who works for another company, or has been deactivated
+    elsewhere = await make_rep(test_db, await make_tenant(test_db, "Elsewhere"))
+    assert (await client.post(url, json={**body, "to_user_id": str(elsewhere.id)}, headers=ra)).status_code == 404
+    rep_b.is_active = False
+    await test_db.commit()
+    assert (await client.post(url, json=body, headers=ra)).status_code == 422
+    rep_b.is_active = True
+    await test_db.commit()
+
+    # a finished deal stays where it is
+    assert (await client.post(f"{API}/leads/{lead.id}/close", json={"outcome": "WON", "feedback": "Signed"}, headers=ra)).status_code == 200
+    assert (await client.post(url, json=body, headers=ra)).status_code == 409
+    assert (await client.post(url, json=body, headers=_headers(admin))).status_code == 409
+
+    # admins can hand a deal to anyone on the team, themselves included
+    free = f"{API}/leads/{world['lead_free'].id}/hand-over"
+    to_admin = await client.post(free, json={**body, "to_user_id": str(admin.id)}, headers=_headers(admin))
+    assert to_admin.status_code == 200 and to_admin.json()["assigned_user_id"] == str(admin.id)
+
+
+@pytest.mark.asyncio
+async def test_closing_a_deal_keeps_the_feedback_resolves_the_chat_and_can_be_undone(client: AsyncClient, test_db, world):
+    lead, rep_a, rep_b = world["lead_a"], world["rep_a"], world["rep_b"]
+    url, ra = f"{API}/leads/{lead.id}/close", _headers(rep_a)
+
+    assert (await client.post(url, json={"outcome": "WON"}, headers=ra)).status_code == 422  # feedback is required
+    assert (await client.post(url, json={"outcome": "WON", "feedback": "  "}, headers=ra)).status_code == 422
+    assert (await client.post(url, json={"outcome": "PROPOSAL", "feedback": "x"}, headers=ra)).status_code == 422  # only Won or Lost
+    assert (await client.post(f"{API}/leads/{world['lead_b'].id}/close", json={"outcome": "LOST", "feedback": "x"}, headers=ra)).status_code == 404
+
+    res = await client.post(url, json={"outcome": "lost", "reason": "Price too high", "feedback": "Liked it, budget was half"}, headers=ra)
+    body = res.json()
+    assert res.status_code == 200 and body["status"] == "LOST" and body["close_reason"] == "Price too high" and body["closed_at"]
+    await test_db.refresh(world["conv_a"])
+    assert world["conv_a"].status == "RESOLVED"
+
+    history = (await client.get(f"{API}/leads/{lead.id}/history", headers=ra)).json()
+    texts = [h["text"] for h in history]
+    assert "Feedback: Liked it, budget was half" in texts
+    assert any("from New to Lost (Price too high)" in t for t in texts)
+    assert next(h for h in history if h["kind"] == "FEEDBACK")["actor_name"] == "Rae Rep"
+    assert history[0]["kind"] == "FEEDBACK"  # the person's own words read as the latest entry
+    assert (await client.get(f"{API}/leads/{lead.id}/history", headers=_headers(rep_b))).status_code == 404
+
+    assert (await client.post(url, json={"outcome": "WON", "feedback": "again"}, headers=ra)).status_code == 409  # already closed
+
+    # moving it back to an open stage forgets the closing details
+    back = (await client.put(f"{API}/leads/{lead.id}", json={"status": "CONTACTED"}, headers=ra)).json()
+    assert back["status"] == "CONTACTED" and back["closed_at"] is None and back["close_reason"] is None
+
+
+@pytest.mark.asyncio
+async def test_a_chat_knows_which_deal_it_belongs_to(client: AsyncClient, world):
+    chat = (await client.get(f"{API}/conversations/{world['conv_a'].id}", headers=_headers(world["rep_a"]))).json()
+    assert chat["lead_id"] == str(world["lead_a"].id)
+
+
+@pytest.mark.asyncio
+async def test_closing_through_the_stage_field_also_stamps_the_deal_and_resolves_the_chat(client: AsyncClient, test_db, world):
+    res = await client.put(f"{API}/leads/{world['lead_b'].id}", json={"status": "WON"}, headers=_headers(world["admin"]))
+    assert res.status_code == 200 and res.json()["closed_at"]
+    await test_db.refresh(world["conv_b"])
+    assert world["conv_b"].status == "RESOLVED"
+
+
+@pytest.mark.asyncio
+async def test_new_served_completed_roll_up_the_stages_and_filter_the_list(client: AsyncClient, world):
+    adm = _headers(world["admin"])
+    stats = (await client.get(f"{API}/leads/pipeline-stats", headers=adm)).json()
+    assert stats["group_counts"] == {"NEW": 2, "SERVING": 1, "COMPLETED": 0}  # Deal A + Deal Free are new, Deal B is qualified
+
+    await client.post(f"{API}/leads/{world['lead_a'].id}/close", json={"outcome": "WON", "feedback": "done"}, headers=adm)
+    stats = (await client.get(f"{API}/leads/pipeline-stats", headers=adm)).json()
+    assert stats["group_counts"] == {"NEW": 1, "SERVING": 1, "COMPLETED": 1}
+
+    only_rep_b = (await client.get(f"{API}/leads/pipeline-stats?assigned_user_id={world['rep_b'].id}", headers=adm)).json()
+    assert only_rep_b["group_counts"] == {"NEW": 0, "SERVING": 1, "COMPLETED": 0}
+    nobody = (await client.get(f"{API}/leads/pipeline-stats?unassigned=true", headers=adm)).json()
+    assert nobody["group_counts"] == {"NEW": 1, "SERVING": 0, "COMPLETED": 0}
+
+    def titles(res):
+        return sorted(l["title"] for l in res.json()["items"])
+
+    assert titles(await client.get(f"{API}/leads?stage_group=SERVING", headers=adm)) == ["Deal B"]
+    assert titles(await client.get(f"{API}/leads?stage_group=completed", headers=adm)) == ["Deal A"]
+    assert titles(await client.get(f"{API}/leads?stage_group=NEW", headers=adm)) == ["Deal Free"]
+    assert (await client.get(f"{API}/leads?stage_group=DONE", headers=adm)).status_code == 422
+    # a rep's numbers only cover their own deals
+    mine = (await client.get(f"{API}/leads/pipeline-stats", headers=_headers(world["rep_b"]))).json()
+    assert mine["group_counts"] == {"NEW": 0, "SERVING": 1, "COMPLETED": 0}
+
+
+@pytest.mark.asyncio
+async def test_workload_shows_each_members_deals_and_todos_to_admins_only(client: AsyncClient, test_db, world):
+    now = datetime.now(timezone.utc)
+    tid, rep_a, rep_b = world["tenant"].id, world["rep_a"], world["rep_b"]
+    test_db.add_all([
+        Task(tenant_id=tid, title="Late", assigned_user_id=rep_a.id, due_at=now - timedelta(days=1)),
+        Task(tenant_id=tid, title="Later", assigned_user_id=rep_a.id, due_at=now + timedelta(days=2)),
+        Task(tenant_id=tid, title="Done", assigned_user_id=rep_a.id, status="DONE"),
+    ])
+    for title, stage in (("Old win", "WON"), ("Old loss", "LOST")):
+        conv = await make_conversation(test_db, world["tenant"], world["cust_a"])
+        await make_lead(test_db, world["tenant"], world["cust_a"], conv, title=title, assigned_user_id=rep_a.id, status=stage)
+    await test_db.commit()
+
+    res = await client.get(f"{API}/team/workload", headers=_headers(world["admin"]))
+    assert res.status_code == 200
+    by_user = {m["user_id"]: m for m in res.json()["members"]}
+    a = by_user[str(rep_a.id)]
+    assert (a["new"], a["serving"], a["completed"], a["won"], a["lost"]) == (1, 0, 2, 1, 1)
+    assert (a["open_tasks"], a["overdue_tasks"]) == (2, 1)
+    assert (by_user[str(rep_b.id)]["serving"], by_user[str(rep_b.id)]["new"]) == (1, 0)
+    assert str(world["admin"].id) not in by_user
+    assert res.json()["unassigned"] == 1  # Deal Free
+
+    assert (await client.get(f"{API}/team/workload", headers=_headers(rep_a))).status_code == 403

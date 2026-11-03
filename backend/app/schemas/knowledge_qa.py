@@ -35,7 +35,7 @@ class AskSource(BaseModel):
 
 
 class AskResponse(BaseModel):
-    status: Literal["answered", "general", "not_found", "not_stated", "unverified", "empty"]
+    status: Literal["answered", "off_topic", "not_found", "not_stated", "unverified", "empty"]
     answer: str
     sources: List[AskSource] = Field(default_factory=list)
     searched_for: Optional[str] = None  # the standalone query used for a follow-up

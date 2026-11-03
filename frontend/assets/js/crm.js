@@ -23,6 +23,13 @@ const Crm = (() => {
     { key: 'WON', label: 'Won' },
     { key: 'LOST', label: 'Lost' },
   ];
+  // The three steps the team talks about; the six stages sit underneath them.
+  const GROUPS = [
+    { key: 'NEW', label: 'New', hint: 'Waiting for a first reply' },
+    { key: 'SERVING', label: 'Being served', hint: 'Contacted, qualified or quoted' },
+    { key: 'COMPLETED', label: 'Completed', hint: 'Won or lost' },
+  ];
+  const LOST_REASONS = ['Price too high', 'Chose a competitor', 'No response', 'Not interested', 'Bought elsewhere', 'Other'];
   const PRIORITIES = [
     { key: 'HOT', label: 'Hot' },
     { key: 'HIGH', label: 'High' },
@@ -450,7 +457,7 @@ const Crm = (() => {
   }
 
   return {
-    user, isAdmin, isRep, STAGES, PRIORITIES,
+    user, isAdmin, isRep, STAGES, GROUPS, LOST_REASONS, PRIORITIES,
     esc, money, initials, avatar, isInternalPhone, phoneLabel, relTime, dayEndISO, dueLabel, localParts, toISO, quickDue,
     stagePill, priorityPill, scorePill, toast, busy,
     on, off, emit, goto, sectionId, sectionKey,

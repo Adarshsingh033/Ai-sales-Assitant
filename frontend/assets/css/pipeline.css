@@ -10,6 +10,23 @@
 .pipeline-notice[hidden] { display: none; }
 .pipeline-notice .crm-link-btn { color: #92400e; }
 
+/* --- the three steps: new -> being served -> completed ----------------------------- */
+.pipeline-steps { display: flex; align-items: stretch; gap: 8px; margin: 0 0 16px; flex-wrap: wrap; }
+.pipeline-steps[hidden] { display: none; }
+.pipeline-step {
+  flex: 1 1 180px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-align: left; cursor: pointer; font: inherit;
+  background: #fff; border: 1px solid var(--color-border); border-left: 4px solid var(--color-primary); border-radius: 12px;
+  transition: box-shadow .15s, transform .15s;
+}
+.pipeline-step:hover, .pipeline-step:focus-visible { box-shadow: 0 2px 10px rgba(0, 0, 0, .08); transform: translateY(-1px); outline: none; }
+.pipeline-step.step-serving { border-left-color: #2563eb; }
+.pipeline-step.step-completed { border-left-color: #16a34a; }
+.pipeline-step-n { font-size: 26px; font-weight: 800; line-height: 1; color: var(--color-gray-900); min-width: 28px; }
+.pipeline-step-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pipeline-step-t strong { font-size: 14px; color: var(--color-gray-800); }
+.pipeline-step-t small { font-size: 12px; color: var(--color-gray-500); }
+.pipeline-step-arrow { align-self: center; color: var(--color-gray-400); font-size: 18px; }
+
 /* --- board ---------------------------------------------------------------- */
 .pipeline-board {
   display: flex; align-items: flex-start; gap: 14px; overflow-x: auto; padding-bottom: 14px; scroll-snap-type: x proximity;
@@ -103,7 +120,31 @@
 .deal-ai p { margin: 4px 0 0; }
 .deal-ai-title { font-weight: 700; font-size: 12px; color: var(--color-primary); }
 
-.deal-close-hint { margin: -6px 0 0; }
+/* what to do next: close it, or hand it over */
+.deal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 16px; padding: 12px 14px; background: #f8f6f1; border: 1px solid var(--color-border); border-radius: 10px; }
+.deal-actions .crm-hint { margin: 0; flex: 1 1 200px; }
+.deal-closed { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; margin: 0 0 16px; padding: 12px 14px; border-radius: 10px; font-size: 13.5px; }
+.deal-closed span { flex-basis: 100%; font-size: 12.5px; opacity: .8; }
+.deal-closed--won { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.deal-closed--lost { background: #f6f7f9; border: 1px solid #e2e8f0; color: #475569; }
+
+/* the "Close this deal" and "Hand over" dialogs */
+.deal-close-title { margin: 0 0 14px; font-weight: 700; font-size: 15px; color: var(--color-gray-900); }
+.deal-outcome { display: flex; gap: 10px; }
+.deal-outcome-opt { flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; background: #fff; }
+.deal-outcome-opt:has(input:checked).won { border-color: #16a34a; background: #f0fdf4; color: #166534; }
+.deal-outcome-opt:has(input:checked).lost { border-color: #64748b; background: #f1f5f9; color: #334155; }
+
+/* history of one deal */
+.deal-history { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--color-border); }
+.deal-history-title { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--color-gray-500); }
+.deal-history-list { list-style: none; margin: 0; padding: 0; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.deal-history-item { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.45; }
+.deal-history-icon { flex: none; width: 22px; text-align: center; }
+.deal-history-text { color: var(--color-gray-800); word-break: break-word; }
+.deal-history-meta { font-size: 12px; color: var(--color-gray-500); }
+.deal-history-item.kind-feedback .deal-history-text { padding: 6px 10px; background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0; }
+
 .deal-dialog .crm-modal-footer { justify-content: space-between; flex-wrap: wrap; }
 .deal-foot-left, .deal-foot-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .deal-delete { color: #b91c1c; }

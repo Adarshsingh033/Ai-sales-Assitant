@@ -187,6 +187,45 @@ class DealCreate(BaseModel):
     _strip = field_validator("title", "notes", mode="before")(_blank_to_none)
 
 
+class DealClose(BaseModel):
+    outcome: str = Field(..., max_length=30)  # WON | LOST
+    reason: Optional[str] = Field(None, max_length=100)  # e.g. why it was lost
+    feedback: str = Field(..., min_length=1, max_length=1500)  # the rep's own words on how it went
+
+    _strip = field_validator("reason", "feedback", mode="before")(_blank_to_none)
+
+
+class DealHandOver(BaseModel):
+    to_user_id: uuid.UUID
+    note: str = Field(..., min_length=1, max_length=1500)  # what the next person needs to know
+
+    _strip = field_validator("note", mode="before")(_blank_to_none)
+
+
+class DealHistoryItem(BaseModel):
+    id: uuid.UUID
+    kind: str
+    text: str
+    actor_name: Optional[str] = None
+    created_at: datetime
+
+
+class WorkloadMember(BaseModel):
+    user_id: uuid.UUID
+    new: int = 0
+    serving: int = 0
+    completed: int = 0
+    won: int = 0
+    lost: int = 0
+    open_tasks: int = 0
+    overdue_tasks: int = 0
+
+
+class WorkloadResponse(BaseModel):
+    members: List[WorkloadMember]
+    unassigned: int = 0  # open deals nobody owns yet
+
+
 class BoardCard(BaseModel):
     id: uuid.UUID
     title: str

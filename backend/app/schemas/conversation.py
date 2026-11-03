@@ -34,6 +34,7 @@ class ConversationResponse(BaseModel):
     last_activity_at: datetime
     created_at: datetime
     messages: Optional[List[MessageResponse]] = None
+    lead_id: Optional[uuid.UUID] = None  # the deal this chat belongs to (single-conversation view only)
 
     model_config = ConfigDict(from_attributes=True)
 

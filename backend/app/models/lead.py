@@ -67,6 +67,9 @@ class Lead(Base):
     source: Mapped[str] = mapped_column(String(50), nullable=False, default="WHATSAPP")
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    closed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)  # set while WON / LOST
+    close_reason: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # why a deal was lost (or how it was won)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=_utcnow
     )

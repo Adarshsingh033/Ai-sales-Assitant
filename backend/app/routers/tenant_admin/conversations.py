@@ -17,6 +17,7 @@ from app.core.database import get_db
 from app.core.dependencies import CRMContext, require_crm_context
 from app.models.ai_assistant_config import AIAssistantConfig
 from app.models.conversation import Conversation, Message
+from app.models.lead import Lead
 from app.schemas.conversation import (
     ConversationListResponse,
     ConversationResponse,
@@ -119,7 +120,17 @@ async def get_conversation(
     db: AsyncSession = Depends(get_db),
     ctx: CRMContext = Depends(require_crm_context),
 ) -> ConversationResponse:
-    return _to_conv_response(await _get_conversation(db, ctx, conversation_id))
+    conv = await _get_conversation(db, ctx, conversation_id)
+    response = _to_conv_response(conv)
+    response.lead_id = (
+        await db.execute(
+            select(Lead.id)
+            .where(Lead.tenant_id == ctx.tenant_id, Lead.conversation_id == conv.id)
+            .order_by(Lead.created_at.desc())
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+    return response
 
 
 @router.get(

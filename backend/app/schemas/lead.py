@@ -29,6 +29,8 @@ class LeadResponse(BaseModel):
     assigned_user_name: Optional[str] = None
     source: str
     notes: Optional[str] = None
+    closed_at: Optional[datetime] = None
+    close_reason: Optional[str] = None
 
     created_at: datetime
     updated_at: datetime
@@ -58,5 +60,6 @@ class LeadListResponse(BaseModel):
 class PipelineStatsResponse(BaseModel):
     total_leads: int
     stage_counts: Dict[str, int]
+    group_counts: Dict[str, int] = {}  # NEW / SERVING / COMPLETED: the three steps rolled up from the stages
     total_estimated_value: float
     hot_leads_count: int

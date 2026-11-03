@@ -292,6 +292,7 @@ const Api = (() => {
       if (params.search) query.append('search', params.search);
       const statusVal = params.status || params.stage;
       if (statusVal) query.append('status', statusVal);
+      if (params.stage_group) query.append('stage_group', params.stage_group);
       if (params.priority) query.append('priority', params.priority);
       if (params.min_score !== undefined && params.min_score !== '') query.append('min_score', params.min_score);
       if (params.assigned_user_id) query.append('assigned_user_id', params.assigned_user_id);
@@ -443,8 +444,33 @@ const Api = (() => {
       });
     },
 
-    async getLeadPipelineStats() {
-      return request('/tenant-admin/leads/pipeline-stats', { method: 'GET' });
+    /** { stage_counts, group_counts: { NEW, SERVING, COMPLETED }, ... }; admins can narrow it to one owner or the unowned. */
+    async getLeadPipelineStats(params = {}) {
+      const query = new URLSearchParams();
+      if (params.assigned_user_id) query.append('assigned_user_id', params.assigned_user_id);
+      if (params.unassigned) query.append('unassigned', 'true');
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      return request(`/tenant-admin/leads/pipeline-stats${qs}`, { method: 'GET' });
+    },
+
+    /** Finish a deal: { outcome: 'WON' | 'LOST', reason?, feedback } — feedback is required. */
+    async closeLead(id, data) {
+      return request(`/tenant-admin/leads/${id}/close`, { method: 'POST', body: JSON.stringify(data) });
+    },
+
+    /** Give an open deal to another team member: { to_user_id, note } — the note is required. */
+    async handOverLead(id, data) {
+      return request(`/tenant-admin/leads/${id}/hand-over`, { method: 'POST', body: JSON.stringify(data) });
+    },
+
+    /** What happened on a deal, newest first: [{ id, kind, text, actor_name, created_at }] */
+    async getLeadHistory(id) {
+      return request(`/tenant-admin/leads/${id}/history`, { method: 'GET' });
+    },
+
+    /** Admin only: how many deals (new / serving / completed) and to-dos each person has. */
+    async getTeamWorkload() {
+      return request('/tenant-admin/team/workload', { method: 'GET' });
     },
 
     // -----------------------------------------------------------------------

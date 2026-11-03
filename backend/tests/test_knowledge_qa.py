@@ -54,6 +54,16 @@ async def test_answer_is_cited_renumbered_and_lists_only_the_sources_it_used(cli
 
 
 @pytest.mark.asyncio
+async def test_a_misspelled_question_is_corrected_before_searching_and_prompting(client: AsyncClient, test_db, fake_llm):
+    _, admin, _ = await _world(test_db)
+    fake_llm.replies = ["Customers may request a full refund within 30 days of purchase [1]."]
+    body = (await _ask(client, admin, "What is the refnd policy?")).json()
+    assert body["status"] == "answered"
+    assert body["searched_for"] == "What is the refund policy?"
+    assert "QUESTION: What is the refund policy?" in fake_llm.reply_calls()[0]["messages"][1]["content"]
+
+
+@pytest.mark.asyncio
 async def test_nothing_relevant_means_no_model_call_and_the_question_is_logged_for_admins(client: AsyncClient, test_db, fake_llm):
     tenant, admin, rep = await _world(test_db)
     res = await _ask(client, rep, "What is the capital of France?")

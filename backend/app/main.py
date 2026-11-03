@@ -44,6 +44,8 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
+# httpx logs every request URL at INFO, and the Telegram bot token is part of that URL.
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------

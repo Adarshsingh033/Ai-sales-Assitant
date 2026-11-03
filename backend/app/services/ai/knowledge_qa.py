@@ -339,6 +339,7 @@ async def answer_question(
     usage = {"prompt": 0, "completion": 0}
     question = question.strip()
     query = await resolve_query(fast_llm, history, question, usage)
+    query = await RAGService.correct_query(db, tenant_id, query)  # "brighlooop" -> "brightloop" for search and for the model
     passages = await gather_passages(db, tenant_id, query)
 
     def result(status: str, answer: str, sources: Sequence[Passage] = (), model: str = "", latency: int = 0, issues=()) -> QAResult:

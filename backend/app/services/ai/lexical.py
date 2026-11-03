@@ -3,8 +3,9 @@ Small in-memory BM25 index (inverted index, k1=1.5, b=0.75).
 Complements dense retrieval: exact SKUs, product names, numbers and rare terms that embeddings blur.
 """
 import math
+import re
 from collections import Counter, defaultdict
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Mapping, Optional, Sequence, Set, Tuple
 
 from app.services.ai.embeddings import tokenize
 
@@ -16,6 +17,70 @@ _STOPWORDS = frozenset(
 
 def lexical_tokens(text: str) -> List[str]:
     return [t for t in tokenize(text) if t not in _STOPWORDS]
+
+
+# ---------------------------------------------------------------------------
+# Spelling correction against the tenant's own vocabulary
+# ---------------------------------------------------------------------------
+# Neither BM25 nor the multilingual embedder copes with a misspelled brand or product name ("brighlooop"): the word matches
+# nothing lexically and is split into meaningless sub-pieces by the embedder. Words the knowledge base has never seen are
+# therefore replaced by their closest known term, but only when that term is very close.
+_WORD = re.compile(r"[A-Za-z]{5,}")
+
+
+def _edit_distance(a: str, b: str, limit: int) -> int:
+    """Insert/delete/substitute/adjacent-swap distance, abandoned (returns limit + 1) once it must exceed `limit`."""
+    if abs(len(a) - len(b)) > limit:
+        return limit + 1
+    prev2: List[int] = []
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i] + [0] * len(b)
+        for j, cb in enumerate(b, 1):
+            cur[j] = min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb))
+            if i > 1 and j > 1 and ca == b[j - 2] and a[i - 2] == cb:
+                cur[j] = min(cur[j], prev2[j - 2] + 1)
+        if min(cur) > limit:
+            return limit + 1
+        prev2, prev = prev, cur
+    return prev[-1]
+
+
+def correct_spelling(query: str, vocabulary: Mapping[str, Sequence]) -> str:
+    """
+    Replace Latin-script words of 5+ letters that do not occur in `vocabulary` (term -> postings) with the closest term
+    that does: at most 1 edit for words up to 7 letters (same first letter), 2 edits for longer ones. Words that are known,
+    stopwords, shorter or non-Latin (Hindi...) are left alone; ties go to the term found in more chunks.
+    """
+    if not query or not vocabulary:
+        return query
+    candidates: Optional[List[str]] = None
+
+    def fix(match: "re.Match[str]") -> str:
+        nonlocal candidates
+        word = match.group(0)
+        low = word.lower()
+        if low in vocabulary or low in _STOPWORDS:
+            return word
+        if candidates is None:
+            candidates = [t for t in vocabulary if len(t) >= 4 and t.isascii() and t.isalpha()]
+        limit = 1 if len(low) <= 7 else 2
+        best: Optional[Tuple[Tuple[int, int, str], str]] = None
+        for term in candidates:
+            if abs(len(term) - len(low)) > limit or (limit == 1 and term[0] != low[0]):
+                continue
+            dist = _edit_distance(low, term, limit)
+            if dist > limit:
+                continue
+            rank = (dist, -len(vocabulary[term]), term)
+            if best is None or rank < best[0]:
+                best = (rank, term)
+        if best is None:
+            return word
+        fixed = best[1]
+        return fixed.upper() if word.isupper() else fixed.capitalize() if word[0].isupper() else fixed
+
+    return _WORD.sub(fix, query)
 
 
 class BM25Index:

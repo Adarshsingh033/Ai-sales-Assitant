@@ -31,7 +31,7 @@ from app.services.ai.embeddings import (
     embedding_model_name,
     to_bytes,
 )
-from app.services.ai.lexical import lexical_tokens
+from app.services.ai.lexical import correct_spelling, lexical_tokens
 from app.services.ai.vector_store import (
     NumpyVectorStore,
     get_tenant_index,
@@ -377,6 +377,13 @@ class RAGService:
     # Retrieval
     # ------------------------------------------------------------------
     @classmethod
+    async def correct_query(cls, db: AsyncSession, tenant_id: uuid.UUID, query: str) -> str:
+        """`query` with words this tenant's knowledge has never seen replaced by their closest known spelling."""
+        q = (query or "").strip()
+        index = await get_tenant_index(db, tenant_id, need_vectors=get_vector_store().needs_blobs)
+        return correct_spelling(q, index.bm25.postings) if q and index.chunks else q
+
+    @classmethod
     async def retrieve(
         cls,
         db: AsyncSession,
@@ -399,6 +406,7 @@ class RAGService:
         index = await get_tenant_index(db, tenant_id, need_vectors=store.needs_blobs)
         if not index.chunks:
             return result
+        q = result.query = correct_spelling(q, index.bm25.postings)
         qvec = await cls._embed_query(q)
 
         try:

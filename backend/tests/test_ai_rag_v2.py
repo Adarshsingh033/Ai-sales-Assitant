@@ -8,7 +8,7 @@ from sqlalchemy import select
 from app.models.knowledge import KnowledgeChunk, KnowledgeDocument
 from app.services.ai import chunking
 from app.services.ai.embeddings import HashEmbeddingProvider, embedding_model_name, to_bytes
-from app.services.ai.lexical import BM25Index, lexical_tokens
+from app.services.ai.lexical import BM25Index, correct_spelling, lexical_tokens
 from app.services.rag_service import RAGService
 from tests.factories import make_product, make_tenant
 
@@ -197,3 +197,40 @@ async def test_empty_or_unmatched_queries_return_nothing(test_db):
     await RAGService.index_document(test_db, tenant.id, "faq.md", FAQ, "md")
     res = await RAGService.retrieve(test_db, tenant.id, "quantum chromodynamics lagrangian", source_type="DOCUMENT")
     assert res.matches == [] and res.confidence == 0.0
+
+
+# ----------------------------------------------------------------------------- spelling correction
+_VOCAB = {t: [(0, 1)] for t in lexical_tokens("Brightloop Assist pricing plans discount refund customers growth voice")}
+
+
+def test_misspelled_words_are_replaced_by_the_closest_known_term():
+    assert correct_spelling("what is brighlooop?", _VOCAB) == "what is brightloop?"  # one wrong letter + one extra
+    assert correct_spelling("Brigtloop pricng", _VOCAB) == "Brightloop pricing"  # case kept, missing letters restored
+    assert correct_spelling("BRIGHLOOOP", _VOCAB) == "BRIGHTLOOP"
+    assert correct_spelling("discuont refnud", _VOCAB) == "discount refund"  # swapped letters count as one edit
+
+
+def test_known_short_foreign_and_unrelated_words_are_left_alone():
+    assert correct_spelling("pricing plans", _VOCAB) == "pricing plans"  # already known
+    assert correct_spelling("quantum chromodynamics lagrangian", _VOCAB) == "quantum chromodynamics lagrangian"
+    assert correct_spelling("plam vice", _VOCAB) == "plam vice"  # under 5 letters: too ambiguous to guess
+    assert correct_spelling("rricing", _VOCAB) == "rricing"  # a changed first letter is not trusted on short words
+    assert correct_spelling("इसकी कीमत क्या है", _VOCAB) == "इसकी कीमत क्या है"  # non-Latin scripts untouched
+    assert correct_spelling("what is brighlooop?", {}) == "what is brighlooop?"
+    fixed = correct_spelling("brighlooop pricng", _VOCAB)
+    assert correct_spelling(fixed, _VOCAB) == fixed  # idempotent
+
+
+@pytest.mark.asyncio
+async def test_retrieval_searches_with_the_corrected_spelling(test_db):
+    tenant = await make_tenant(test_db)
+    doc = b"# About\nBrightloop builds AI assistants for sales teams.\n\n# Pricing\nThe Growth plan costs 199 dollars per month."
+    await RAGService.index_document(test_db, tenant.id, "about.md", doc, "md")
+
+    res = await RAGService.retrieve(test_db, tenant.id, "what is brighlooop?", source_type="DOCUMENT")
+    assert res.query == "what is brightloop?"
+    assert res.matches and "Brightloop builds" in res.matches[0]["content"]
+    assert await RAGService.correct_query(test_db, tenant.id, "Growth plan dolars") == "Growth plan dollars"
+    assert await RAGService.correct_query(test_db, tenant.id, "  ") == ""
+    other = await make_tenant(test_db, "Other Co")
+    assert await RAGService.correct_query(test_db, other.id, "what is brighlooop?") == "what is brighlooop?"  # no knowledge, no vocabulary

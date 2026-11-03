@@ -64,11 +64,14 @@ async def test_a_misspelled_question_is_corrected_before_searching_and_prompting
 
 
 @pytest.mark.asyncio
-async def test_nothing_relevant_means_no_model_call_and_the_question_is_logged_for_admins(client: AsyncClient, test_db, fake_llm):
+async def test_a_general_question_gets_a_short_answer_and_is_still_logged_for_admins(client: AsyncClient, test_db, fake_llm):
     tenant, admin, rep = await _world(test_db)
+    fake_llm.replies = ["The capital of France is Paris. I'm here for questions about your company's products and policies."] * 2
     res = await _ask(client, rep, "What is the capital of France?")
-    assert res.json()["status"] == "not_found" and res.json()["sources"] == []
-    assert fake_llm.calls == []  # it cannot invent what it is never asked
+    assert res.json()["status"] == "general" and "Paris" in res.json()["answer"] and res.json()["sources"] == []
+    prompt = fake_llm.reply_calls()[0]["messages"]  # no sources are sent; the model is told the company and the NOT_FOUND rule
+    assert "reply with exactly NOT_FOUND" in prompt[0]["content"] and "Ask Co" in prompt[0]["content"]
+    assert prompt[1]["content"] == "What is the capital of France?"
 
     await _ask(client, admin, "what is the capital of France")  # same question, different wording/case
     gaps = (await client.get(f"{API}/gaps", headers=admin)).json()
@@ -80,6 +83,35 @@ async def test_nothing_relevant_means_no_model_call_and_the_question_is_logged_f
     assert (await client.post(f"{API}/gaps/{gap_id}/dismiss", headers=rep)).status_code == 403
     assert (await client.post(f"{API}/gaps/{gap_id}/dismiss", headers=admin)).status_code == 204
     assert (await client.get(f"{API}/gaps", headers=admin)).json()["open_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_a_company_question_the_documents_miss_is_never_answered_from_general_knowledge(client: AsyncClient, test_db, fake_llm):
+    _, admin, _ = await _world(test_db)
+    fake_llm.replies = ["NOT_FOUND", "NOT_FOUND"]
+    body = (await _ask(client, admin, "Who is the CEO of our company?")).json()
+    assert body["status"] == "not_found" and body["sources"] == [] and "couldn't find" in body["answer"]
+    assert (await client.get(f"{API}/gaps", headers=admin)).json()["open_count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_when_the_ai_is_unavailable_an_unrelated_question_is_simply_not_found(client: AsyncClient, test_db):
+    _, admin, _ = await _world(test_db)
+    res = await _ask(client, admin, "What is the capital of France?")  # default NullLLM: the fallback must not turn this into a 503
+    assert res.status_code == 200 and res.json()["status"] == "not_found"
+
+
+@pytest.mark.asyncio
+async def test_general_answers_keep_code_blocks_and_always_close_them(client: AsyncClient, test_db, fake_llm):
+    _, admin, _ = await _world(test_db)
+    fake_llm.replies = ["Here you go:\n```python\nprint(sum([1, 2, 3]))\n```\nI'm here for your company's products and pricing."]
+    body = (await _ask(client, admin, "Give me python code to reverse a string")).json()
+    assert body["status"] == "general" and "```python" in body["answer"] and "sum([1, 2, 3])" in body["answer"]
+
+    fake_llm.replies = ["```python\n" + "x = 1\n" * 400]  # far too long and never closed
+    long = (await _ask(client, admin, "Write a very long script")).json()
+    assert long["status"] == "general" and long["answer"].count("```") % 2 == 0
+    assert len(long["answer"]) <= knowledge_qa.MAX_GENERAL_CHARS + 4
 
 
 @pytest.mark.asyncio
@@ -133,10 +165,10 @@ async def test_unsupported_claims_and_missing_citations_are_caught(client: Async
 @pytest.mark.asyncio
 async def test_the_model_saying_not_found_is_respected(client: AsyncClient, test_db, fake_llm):
     _, admin, _ = await _world(test_db)
-    fake_llm.replies = ["NOT_FOUND"]
+    fake_llm.replies = ["NOT_FOUND", "NOT_FOUND"]  # the second one answers the "is this a company question?" check
     body = (await _ask(client, admin, "What is the refund policy for enterprise customers?")).json()
     assert body["status"] in ("not_found", "not_stated") and body["sources"] is not None
-    assert len(fake_llm.reply_calls()) == 1  # NOT_FOUND is final, no retry
+    assert not any("rejected" in c["messages"][-1]["content"] for c in fake_llm.reply_calls())  # NOT_FOUND is final, no retry
 
 
 def test_verify_checks_numbers_links_citations_and_sentence_support():
@@ -285,8 +317,9 @@ async def test_related_but_silent_passages_get_an_honest_reply_and_are_shown(tes
     )
     assert res.status == "not_stated" and res.is_gap and "don't guess or calculate" in res.answer
     assert [s.title for s in res.sources] == ["OmniCRM"]  # only the strongly related passage, renumbered from 1
+    assert len(fake_llm.reply_calls()) == 1  # strongly related text exists, so it is a company question: no general answer
 
-    fake_llm.replies = ["NOT_FOUND"]
+    fake_llm.replies = ["NOT_FOUND", "NOT_FOUND"]
     monkeypatch.setattr(knowledge_qa, "gather_passages", lambda *a, **k: _coro([weak]))
     res = await knowledge_qa.answer_question(
         test_db, tenant_id=tenant.id, question="Who is the CEO?", history=[], llm=fake_llm.for_task("reply"),

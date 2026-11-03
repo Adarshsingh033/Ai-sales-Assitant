@@ -206,6 +206,7 @@ _VOCAB = {t: [(0, 1)] for t in lexical_tokens("Brightloop Assist pricing plans d
 def test_misspelled_words_are_replaced_by_the_closest_known_term():
     assert correct_spelling("what is brighlooop?", _VOCAB) == "what is brightloop?"  # one wrong letter + one extra
     assert correct_spelling("Brigtloop pricng", _VOCAB) == "Brightloop pricing"  # case kept, missing letters restored
+    assert correct_spelling("what is brighloooup?", _VOCAB) == "what is brightloop?"  # 3 edits is fine on an 11-letter word
     assert correct_spelling("BRIGHLOOOP", _VOCAB) == "BRIGHTLOOP"
     assert correct_spelling("discuont refnud", _VOCAB) == "discount refund"  # swapped letters count as one edit
 
@@ -214,6 +215,7 @@ def test_known_short_foreign_and_unrelated_words_are_left_alone():
     assert correct_spelling("pricing plans", _VOCAB) == "pricing plans"  # already known
     assert correct_spelling("quantum chromodynamics lagrangian", _VOCAB) == "quantum chromodynamics lagrangian"
     assert correct_spelling("plam vice", _VOCAB) == "plam vice"  # under 5 letters: too ambiguous to guess
+    assert correct_spelling("discxxxt", _VOCAB) == "discxxxt"  # 8 letters allow 2 edits, this one is 3 away
     assert correct_spelling("rricing", _VOCAB) == "rricing"  # a changed first letter is not trusted on short words
     assert correct_spelling("इसकी कीमत क्या है", _VOCAB) == "इसकी कीमत क्या है"  # non-Latin scripts untouched
     assert correct_spelling("what is brighlooop?", {}) == "what is brighlooop?"

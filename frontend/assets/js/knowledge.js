@@ -244,8 +244,16 @@ const KnowledgeModule = (() => {
     return html;
   }
 
+  /** A general answer: plain paragraphs, with ``` fenced blocks shown as code. */
+  function generalHtml(text) {
+    return String(text).split(/```[\w+-]*\n?/).map((part, i) => (i % 2
+      ? `<pre class="kb-code"><code>${esc(part.replace(/\n+$/, ''))}</code></pre>`
+      : part.split(/\n+/).map((l) => l.trim()).filter(Boolean).map((l) => `<p>${esc(l)}</p>`).join(''))).join('');
+  }
+
   const STATUS_LOOK = {
     answered: { cls: 'ok', icon: '' },
+    general: { cls: 'ok', icon: '💬' },
     not_found: { cls: 'muted', icon: '🔍' },
     empty: { cls: 'muted', icon: '📚' },
     not_stated: { cls: 'warn', icon: '⚠️' },
@@ -275,14 +283,17 @@ const KnowledgeModule = (() => {
 
   function addAnswer(res) {
     const look = STATUS_LOOK[res.status] || STATUS_LOOK.not_found;
-    const body = res.status === 'answered' ? answerHtml(res.answer) : `<p>${esc(res.answer)}</p>`;
+    const body = res.status === 'answered' ? answerHtml(res.answer)
+      : res.status === 'general' ? generalHtml(res.answer) : `<p>${esc(res.answer)}</p>`;
     const searched = res.status === 'answered' && res.searched_for ? `<div class="kb-searched">Searched for: ${esc(res.searched_for)}</div>` : '';
-    const shared = res.status === 'not_found' || res.status === 'not_stated' || res.status === 'unverified'
-      ? '<div class="kb-shared">Shared with your admins so they can add the missing information.</div>' : '';
-    const actions = res.status === 'answered'
+    const shared = res.status === 'general'
+      ? '<div class="kb-shared">General answer, not from your documents. Your admins can see the question and add company information if it should be covered.</div>'
+      : res.status === 'not_found' || res.status === 'not_stated' || res.status === 'unverified'
+        ? '<div class="kb-shared">Shared with your admins so they can add the missing information.</div>' : '';
+    const actions = res.status === 'answered' || res.status === 'general'
       ? '<div class="kb-actions"><button type="button" class="crm-link-btn" data-copy>Copy answer</button></div>' : '';
     $('kbMessages').insertAdjacentHTML('beforeend', `
-      <div class="kb-msg bot ${look.cls}" data-answer="${esc(stripCitations(res.answer))}">
+      <div class="kb-msg bot ${look.cls}" data-answer="${esc(res.status === 'general' ? res.answer : stripCitations(res.answer))}">
         <div class="kb-bot-body">
           ${look.icon ? `<span class="kb-status-icon" aria-hidden="true">${look.icon}</span>` : ''}
           <div class="kb-answer">${body}</div>
@@ -318,7 +329,7 @@ const KnowledgeModule = (() => {
       const res = await Api.askKnowledge(question, history.slice(-MAX_HISTORY));
       thinking.remove();
       addAnswer(res);
-      history.push({ role: 'user', text: question }, { role: 'assistant', text: stripCitations(res.answer).slice(0, 1400) });
+      history.push({ role: 'user', text: question }, { role: 'assistant', text: (res.status === 'general' ? res.answer : stripCitations(res.answer)).slice(0, 1400) });
       history = history.slice(-MAX_HISTORY);
       if (res.status !== 'answered' && res.status !== 'empty' && isAdmin) loadGaps(true);
     } catch (err) {

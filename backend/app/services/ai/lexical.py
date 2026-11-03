@@ -49,8 +49,8 @@ def _edit_distance(a: str, b: str, limit: int) -> int:
 def correct_spelling(query: str, vocabulary: Mapping[str, Sequence]) -> str:
     """
     Replace Latin-script words of 5+ letters that do not occur in `vocabulary` (term -> postings) with the closest term
-    that does: at most 1 edit for words up to 7 letters (same first letter), 2 edits for longer ones. Words that are known,
-    stopwords, shorter or non-Latin (Hindi...) are left alone; ties go to the term found in more chunks.
+    that does: at most 1 edit for words up to 7 letters (same first letter), 2 edits for 8-9 letters, 3 for longer ones.
+    Words that are known, stopwords, shorter or non-Latin (Hindi...) are left alone; ties go to the term found in more chunks.
     """
     if not query or not vocabulary:
         return query
@@ -64,7 +64,7 @@ def correct_spelling(query: str, vocabulary: Mapping[str, Sequence]) -> str:
             return word
         if candidates is None:
             candidates = [t for t in vocabulary if len(t) >= 4 and t.isascii() and t.isalpha()]
-        limit = 1 if len(low) <= 7 else 2
+        limit = 1 if len(low) <= 7 else 2 if len(low) <= 9 else 3
         best: Optional[Tuple[Tuple[int, int, str], str]] = None
         for term in candidates:
             if abs(len(term) - len(low)) > limit or (limit == 1 and term[0] != low[0]):
